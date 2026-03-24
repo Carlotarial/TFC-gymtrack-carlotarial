@@ -7,24 +7,47 @@ export default function HomeScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   
-  // Recogemos el nombre del cuestionario o usamos 'Carlota' por defecto
   const userName = params.userName || 'Usuario GymTrack';
   
-  // Estados para la lógica de progreso
+  // Datos de ejemplo para las nuevas secciones
   const [sessionsCompleted] = useState(3);
   const totalSessions = 4;
   const progressPercent = (sessionsCompleted / totalSessions) * 100;
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Cabecera Minimalista */}
+      {/* Cabecera */}
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hola, {userName}</Text>
-        <Text style={styles.subtitle}>Progreso de tu plan actual</Text>
+        <View>
+          <Text style={styles.greeting}>Hola, {userName} 👋</Text>
+          <Text style={styles.subtitle}>Tu cuerpo te lo agradecerá hoy.</Text>
+        </View>
+        <Pressable style={styles.notificationBtn}>
+          <Ionicons name="notifications-outline" size={24} color="#1A1C1A" />
+        </Pressable>
       </View>
 
-      {/* Tarjeta de Progreso Principal */}
+      {/* Métricas Rápidas (NUEVO) */}
+      <View style={styles.metricsRow}>
+        <View style={styles.metricItem}>
+          <Text style={styles.metricValue}>7</Text>
+          <Text style={styles.metricLabel}>Días racha</Text>
+        </View>
+        <View style={styles.metricDivider} />
+        <View style={styles.metricItem}>
+          <Text style={styles.metricValue}>520</Text>
+          <Text style={styles.metricLabel}>Kcal hoy</Text>
+        </View>
+        <View style={styles.metricDivider} />
+        <View style={styles.metricItem}>
+          <Text style={styles.metricValue}>1.2L</Text>
+          <Text style={styles.metricLabel}>Agua</Text>
+        </View>
+      </View>
+
+      {/* Tarjeta de Progreso */}
       <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Progreso semanal</Text>
         <View style={styles.progressCard}>
           <View style={styles.progressInfo}>
             <View>
@@ -35,26 +58,21 @@ export default function HomeScreen() {
               <Text style={styles.percentageText}>{Math.round(progressPercent)}%</Text>
             </View>
           </View>
-          
           <View style={styles.barBackground}>
             <View style={[styles.barFill, { width: `${progressPercent}%` }]} />
           </View>
         </View>
       </View>
 
-      {/* Sección de Rutinas Recomendadas */}
+      {/* Entrenamientos recomendados */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Entrenamientos recomendados</Text>
-        
+        <Text style={styles.sectionTitle}>Siguiente sesión</Text>
         <View style={styles.grid}>
           <Pressable 
             style={styles.gridCard} 
-            onPress={() => router.push({ 
-              pathname: '/routine', 
-              params: { title: 'Tren Inferior' } 
-            } as any)}
+            onPress={() => router.push({ pathname: '/routine', params: { title: 'Tren Inferior' } } as any)}
           >
-            <View style={styles.cardIconBox}>
+            <View style={[styles.cardIconBox, { backgroundColor: '#E6EBE0' }]}>
               <Ionicons name="fitness-outline" size={24} color="#4A5D4A" />
             </View>
             <Text style={styles.cardTitle}>Tren Inferior</Text>
@@ -63,13 +81,10 @@ export default function HomeScreen() {
 
           <Pressable 
             style={styles.gridCard} 
-            onPress={() => router.push({ 
-              pathname: '/routine', 
-              params: { title: 'Zona Core' } 
-            } as any)}
+            onPress={() => router.push({ pathname: '/routine', params: { title: 'Zona Core' } } as any)}
           >
-            <View style={styles.cardIconBox}>
-              <Ionicons name="accessibility-outline" size={24} color="#4A5D4A" />
+            <View style={[styles.cardIconBox, { backgroundColor: '#FAF3E0' }]}>
+              <Ionicons name="accessibility-outline" size={24} color="#CDA434" />
             </View>
             <Text style={styles.cardTitle}>Zona Core</Text>
             <Text style={styles.cardTag}>Intensidad Suave</Text>
@@ -77,18 +92,18 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Reto Activo Sutil */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Reto activo</Text>
-        <Pressable style={styles.challengeMiniCard}>
-          <View style={styles.challengeDot} />
-          <Text style={styles.challengeText}>100 Sentadillas / 5 días</Text>
-          <Ionicons name="chevron-forward" size={16} color="#8C9A8C" />
-        </Pressable>
+      {/* Tip del día (NUEVO) */}
+      <View style={styles.tipCard}>
+        <Ionicons name="bulb-outline" size={24} color="#9CAF88" />
+        <View style={styles.tipContent}>
+          <Text style={styles.tipTitle}>Sabías que...</Text>
+          <Text style={styles.tipText}>
+            Beber agua antes de entrenar mejora tu rendimiento hasta un 25%.
+          </Text>
+        </View>
       </View>
 
-      {/* Espaciado de seguridad inferior */}
-      <View style={{ height: 50 }} />
+      <View style={{ height: 60 }} />
     </ScrollView>
   );
 }
@@ -96,24 +111,65 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDFBF6', // Blanco hueso premium
+    backgroundColor: '#FDFBF6',
     paddingHorizontal: 24,
   },
   header: {
     marginTop: 80,
-    marginBottom: 32,
+    marginBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   greeting: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: '#1A1C1A',
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#8C9A8C',
     marginTop: 4,
-    fontWeight: '500',
+  },
+  notificationBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F0F2ED',
+  },
+  metricsRow: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 32,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderWidth: 1,
+    borderColor: '#F0F2ED',
+  },
+  metricItem: {
+    alignItems: 'center',
+  },
+  metricValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1C1A',
+  },
+  metricLabel: {
+    fontSize: 12,
+    color: '#8C9A8C',
+    marginTop: 2,
+  },
+  metricDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#F0F2ED',
   },
   section: {
     marginBottom: 32,
@@ -128,12 +184,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 24,
-    // Sombra muy suave para que parezca moderno
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 12,
-    elevation: 2,
     borderWidth: 1,
     borderColor: '#F0F2ED',
   },
@@ -144,23 +194,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   progressValue: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
     color: '#1A1C1A',
   },
   progressLabel: {
     fontSize: 14,
     color: '#8C9A8C',
-    marginTop: 2,
   },
   percentageBadge: {
     backgroundColor: '#E6EBE0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   percentageText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '700',
     color: '#4A5D4A',
   },
@@ -172,7 +221,7 @@ const styles = StyleSheet.create({
   },
   barFill: {
     height: 8,
-    backgroundColor: '#9CAF88', // Verde salvia
+    backgroundColor: '#9CAF88',
     borderRadius: 4,
   },
   grid: {
@@ -188,16 +237,15 @@ const styles = StyleSheet.create({
     borderColor: '#F0F2ED',
   },
   cardIconBox: {
-    width: 48,
-    height: 48,
-    backgroundColor: '#FDFBF6',
-    borderRadius: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#1A1C1A',
   },
@@ -205,28 +253,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#8C9A8C',
     marginTop: 4,
-    fontWeight: '500',
   },
-  challengeMiniCard: {
+  tipCard: {
     flexDirection: 'row',
+    backgroundColor: '#F0F4F0',
+    padding: 20,
+    borderRadius: 24,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 18,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#F0F2ED',
   },
-  challengeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#CDA434', // Color acento
-    marginRight: 12,
-  },
-  challengeText: {
+  tipContent: {
+    marginLeft: 16,
     flex: 1,
-    fontSize: 15,
+  },
+  tipTitle: {
+    fontSize: 14,
+    fontWeight: '700',
     color: '#4A5D4A',
-    fontWeight: '500',
+    marginBottom: 2,
+  },
+  tipText: {
+    fontSize: 13,
+    color: '#6B7A6B',
+    lineHeight: 18,
   },
 });
