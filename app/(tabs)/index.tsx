@@ -1,98 +1,199 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const router = useRouter();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Text style={styles.greeting}>¡Hola, Carlota! ✨</Text>
+        <Text style={styles.subtitle}>Tu cuerpo y mente te lo agradecerán hoy</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Mi Constancia 🌱</Text>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>3 de 4 sesiones</Text>
+            <Ionicons name="flame" size={20} color="#CDA434" />
+          </View>
+          <View style={styles.progressBarBackground}>
+            <View style={styles.progressBarFill} />
+          </View>
+          <Text style={styles.cardSubtitle}>Casi completado. ¡Sigue así!</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Reto del Mes 🔥</Text>
+        <View style={styles.challengeCard}>
+          <Ionicons name="trophy-outline" size={24} color="#FAF3E0" style={styles.challengeIcon} />
+          <View>
+            <Text style={styles.challengeTitle}>100 Sentadillas en 5 días</Text>
+            <Text style={styles.challengeSubtitle}>Progreso actual: 60%</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Explora por Zona 💪</Text>
+        <View style={styles.routinesGrid}>
+          <Pressable style={styles.routineCard} onPress={() => router.push('/routine')}>
+            <View style={[styles.iconContainer, { backgroundColor: '#FAF3E0' }]}>
+              <Text style={styles.routineEmoji}>🍑</Text>
+            </View>
+            <Text style={styles.routineName}>Glúteo Firme</Text>
+            <Text style={styles.routineLevel}>Intensidad Media</Text>
+          </Pressable>
+          
+          <Pressable style={styles.routineCard} onPress={() => router.push('/routine')}>
+            <View style={[styles.iconContainer, { backgroundColor: '#FAF3E0' }]}>
+              <Text style={styles.routineEmoji}>🧘‍♀️</Text>
+            </View>
+            <Text style={styles.routineName}>Core & Abs</Text>
+            <Text style={styles.routineLevel}>Intensidad Suave</Text>
+          </Pressable>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#FDFBF6',
+    paddingHorizontal: 20,
+  },
+  header: {
+    marginTop: 70,
+    marginBottom: 30,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#4A5D4A',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#8C9A8C',
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4A5D4A',
+    marginBottom: 15,
+  },
+  card: {
+    backgroundColor: '#E6EBE0',
+    borderRadius: 24,
+    padding: 22,
+    borderWidth: 1,
+    borderColor: '#9CAF88',
+    shadowColor: '#4A5D4A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4A5D4A',
+  },
+  progressBarBackground: {
+    height: 12,
+    backgroundColor: '#FAF3E0',
+    borderRadius: 6,
+    marginBottom: 12,
+  },
+  progressBarFill: {
+    height: 12,
+    backgroundColor: '#CDA434',
+    width: '75%',
+    borderRadius: 6,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#8C9A8C',
+    fontWeight: '500',
+  },
+  challengeCard: {
+    backgroundColor: '#CDA434',
+    borderRadius: 24,
+    padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    shadowColor: '#CDA434',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 6,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  challengeIcon: {
+    marginRight: 15,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  challengeTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#FAF3E0',
+    marginBottom: 4,
+  },
+  challengeSubtitle: {
+    fontSize: 14,
+    color: '#E6CCB2',
+  },
+  routinesGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  routineCard: {
+    backgroundColor: '#FAF3E0',
+    width: '47%',
+    borderRadius: 24,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E6CCB2',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  iconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  routineEmoji: {
+    fontSize: 32,
+  },
+  routineName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4A5D4A',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  routineLevel: {
+    fontSize: 12,
+    color: '#8C9A8C',
+    fontWeight: '600',
   },
 });
