@@ -8,7 +8,7 @@ export default function HomeScreen() {
   const params = useLocalSearchParams();
   
   // Recogemos el nombre del cuestionario o usamos 'Carlota' por defecto
-  const userName = params.userName || 'Carlota';
+  const userName = params.userName || 'Usuario GymTrack';
   
   // Estados para la lógica de progreso
   const [sessionsCompleted] = useState(3);
