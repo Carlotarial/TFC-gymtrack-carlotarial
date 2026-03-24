@@ -1,3 +1,4 @@
+import { useTheme, AppColors } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,6 +10,7 @@ const { width } = Dimensions.get('window');
 export default function NameScreen() {
   const router = useRouter();
   const { updateUser } = useUser();
+  const { colors } = useTheme();
   const [name, setName] = useState('');
 
   const handleContinue = async () => {
@@ -19,159 +21,80 @@ export default function NameScreen() {
     } as any);
   };
 
+  const s = dynamicStyles(colors);
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={s.container}
     >
-      {/* Indicador de pasos discreto (Paso 1 de 4) */}
-      <View style={styles.stepContainer}>
-        <View style={[styles.stepDot, styles.stepDotActive]} />
-        <View style={styles.stepDot} />
-        <View style={styles.stepDot} />
-        <View style={styles.stepDot} />
+      <View style={s.stepContainer}>
+        <View style={[s.stepDot, s.stepDotActive]} />
+        <View style={s.stepDot} />
+        <View style={s.stepDot} />
+        <View style={s.stepDot} />
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.welcomeBadge}>
-          <Text style={styles.badgeText}>Bienvenido a GymTrack</Text>
+      <View style={staticStyles.content}>
+        <View style={s.welcomeBadge}>
+          <Text style={s.badgeText}>Bienvenido a GymTrack</Text>
         </View>
         
-        <Text style={styles.title}>Empecemos por tu nombre</Text>
-        <Text style={styles.subtitle}>
+        <Text style={s.title}>Empecemos por tu nombre</Text>
+        <Text style={s.subtitle}>
           Lo usaremos para personalizar tus rutinas y saludarte cada mañana.
         </Text>
 
-        <View style={styles.inputWrapper}>
+        <View style={s.inputWrapper}>
           <TextInput
-            style={styles.input}
+            style={s.input}
             placeholder="Tu nombre aquí..."
-            placeholderTextColor="#C1C7C1"
+            placeholderTextColor={colors.textMuted}
             value={name}
             onChangeText={setName}
             autoFocus
-            selectionColor="#4A5D4A"
+            selectionColor={colors.accentDark}
           />
           {name.length > 0 && (
-            <Pressable onPress={() => setName('')} style={styles.clearButton}>
-              <Ionicons name="close-circle" size={20} color="#8C9A8C" />
+            <Pressable onPress={() => setName('')} style={staticStyles.clearButton}>
+              <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
             </Pressable>
           )}
         </View>
       </View>
 
-      <View style={styles.footer}>
+      <View style={staticStyles.footer}>
         <Pressable 
-          style={[styles.nextButton, !name && styles.nextButtonDisabled]} 
+          style={[s.nextButton, !name && s.nextButtonDisabled]} 
           disabled={!name}
           onPress={handleContinue}
         >
-          <Text style={styles.nextButtonText}>Continuar</Text>
-          <Ionicons name="chevron-forward" size={18} color="#FDFBF6" />
+          <Text style={s.nextButtonText}>Continuar</Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.buttonPrimaryText} />
         </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FDFBF6', 
-    paddingHorizontal: 32 
-  },
-  stepContainer: { 
-    flexDirection: 'row', 
-    marginTop: 70, 
-    marginBottom: 20, 
-    justifyContent: 'flex-start' 
-  },
-  stepDot: { 
-    width: 12, 
-    height: 4, 
-    borderRadius: 2, 
-    backgroundColor: '#E6EBE0', 
-    marginRight: 6 
-  },
-  stepDotActive: { 
-    width: 32, 
-    backgroundColor: '#4A5D4A' 
-  },
-  content: { 
-    flex: 1, 
-    paddingTop: 40 
-  },
-  welcomeBadge: {
-    backgroundColor: '#E6EBE0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    marginBottom: 20,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#4A5D4A',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  title: { 
-    fontSize: 34, 
-    fontWeight: '800', 
-    color: '#1A1C1A', 
-    letterSpacing: -1, 
-    lineHeight: 40 
-  },
-  subtitle: { 
-    fontSize: 17, 
-    color: '#8C9A8C', 
-    marginTop: 16, 
-    lineHeight: 26,
-    fontWeight: '400',
-  },
-  inputWrapper: {
-    marginTop: 60,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#E6EBE0',
-  },
-  input: {
-    flex: 1,
-    fontSize: 26,
-    color: '#1A1C1A',
-    paddingVertical: 15,
-    fontWeight: '600',
-    letterSpacing: -0.5,
-  },
-  clearButton: {
-    padding: 10,
-  },
-  footer: { 
-    paddingBottom: 50 
-  },
-  nextButton: {
-    flexDirection: 'row',
-    backgroundColor: '#1A1C1A', // Negro elegante
-    padding: 22,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
-  },
-  nextButtonDisabled: { 
-    backgroundColor: '#E6EBE0',
-    shadowOpacity: 0 
-  },
-  nextButtonText: { 
-    fontSize: 17, 
-    fontWeight: '700', 
-    color: '#FDFBF6', 
-    marginRight: 8 
-  },
+const staticStyles = StyleSheet.create({
+  content: { flex: 1, paddingTop: 40 },
+  clearButton: { padding: 10 },
+  footer: { paddingBottom: 50 },
+});
+
+const dynamicStyles = (c: AppColors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 32 },
+  stepContainer: { flexDirection: 'row', marginTop: 70, marginBottom: 20, justifyContent: 'flex-start' },
+  stepDot: { width: 12, height: 4, borderRadius: 2, backgroundColor: c.accentLight, marginRight: 6 },
+  stepDotActive: { width: 32, backgroundColor: c.accentDark },
+  welcomeBadge: { backgroundColor: c.accentLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, alignSelf: 'flex-start', marginBottom: 20 },
+  badgeText: { fontSize: 12, fontWeight: '700', color: c.accentDark, textTransform: 'uppercase', letterSpacing: 1 },
+  title: { fontSize: 34, fontWeight: '800', color: c.text, letterSpacing: -1, lineHeight: 40 },
+  subtitle: { fontSize: 17, color: c.textSecondary, marginTop: 16, lineHeight: 26, fontWeight: '400' },
+  inputWrapper: { marginTop: 60, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1.5, borderBottomColor: c.accentLight },
+  input: { flex: 1, fontSize: 26, color: c.text, paddingVertical: 15, fontWeight: '600', letterSpacing: -0.5 },
+  nextButton: { flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 22, borderRadius: 24, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 5 },
+  nextButtonDisabled: { backgroundColor: c.buttonDisabled, shadowOpacity: 0 },
+  nextButtonText: { fontSize: 17, fontWeight: '700', color: c.buttonPrimaryText, marginRight: 8 },
 });

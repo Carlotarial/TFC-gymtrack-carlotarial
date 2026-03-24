@@ -1,7 +1,9 @@
+import { useTheme, AppColors } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useNotifications } from '@/hooks/useNotifications';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -15,10 +17,10 @@ import {
 export default function SettingsScreen() {
   const router = useRouter();
   const { user, resetUser } = useUser();
+  const { colors, mode, setMode, isDark } = useTheme();
   
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { isEnabled: notificationsEnabled, toggleNotifications } = useNotifications();
 
-  // Datos dinámicos del contexto
   const userName = user.name || 'Usuario GymTrack';
   
   const { userInitial, userEmail } = useMemo(() => {
@@ -27,98 +29,132 @@ export default function SettingsScreen() {
     return { userInitial: initial, userEmail: email };
   }, [userName]);
 
-  // Función de Logout — limpia AsyncStorage y estado global
   const handleLogout = async () => {
     await resetUser();
     router.replace('/onboarding' as any); 
   };
 
+  // Ciclar entre modos de tema
+  const handleThemeToggle = () => {
+    const modes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
+    const currentIndex = modes.indexOf(mode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+    setMode(nextMode);
+  };
+
+  const getThemeLabel = () => {
+    if (mode === 'system') return 'Sistema';
+    if (mode === 'dark') return 'Oscuro';
+    return 'Claro';
+  };
+
+  const getThemeIcon = (): any => {
+    if (mode === 'system') return 'phone-portrait-outline';
+    if (mode === 'dark') return 'moon-outline';
+    return 'sunny-outline';
+  };
+
+  const s = dynamicStyles(colors);
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FDFBF6' }}>
+    <SafeAreaView style={s.safeArea}>
       <ScrollView 
-        style={styles.container} 
+        style={s.container} 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>Ajustes</Text>
-          <Text style={styles.subtitle}>Gestiona tu cuenta y preferencias</Text>
+        <View style={s.header}>
+          <Text style={s.title}>Ajustes</Text>
+          <Text style={s.subtitle}>Gestiona tu cuenta y preferencias</Text>
         </View>
 
         {/* Tarjeta de Perfil */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{userInitial}</Text>
+        <View style={s.profileCard}>
+          <View style={s.avatar}>
+            <Text style={s.avatarText}>{userInitial}</Text>
           </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{userName}</Text>
-            <Text style={styles.profileEmail}>{userEmail}</Text>
+          <View style={staticStyles.profileInfo}>
+            <Text style={s.profileName}>{userName}</Text>
+            <Text style={s.profileEmail}>{userEmail}</Text>
           </View>
         </View>
 
         {/* SECCIÓN: PREFERENCIAS */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferencias</Text>
+        <View style={staticStyles.section}>
+          <Text style={s.sectionTitle}>Preferencias</Text>
           
-          <View style={styles.settingItem}>
-            <View style={styles.settingLabelGroup}>
-              <View style={[styles.iconBox, { backgroundColor: '#F0F2ED' }]}>
-                <Ionicons name="notifications-outline" size={20} color="#4A5D4A" />
+          {/* Toggle tema oscuro */}
+          <TouchableOpacity style={s.settingItem} onPress={handleThemeToggle} activeOpacity={0.7}>
+            <View style={staticStyles.settingLabelGroup}>
+              <View style={[s.iconBox, { backgroundColor: colors.accentLight }]}>
+                <Ionicons name={getThemeIcon()} size={20} color={colors.accentDark} />
               </View>
-              <Text style={styles.settingText}>Notificaciones</Text>
+              <Text style={s.settingText}>Tema</Text>
+            </View>
+            <View style={s.themeBadge}>
+              <Text style={s.themeBadgeText}>{getThemeLabel()}</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={s.settingItem}>
+            <View style={staticStyles.settingLabelGroup}>
+              <View style={[s.iconBox, { backgroundColor: colors.barInactive }]}>
+                <Ionicons name="notifications-outline" size={20} color={colors.accentDark} />
+              </View>
+              <Text style={s.settingText}>Notificaciones</Text>
             </View>
             <Switch
               value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              trackColor={{ false: '#E6EBE0', true: '#9CAF88' }}
-              thumbColor="#FDFBF6"
+              onValueChange={(val) => { toggleNotifications(val); }}
+              trackColor={{ false: false ? colors.accentLight : colors.barInactive, true: colors.accent }}
+              thumbColor={colors.buttonPrimaryText}
             />
           </View>
 
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
-            <View style={styles.settingLabelGroup}>
-              <View style={[styles.iconBox, { backgroundColor: '#FDFBF6' }]}>
-                <Ionicons name="person-outline" size={20} color="#4A5D4A" />
+          <TouchableOpacity style={s.settingItem} activeOpacity={0.7}>
+            <View style={staticStyles.settingLabelGroup}>
+              <View style={[s.iconBox, { backgroundColor: colors.background }]}>
+                <Ionicons name="person-outline" size={20} color={colors.accentDark} />
               </View>
-              <Text style={styles.settingText}>Mis Datos Físicos</Text>
+              <Text style={s.settingText}>Mis Datos Físicos</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#C1C7C1" />
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
         {/* SECCIÓN: GENERAL */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>General</Text>
+        <View style={staticStyles.section}>
+          <Text style={s.sectionTitle}>General</Text>
 
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
-            <View style={styles.settingLabelGroup}>
-              <View style={[styles.iconBox, { backgroundColor: '#F0F2ED' }]}>
-                <Ionicons name="star-outline" size={20} color="#4A5D4A" />
+          <TouchableOpacity style={s.settingItem} activeOpacity={0.7}>
+            <View style={staticStyles.settingLabelGroup}>
+              <View style={[s.iconBox, { backgroundColor: colors.barInactive }]}>
+                <Ionicons name="star-outline" size={20} color={colors.accentDark} />
               </View>
-              <Text style={styles.settingText}>Valorar la App</Text>
+              <Text style={s.settingText}>Valorar la App</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#C1C7C1" />
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
-            <View style={styles.settingLabelGroup}>
-              <View style={[styles.iconBox, { backgroundColor: '#FDFBF6' }]}>
-                <Ionicons name="help-circle-outline" size={20} color="#4A5D4A" />
+          <TouchableOpacity style={s.settingItem} activeOpacity={0.7}>
+            <View style={staticStyles.settingLabelGroup}>
+              <View style={[s.iconBox, { backgroundColor: colors.background }]}>
+                <Ionicons name="help-circle-outline" size={20} color={colors.accentDark} />
               </View>
-              <Text style={styles.settingText}>Ayuda y Soporte</Text>
+              <Text style={s.settingText}>Ayuda y Soporte</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#C1C7C1" />
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
         {/* BOTÓN DE LOGOUT */}
         <TouchableOpacity 
-          style={styles.logoutButton} 
+          style={s.logoutButton} 
           onPress={handleLogout}
           activeOpacity={0.8}
         >
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
-          <Ionicons name="log-out-outline" size={20} color="#1A1C1A" style={{ marginLeft: 8 }} />
+          <Text style={s.logoutText}>Cerrar sesión</Text>
+          <Ionicons name="log-out-outline" size={20} color={colors.text} style={{ marginLeft: 8 }} />
         </TouchableOpacity>
 
       </ScrollView>
@@ -126,58 +162,29 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const staticStyles = StyleSheet.create({
+  profileInfo: { flex: 1 },
+  section: { marginBottom: 24 },
+  settingLabelGroup: { flexDirection: 'row', alignItems: 'center' },
+});
+
+const dynamicStyles = (c: AppColors) => StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: c.background },
   container: { flex: 1, paddingHorizontal: 24 },
   header: { marginTop: 40, marginBottom: 32 },
-  title: { fontSize: 32, fontWeight: '700', color: '#1A1C1A', letterSpacing: -0.5 },
-  subtitle: { fontSize: 16, color: '#8C9A8C', marginTop: 4 },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 24,
-    borderRadius: 24,
-    marginBottom: 32,
-    borderWidth: 1,
-    borderColor: '#F0F2ED',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.02,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#1A1C1A', justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-  avatarText: { fontSize: 20, fontWeight: '700', color: '#FDFBF6' },
-  profileInfo: { flex: 1 },
-  profileName: { fontSize: 18, fontWeight: '700', color: '#1A1C1A' },
-  profileEmail: { fontSize: 14, color: '#8C9A8C', marginTop: 2 },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: '#4A5D4A', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 20,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#F0F2ED',
-  },
-  settingLabelGroup: { flexDirection: 'row', alignItems: 'center' },
+  title: { fontSize: 32, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
+  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4 },
+  profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, padding: 24, borderRadius: 24, marginBottom: 32, borderWidth: 1, borderColor: c.surfaceBorder },
+  avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: c.buttonPrimary, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
+  avatarText: { fontSize: 20, fontWeight: '700', color: c.buttonPrimaryText },
+  profileName: { fontSize: 18, fontWeight: '700', color: c.text },
+  profileEmail: { fontSize: 14, color: c.textSecondary, marginTop: 2 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: c.accentDark, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 },
+  settingItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: c.surface, padding: 16, borderRadius: 20, marginBottom: 10, borderWidth: 1, borderColor: c.surfaceBorder },
   iconBox: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-  settingText: { fontSize: 16, color: '#1A1C1A', fontWeight: '500' },
-  logoutButton: {
-    marginTop: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    padding: 20,
-    borderRadius: 22,
-    backgroundColor: '#F0F2ED',
-    borderWidth: 1,
-    borderColor: '#E6EBE0',
-  },
-  logoutText: { fontSize: 16, fontWeight: '700', color: '#1A1C1A' },
+  settingText: { fontSize: 16, color: c.text, fontWeight: '500' },
+  themeBadge: { backgroundColor: c.accentLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
+  themeBadgeText: { fontSize: 13, fontWeight: '700', color: c.accentDark },
+  logoutButton: { marginTop: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', padding: 20, borderRadius: 22, backgroundColor: c.barInactive, borderWidth: 1, borderColor: c.surfaceBorder },
+  logoutText: { fontSize: 16, fontWeight: '700', color: c.text },
 });

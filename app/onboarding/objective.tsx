@@ -1,15 +1,16 @@
+import { useTheme, AppColors } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
-
-const { width } = Dimensions.get('window');
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 
 export default function ObjectiveScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { updateUser } = useUser();
+  const { colors } = useTheme();
   const [selectedGoal, setSelectedGoal] = useState('');
 
   const goals = [
@@ -18,48 +19,49 @@ export default function ObjectiveScreen() {
     { id: 'tonificar', title: 'Tonificar', desc: 'Definición y resistencia física', icon: 'fitness-outline' },
   ];
 
+  const s = dynamicStyles(colors);
+
   return (
-    <View style={styles.container}>
-      {/* Indicador de pasos discreto */}
-      <View style={styles.stepContainer}>
+    <Animated.View entering={FadeInRight.duration(400)} style={s.container}>
+      <View style={staticStyles.stepContainer}>
         { [1, 2, 3, 4].map((step) => (
-          <View key={step} style={[styles.stepDot, step === 2 && styles.stepDotActive, step < 2 && styles.stepDotDone]} />
+          <View key={step} style={[s.stepDot, step === 2 && s.stepDotActive, step < 2 && s.stepDotDone]} />
         ))}
       </View>
 
-      <View style={styles.header}>
-        <Text style={styles.title}>¿Cuál es tu meta, {params.userName}?</Text>
-        <Text style={styles.subtitle}>Selecciona el enfoque de tu entrenamiento para los próximos meses.</Text>
+      <View style={staticStyles.header}>
+        <Text style={s.title}>¿Cuál es tu meta, {params.userName}?</Text>
+        <Text style={s.subtitle}>Selecciona el enfoque de tu entrenamiento para los próximos meses.</Text>
       </View>
 
-      <View style={styles.optionsContainer}>
+      <View style={staticStyles.optionsContainer}>
         {goals.map((goal) => (
           <Pressable 
             key={goal.id}
-            style={[styles.card, selectedGoal === goal.id && styles.cardActive]}
+            style={[s.card, selectedGoal === goal.id && s.cardActive]}
             onPress={() => setSelectedGoal(goal.id)}
           >
-            <View style={[styles.iconBox, selectedGoal === goal.id && styles.iconBoxActive]}>
+            <View style={[s.iconBox, selectedGoal === goal.id && s.iconBoxActive]}>
               <Ionicons 
                 name={goal.icon as any} 
                 size={24} 
-                color={selectedGoal === goal.id ? '#FDFBF6' : '#4A5D4A'} 
+                color={selectedGoal === goal.id ? colors.buttonPrimaryText : colors.accentDark} 
               />
             </View>
-            <View style={styles.textColumn}>
-              <Text style={[styles.cardTitle, selectedGoal === goal.id && styles.cardTitleActive]}>{goal.title}</Text>
-              <Text style={[styles.cardDesc, selectedGoal === goal.id && styles.cardDescActive]}>{goal.desc}</Text>
+            <View style={staticStyles.textColumn}>
+              <Text style={[s.cardTitle, selectedGoal === goal.id && s.cardTitleActive]}>{goal.title}</Text>
+              <Text style={[s.cardDesc, selectedGoal === goal.id && s.cardDescActive]}>{goal.desc}</Text>
             </View>
             {selectedGoal === goal.id && (
-              <Ionicons name="chevron-forward" size={20} color="#FDFBF6" />
+              <Ionicons name="chevron-forward" size={20} color={colors.buttonPrimaryText} />
             )}
           </Pressable>
         ))}
       </View>
 
-      <View style={styles.footer}>
+      <View style={staticStyles.footer}>
         <Pressable 
-          style={[styles.nextButton, !selectedGoal && styles.nextButtonDisabled]} 
+          style={[s.nextButton, !selectedGoal && s.nextButtonDisabled]} 
           disabled={!selectedGoal}
           onPress={async () => {
             await updateUser({ goal: selectedGoal });
@@ -69,57 +71,38 @@ export default function ObjectiveScreen() {
             } as any);
           }}
         >
-          <Text style={styles.nextButtonText}>Siguiente paso</Text>
-          <Ionicons name="arrow-forward" size={18} color="#FDFBF6" />
+          <Text style={s.nextButtonText}>Siguiente paso</Text>
+          <Ionicons name="arrow-forward" size={18} color={colors.buttonPrimaryText} />
         </Pressable>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FDFBF6', paddingHorizontal: 28 },
+const staticStyles = StyleSheet.create({
   stepContainer: { flexDirection: 'row', marginTop: 70, marginBottom: 40, justifyContent: 'center' },
-  stepDot: { width: 8, height: 4, borderRadius: 2, backgroundColor: '#E6EBE0', marginHorizontal: 4 },
-  stepDotActive: { width: 24, backgroundColor: '#4A5D4A' },
-  stepDotDone: { backgroundColor: '#9CAF88' },
   header: { marginBottom: 40 },
-  title: { fontSize: 30, fontWeight: '700', color: '#1A1C1A', letterSpacing: -0.8, lineHeight: 36 },
-  subtitle: { fontSize: 16, color: '#8C9A8C', marginTop: 12, lineHeight: 24 },
   optionsContainer: { flex: 1 },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 24,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#F0F2ED',
-    // Sombra sutil
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  cardActive: { backgroundColor: '#4A5D4A', borderColor: '#4A5D4A' },
-  iconBox: { width: 48, height: 48, backgroundColor: '#FDFBF6', borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-  iconBoxActive: { backgroundColor: 'rgba(255,255,255,0.15)' },
   textColumn: { flex: 1 },
-  cardTitle: { fontSize: 18, fontWeight: '600', color: '#1A1C1A' },
-  cardTitleActive: { color: '#FDFBF6' },
-  cardDesc: { fontSize: 13, color: '#8C9A8C', marginTop: 2 },
-  cardDescActive: { color: '#E6EBE0' },
   footer: { paddingBottom: 50 },
-  nextButton: {
-    flexDirection: 'row',
-    backgroundColor: '#1A1C1A',
-    padding: 20,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  nextButtonDisabled: { backgroundColor: '#E6EBE0' },
-  nextButtonText: { fontSize: 16, fontWeight: '700', color: '#FDFBF6', marginRight: 8 },
+});
+
+const dynamicStyles = (c: AppColors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 28 },
+  stepDot: { width: 8, height: 4, borderRadius: 2, backgroundColor: c.accentLight, marginHorizontal: 4 },
+  stepDotActive: { width: 24, backgroundColor: c.accentDark },
+  stepDotDone: { backgroundColor: c.accent },
+  title: { fontSize: 30, fontWeight: '700', color: c.text, letterSpacing: -0.8, lineHeight: 36 },
+  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 12, lineHeight: 24 },
+  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, padding: 20, borderRadius: 24, marginBottom: 16, borderWidth: 1, borderColor: c.surfaceBorder, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.03, shadowRadius: 10, elevation: 2 },
+  cardActive: { backgroundColor: c.accentDark, borderColor: c.accentDark },
+  iconBox: { width: 48, height: 48, backgroundColor: c.background, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
+  iconBoxActive: { backgroundColor: 'rgba(255,255,255,0.15)' },
+  cardTitle: { fontSize: 18, fontWeight: '600', color: c.text },
+  cardTitleActive: { color: c.buttonPrimaryText },
+  cardDesc: { fontSize: 13, color: c.textSecondary, marginTop: 2 },
+  cardDescActive: { color: c.buttonPrimaryText },
+  nextButton: { flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 20, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  nextButtonDisabled: { backgroundColor: c.buttonDisabled },
+  nextButtonText: { fontSize: 16, fontWeight: '700', color: c.buttonPrimaryText, marginRight: 8 },
 });

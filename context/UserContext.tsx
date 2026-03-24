@@ -20,18 +20,26 @@ export interface UserData {
   kcalBurned: number;
   sessionsCompleted: number;
   streak: number;
-  waterIntake: number;        // litros consumidos hoy
+  waterIntake: number;
   workoutHistory: WorkoutSession[];
 }
 
+// Discriminated union para el estado de inicialización
+export type AppState =
+  | { status: 'loading' }
+  | { status: 'ready'; user: UserData }
+  | { status: 'error'; error: Error };
+
 interface UserContextType {
   user: UserData;
+  status: AppState['status'];
+  error?: Error;
   updateUser: (newData: Partial<UserData>) => Promise<void>;
   completeWorkout: (title: string, durationSecs: number, kcal: number) => Promise<void>;
   updateWater: (liters: number) => Promise<void>;
   resetUser: () => Promise<void>;
   isOnboarded: boolean;
-  isLoading: boolean;
+  isLoading: boolean; // Mantenido por retrocompatibilidad con pantallas existentes
 }
 
 const DEFAULT_USER: UserData = {
@@ -47,19 +55,10 @@ const DEFAULT_USER: UserData = {
   workoutHistory: [],
 };
 
-const UserContext = createContext<UserContextType>({
-  user: DEFAULT_USER,
-  updateUser: async () => {},
-  completeWorkout: async () => {},
-  updateWater: async () => {},
-  resetUser: async () => {},
-  isOnboarded: false,
-  isLoading: true,
-});
+const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<UserData>(DEFAULT_USER);
-  const [isLoading, setIsLoading] = useState(true);
+  const [appState, setAppState] = useState<AppState>({ status: 'loading' });
 
   // Cargar datos guardados al arrancar la app
   useEffect(() => {
@@ -68,27 +67,32 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         const saved = await AsyncStorage.getItem('@user_data');
         if (saved) {
           const parsed = JSON.parse(saved);
-          // Merge con defaults para campos nuevos que no existían antes
-          setUser({ ...DEFAULT_USER, ...parsed });
+          setAppState({ status: 'ready', user: { ...DEFAULT_USER, ...parsed } });
+        } else {
+          setAppState({ status: 'ready', user: DEFAULT_USER });
         }
       } catch (e) {
         console.error('Error cargando datos del usuario:', e);
-      } finally {
-        setIsLoading(false);
+        setAppState({ status: 'error', error: e instanceof Error ? e : new Error('Error de almacenamiento') });
       }
     };
     loadData();
   }, []);
 
-  // Función genérica para actualizar datos parciales
+  // Helpers para no romper la API actual
+  const user = appState.status === 'ready' ? appState.user : DEFAULT_USER;
+  const isLoading = appState.status === 'loading';
+  const error = appState.status === 'error' ? appState.error : undefined;
+
   const updateUser = async (newData: Partial<UserData>) => {
-    const updated = { ...user, ...newData };
-    setUser(updated);
+    if (appState.status !== 'ready') return;
+    const updated = { ...appState.user, ...newData };
+    setAppState({ status: 'ready', user: updated });
     await AsyncStorage.setItem('@user_data', JSON.stringify(updated));
   };
 
-  // Registrar un entrenamiento completado y actualizar stats
   const completeWorkout = async (title: string, durationSecs: number, kcal: number) => {
+    if (appState.status !== 'ready') return;
     const session: WorkoutSession = {
       id: Date.now().toString(),
       title,
@@ -98,37 +102,52 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const updated: UserData = {
-      ...user,
-      sessionsCompleted: user.sessionsCompleted + 1,
-      kcalBurned: user.kcalBurned + kcal,
-      streak: user.streak + 1, // Simplificado: incrementa racha por sesión
-      workoutHistory: [session, ...user.workoutHistory],
+      ...appState.user,
+      sessionsCompleted: appState.user.sessionsCompleted + 1,
+      kcalBurned: appState.user.kcalBurned + kcal,
+      streak: appState.user.streak + 1,
+      workoutHistory: [session, ...appState.user.workoutHistory],
     };
 
-    setUser(updated);
+    setAppState({ status: 'ready', user: updated });
     await AsyncStorage.setItem('@user_data', JSON.stringify(updated));
   };
 
-  // Actualizar agua consumida
   const updateWater = async (liters: number) => {
-    const updated = { ...user, waterIntake: liters };
-    setUser(updated);
+    if (appState.status !== 'ready') return;
+    const updated = { ...appState.user, waterIntake: liters };
+    setAppState({ status: 'ready', user: updated });
     await AsyncStorage.setItem('@user_data', JSON.stringify(updated));
   };
 
-  // Limpiar todo para logout
   const resetUser = async () => {
-    setUser(DEFAULT_USER);
+    setAppState({ status: 'ready', user: DEFAULT_USER });
     await AsyncStorage.removeItem('@user_data');
   };
 
   const isOnboarded = user.name.length > 0;
 
   return (
-    <UserContext.Provider value={{ user, updateUser, completeWorkout, updateWater, resetUser, isOnboarded, isLoading }}>
+    <UserContext.Provider 
+      value={{ 
+        user, 
+        status: appState.status, 
+        error, 
+        updateUser, 
+        completeWorkout, 
+        updateWater, 
+        resetUser, 
+        isOnboarded, 
+        isLoading 
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
 };
 
-export const useUser = () => useContext(UserContext);
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) throw new Error('useUser must be used within a UserProvider');
+  return context;
+};
