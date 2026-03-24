@@ -1,62 +1,94 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  
+  // Recogemos el nombre del cuestionario o usamos 'Carlota' por defecto
+  const userName = params.userName || 'Carlota';
+  
+  // Estados para la lógica de progreso
+  const [sessionsCompleted] = useState(3);
+  const totalSessions = 4;
+  const progressPercent = (sessionsCompleted / totalSessions) * 100;
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Cabecera Minimalista */}
       <View style={styles.header}>
-        <Text style={styles.greeting}>¡Hola, Carlota! ✨</Text>
-        <Text style={styles.subtitle}>Tu cuerpo y mente te lo agradecerán hoy</Text>
+        <Text style={styles.greeting}>Hola, {userName}</Text>
+        <Text style={styles.subtitle}>Progreso de tu plan actual</Text>
       </View>
 
+      {/* Tarjeta de Progreso Principal */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Mi Constancia 🌱</Text>
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>3 de 4 sesiones</Text>
-            <Ionicons name="flame" size={20} color="#CDA434" />
-          </View>
-          <View style={styles.progressBarBackground}>
-            <View style={styles.progressBarFill} />
-          </View>
-          <Text style={styles.cardSubtitle}>Casi completado. ¡Sigue así!</Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Reto del Mes 🔥</Text>
-        <View style={styles.challengeCard}>
-          <Ionicons name="trophy-outline" size={24} color="#FAF3E0" style={styles.challengeIcon} />
-          <View>
-            <Text style={styles.challengeTitle}>100 Sentadillas en 5 días</Text>
-            <Text style={styles.challengeSubtitle}>Progreso actual: 60%</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Explora por Zona 💪</Text>
-        <View style={styles.routinesGrid}>
-          <Pressable style={styles.routineCard} onPress={() => router.push('/routine')}>
-            <View style={[styles.iconContainer, { backgroundColor: '#FAF3E0' }]}>
-              <Text style={styles.routineEmoji}>🍑</Text>
+        <View style={styles.progressCard}>
+          <View style={styles.progressInfo}>
+            <View>
+              <Text style={styles.progressValue}>{sessionsCompleted} de {totalSessions}</Text>
+              <Text style={styles.progressLabel}>Sesiones completadas</Text>
             </View>
-            <Text style={styles.routineName}>Glúteo Firme</Text>
-            <Text style={styles.routineLevel}>Intensidad Media</Text>
-          </Pressable>
+            <View style={styles.percentageBadge}>
+              <Text style={styles.percentageText}>{Math.round(progressPercent)}%</Text>
+            </View>
+          </View>
           
-          <Pressable style={styles.routineCard} onPress={() => router.push('/routine')}>
-            <View style={[styles.iconContainer, { backgroundColor: '#FAF3E0' }]}>
-              <Text style={styles.routineEmoji}>🧘‍♀️</Text>
+          <View style={styles.barBackground}>
+            <View style={[styles.barFill, { width: `${progressPercent}%` }]} />
+          </View>
+        </View>
+      </View>
+
+      {/* Sección de Rutinas Recomendadas */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Entrenamientos recomendados</Text>
+        
+        <View style={styles.grid}>
+          <Pressable 
+            style={styles.gridCard} 
+            onPress={() => router.push({ 
+              pathname: '/routine', 
+              params: { title: 'Tren Inferior' } 
+            } as any)}
+          >
+            <View style={styles.cardIconBox}>
+              <Ionicons name="fitness-outline" size={24} color="#4A5D4A" />
             </View>
-            <Text style={styles.routineName}>Core & Abs</Text>
-            <Text style={styles.routineLevel}>Intensidad Suave</Text>
+            <Text style={styles.cardTitle}>Tren Inferior</Text>
+            <Text style={styles.cardTag}>Intensidad Media</Text>
+          </Pressable>
+
+          <Pressable 
+            style={styles.gridCard} 
+            onPress={() => router.push({ 
+              pathname: '/routine', 
+              params: { title: 'Zona Core' } 
+            } as any)}
+          >
+            <View style={styles.cardIconBox}>
+              <Ionicons name="accessibility-outline" size={24} color="#4A5D4A" />
+            </View>
+            <Text style={styles.cardTitle}>Zona Core</Text>
+            <Text style={styles.cardTag}>Intensidad Suave</Text>
           </Pressable>
         </View>
       </View>
+
+      {/* Reto Activo Sutil */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Reto activo</Text>
+        <Pressable style={styles.challengeMiniCard}>
+          <View style={styles.challengeDot} />
+          <Text style={styles.challengeText}>100 Sentadillas / 5 días</Text>
+          <Ionicons name="chevron-forward" size={16} color="#8C9A8C" />
+        </Pressable>
+      </View>
+
+      {/* Espaciado de seguridad inferior */}
+      <View style={{ height: 50 }} />
     </ScrollView>
   );
 }
@@ -64,136 +96,137 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDFBF6',
-    paddingHorizontal: 20,
+    backgroundColor: '#FDFBF6', // Blanco hueso premium
+    paddingHorizontal: 24,
   },
   header: {
-    marginTop: 70,
-    marginBottom: 30,
+    marginTop: 80,
+    marginBottom: 32,
   },
   greeting: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#4A5D4A',
-    marginBottom: 5,
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#1A1C1A',
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 16,
     color: '#8C9A8C',
-  },
-  section: {
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#4A5D4A',
-    marginBottom: 15,
-  },
-  card: {
-    backgroundColor: '#E6EBE0',
-    borderRadius: 24,
-    padding: 22,
-    borderWidth: 1,
-    borderColor: '#9CAF88',
-    shadowColor: '#4A5D4A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4A5D4A',
-  },
-  progressBarBackground: {
-    height: 12,
-    backgroundColor: '#FAF3E0',
-    borderRadius: 6,
-    marginBottom: 12,
-  },
-  progressBarFill: {
-    height: 12,
-    backgroundColor: '#CDA434',
-    width: '75%',
-    borderRadius: 6,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: '#8C9A8C',
+    marginTop: 4,
     fontWeight: '500',
   },
-  challengeCard: {
-    backgroundColor: '#CDA434',
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1A1C1A',
+    marginBottom: 16,
+  },
+  progressCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 20,
+    padding: 24,
+    // Sombra muy suave para que parezca moderno
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F0F2ED',
+  },
+  progressInfo: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#CDA434',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-    elevation: 6,
+    marginBottom: 20,
   },
-  challengeIcon: {
-    marginRight: 15,
+  progressValue: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1A1C1A',
   },
-  challengeTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#FAF3E0',
-    marginBottom: 4,
-  },
-  challengeSubtitle: {
+  progressLabel: {
     fontSize: 14,
-    color: '#E6CCB2',
+    color: '#8C9A8C',
+    marginTop: 2,
   },
-  routinesGrid: {
+  percentageBadge: {
+    backgroundColor: '#E6EBE0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  percentageText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#4A5D4A',
+  },
+  barBackground: {
+    height: 8,
+    backgroundColor: '#F0F2ED',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  barFill: {
+    height: 8,
+    backgroundColor: '#9CAF88', // Verde salvia
+    borderRadius: 4,
+  },
+  grid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  routineCard: {
-    backgroundColor: '#FAF3E0',
+  gridCard: {
     width: '47%',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 20,
-    alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E6CCB2',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderColor: '#F0F2ED',
   },
-  iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  cardIconBox: {
+    width: 48,
+    height: 48,
+    backgroundColor: '#FDFBF6',
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 16,
   },
-  routineEmoji: {
-    fontSize: 32,
-  },
-  routineName: {
+  cardTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4A5D4A',
-    marginBottom: 6,
-    textAlign: 'center',
+    fontWeight: '600',
+    color: '#1A1C1A',
   },
-  routineLevel: {
+  cardTag: {
     fontSize: 12,
     color: '#8C9A8C',
-    fontWeight: '600',
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  challengeMiniCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 18,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#F0F2ED',
+  },
+  challengeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#CDA434', // Color acento
+    marginRight: 12,
+  },
+  challengeText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#4A5D4A',
+    fontWeight: '500',
   },
 });

@@ -1,187 +1,170 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-export default function ObjectiveScreen() {
+const { width } = Dimensions.get('window');
+
+export default function NameScreen() {
   const router = useRouter();
-  const [selectedGoal, setSelectedGoal] = useState('');
+  const [name, setName] = useState('');
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.stepText}>Paso 1 de 4</Text>
-        <div style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: '25%' }]} />
-        </div>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      {/* Indicador de pasos discreto (Paso 1 de 4) */}
+      <View style={styles.stepContainer}>
+        <View style={[styles.stepDot, styles.stepDotActive]} />
+        <View style={styles.stepDot} />
+        <View style={styles.stepDot} />
+        <View style={styles.stepDot} />
       </View>
 
-      <Text style={styles.title}>¿Cuál es tu objetivo principal? 🎯</Text>
-      <Text style={styles.subtitle}>Esto nos ayudará a crear tu rutina perfecta.</Text>
+      <View style={styles.content}>
+        <View style={styles.welcomeBadge}>
+          <Text style={styles.badgeText}>Bienvenido a GymTrack</Text>
+        </View>
+        
+        <Text style={styles.title}>Empecemos por tu nombre</Text>
+        <Text style={styles.subtitle}>
+          Lo usaremos para personalizar tus rutinas y saludarte cada mañana.
+        </Text>
 
-      <View style={styles.optionsContainer}>
-        <Pressable 
-          style={[styles.optionCard, selectedGoal === 'perder_peso' && styles.optionCardActive]}
-          onPress={() => setSelectedGoal('perder_peso')}
-        >
-          <View style={[styles.iconContainer, selectedGoal === 'perder_peso' && styles.iconContainerActive]}>
-            <Ionicons name="flame" size={32} color={selectedGoal === 'perder_peso' ? '#FDFBF6' : '#CDA434'} />
-          </View>
-          <View style={styles.optionTextContainer}>
-            <Text style={[styles.optionTitle, selectedGoal === 'perder_peso' && styles.optionTitleActive]}>Perder Peso</Text>
-            <Text style={[styles.optionSubtitle, selectedGoal === 'perder_peso' && styles.optionSubtitleActive]}>Quemar grasa y definir</Text>
-          </View>
-        </Pressable>
-
-        <Pressable 
-          style={[styles.optionCard, selectedGoal === 'ganar_musculo' && styles.optionCardActive]}
-          onPress={() => setSelectedGoal('ganar_musculo')}
-        >
-          <View style={[styles.iconContainer, selectedGoal === 'ganar_musculo' && styles.iconContainerActive]}>
-            <Ionicons name="barbell" size={32} color={selectedGoal === 'ganar_musculo' ? '#FDFBF6' : '#9CAF88'} />
-          </View>
-          <View style={styles.optionTextContainer}>
-            <Text style={[styles.optionTitle, selectedGoal === 'ganar_musculo' && styles.optionTitleActive]}>Ganar Músculo</Text>
-            <Text style={[styles.optionSubtitle, selectedGoal === 'ganar_musculo' && styles.optionSubtitleActive]}>Aumentar volumen y fuerza</Text>
-          </View>
-        </Pressable>
-
-        <Pressable 
-          style={[styles.optionCard, selectedGoal === 'tonificar' && styles.optionCardActive]}
-          onPress={() => setSelectedGoal('tonificar')}
-        >
-          <View style={[styles.iconContainer, selectedGoal === 'tonificar' && styles.iconContainerActive]}>
-            <Ionicons name="body" size={32} color={selectedGoal === 'tonificar' ? '#FDFBF6' : '#E6CCB2'} />
-          </View>
-          <View style={styles.optionTextContainer}>
-            <Text style={[styles.optionTitle, selectedGoal === 'tonificar' && styles.optionTitleActive]}>Tonificar</Text>
-            <Text style={[styles.optionSubtitle, selectedGoal === 'tonificar' && styles.optionSubtitleActive]}>Mantenerme en forma</Text>
-          </View>
-        </Pressable>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            placeholder="Tu nombre aquí..."
+            placeholderTextColor="#C1C7C1"
+            value={name}
+            onChangeText={setName}
+            autoFocus
+            selectionColor="#4A5D4A"
+          />
+          {name.length > 0 && (
+            <Pressable onPress={() => setName('')} style={styles.clearButton}>
+              <Ionicons name="close-circle" size={20} color="#8C9A8C" />
+            </Pressable>
+          )}
+        </View>
       </View>
 
-      <Pressable 
-        style={[styles.nextButton, !selectedGoal && styles.nextButtonDisabled]} 
-        disabled={!selectedGoal}
-        onPress={() => router.push({
-          pathname: '/onboarding/activity',
-          params: { goal: selectedGoal }
-        } as any)}
-      >
-        <Text style={styles.nextButtonText}>Continuar</Text>
-        <Ionicons name="arrow-forward" size={24} color="#FDFBF6" />
-      </Pressable>
-    </View>
+      <View style={styles.footer}>
+        <Pressable 
+          style={[styles.nextButton, !name && styles.nextButtonDisabled]} 
+          disabled={!name}
+          onPress={() => router.push({
+            pathname: '/onboarding/objective',
+            params: { userName: name }
+          } as any)}
+        >
+          <Text style={styles.nextButtonText}>Continuar</Text>
+          <Ionicons name="chevron-forward" size={18} color="#FDFBF6" />
+        </Pressable>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDFBF6',
-    paddingHorizontal: 20,
-    paddingTop: 60,
+  container: { 
+    flex: 1, 
+    backgroundColor: '#FDFBF6', 
+    paddingHorizontal: 32 
   },
-  header: {
-    marginBottom: 40,
+  stepContainer: { 
+    flexDirection: 'row', 
+    marginTop: 70, 
+    marginBottom: 20, 
+    justifyContent: 'flex-start' 
   },
-  stepText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#8C9A8C',
-    marginBottom: 10,
-    textTransform: 'uppercase',
+  stepDot: { 
+    width: 12, 
+    height: 4, 
+    borderRadius: 2, 
+    backgroundColor: '#E6EBE0', 
+    marginRight: 6 
   },
-  progressBar: {
-    height: 8,
+  stepDotActive: { 
+    width: 32, 
+    backgroundColor: '#4A5D4A' 
+  },
+  content: { 
+    flex: 1, 
+    paddingTop: 40 
+  },
+  welcomeBadge: {
     backgroundColor: '#E6EBE0',
-    borderRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 20,
   },
-  progressFill: {
-    height: 8,
-    backgroundColor: '#9CAF88',
-    borderRadius: 4,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '700',
     color: '#4A5D4A',
-    marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#8C9A8C',
-    marginBottom: 40,
+  title: { 
+    fontSize: 34, 
+    fontWeight: '800', 
+    color: '#1A1C1A', 
+    letterSpacing: -1, 
+    lineHeight: 40 
   },
-  optionsContainer: {
-    flex: 1,
+  subtitle: { 
+    fontSize: 17, 
+    color: '#8C9A8C', 
+    marginTop: 16, 
+    lineHeight: 26,
+    fontWeight: '400',
   },
-  optionCard: {
+  inputWrapper: {
+    marginTop: 60,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAF3E0',
-    padding: 20,
-    borderRadius: 24,
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: '#E6EBE0',
+    borderBottomWidth: 1.5,
+    borderBottomColor: '#E6EBE0',
   },
-  optionCardActive: {
-    backgroundColor: '#4A5D4A',
-    borderColor: '#4A5D4A',
-    shadowColor: '#4A5D4A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
-    backgroundColor: '#FDFBF6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 20,
-  },
-  iconContainerActive: {
-    backgroundColor: 'rgba(253, 251, 246, 0.2)',
-  },
-  optionTextContainer: {
+  input: {
     flex: 1,
+    fontSize: 26,
+    color: '#1A1C1A',
+    paddingVertical: 15,
+    fontWeight: '600',
+    letterSpacing: -0.5,
   },
-  optionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4A5D4A',
-    marginBottom: 4,
+  clearButton: {
+    padding: 10,
   },
-  optionTitleActive: {
-    color: '#FDFBF6',
-  },
-  optionSubtitle: {
-    fontSize: 14,
-    color: '#8C9A8C',
-  },
-  optionSubtitleActive: {
-    color: '#E6EBE0',
+  footer: { 
+    paddingBottom: 50 
   },
   nextButton: {
     flexDirection: 'row',
-    backgroundColor: '#CDA434',
-    padding: 20,
-    borderRadius: 20,
+    backgroundColor: '#1A1C1A', // Negro elegante
+    padding: 22,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 40,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
   },
-  nextButtonDisabled: {
+  nextButtonDisabled: { 
     backgroundColor: '#E6EBE0',
+    shadowOpacity: 0 
   },
-  nextButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FDFBF6',
-    marginRight: 10,
+  nextButtonText: { 
+    fontSize: 17, 
+    fontWeight: '700', 
+    color: '#FDFBF6', 
+    marginRight: 8 
   },
 });

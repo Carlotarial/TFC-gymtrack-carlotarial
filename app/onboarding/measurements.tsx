@@ -5,8 +5,7 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput,
 
 export default function MeasurementsScreen() {
   const router = useRouter();
-  // Recogemos los datos acumulados
-  const { goal, activity } = useLocalSearchParams(); 
+  const { userName, goal, activity } = useLocalSearchParams(); 
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
 
@@ -17,15 +16,18 @@ export default function MeasurementsScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <View style={styles.header}>
-        <Text style={styles.stepText}>Paso 3 de 4</Text>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: '75%' }]} />
-        </View>
+      {/* Steppers - Paso 4 de 4 */}
+      <View style={styles.stepContainer}>
+        <View style={[styles.stepDot, styles.stepDotDone]} />
+        <View style={[styles.stepDot, styles.stepDotDone]} />
+        <View style={[styles.stepDot, styles.stepDotDone]} />
+        <View style={[styles.stepDot, styles.stepDotActive]} />
       </View>
 
-      <Text style={styles.title}>Tus medidas 📏</Text>
-      <Text style={styles.subtitle}>Para calcular tus necesidades calóricas diarias con precisión.</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Tus medidas</Text>
+        <Text style={styles.subtitle}>Esto nos permite calcular tu IMC y ajustar tus objetivos calóricos.</Text>
+      </View>
 
       <View style={styles.inputsContainer}>
         <View style={styles.inputGroup}>
@@ -33,8 +35,8 @@ export default function MeasurementsScreen() {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="Ej. 65"
-              placeholderTextColor="#8C9A8C"
+              placeholder="00"
+              placeholderTextColor="#C1C7C1"
               keyboardType="numeric"
               value={weight}
               onChangeText={setWeight}
@@ -49,8 +51,8 @@ export default function MeasurementsScreen() {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="Ej. 170"
-              placeholderTextColor="#8C9A8C"
+              placeholder="000"
+              placeholderTextColor="#C1C7C1"
               keyboardType="numeric"
               value={height}
               onChangeText={setHeight}
@@ -61,37 +63,61 @@ export default function MeasurementsScreen() {
         </View>
       </View>
 
-      <Pressable 
-        style={[styles.nextButton, !isValid && styles.nextButtonDisabled]} 
-        disabled={!isValid}
-        // Pasamos ABSOLUTAMENTE TODOS los datos acumulados al final
-        onPress={() => router.push({
-          pathname: '/onboarding/generating',
-          params: { goal: goal, activity: activity, weight: weight, height: height }
-        } as any)}
-      >
-        <Text style={styles.nextButtonText}>Continuar</Text>
-        <Ionicons name="arrow-forward" size={24} color="#FDFBF6" />
-      </Pressable>
+      <View style={styles.footer}>
+        <Pressable 
+          style={[styles.nextButton, !isValid && styles.nextButtonDisabled]} 
+          disabled={!isValid}
+          onPress={() => router.push({
+            pathname: '/onboarding/generating',
+            params: { userName, goal, activity, weight, height }
+          } as any)}
+        >
+          <Text style={styles.nextButtonText}>Finalizar test</Text>
+          <Ionicons name="checkmark-circle" size={20} color="#FDFBF6" />
+        </Pressable>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FDFBF6', paddingHorizontal: 20, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: '#FDFBF6', paddingHorizontal: 28 },
+  stepContainer: { flexDirection: 'row', marginTop: 70, marginBottom: 40, justifyContent: 'flex-start' },
+  stepDot: { width: 8, height: 4, borderRadius: 2, backgroundColor: '#E6EBE0', marginRight: 6 },
+  stepDotActive: { width: 24, backgroundColor: '#4A5D4A' },
+  stepDotDone: { backgroundColor: '#9CAF88' },
   header: { marginBottom: 40 },
-  stepText: { fontSize: 14, fontWeight: 'bold', color: '#8C9A8C', marginBottom: 10, textTransform: 'uppercase' },
-  progressBar: { height: 8, backgroundColor: '#E6EBE0', borderRadius: 4 },
-  progressFill: { height: 8, backgroundColor: '#9CAF88', borderRadius: 4 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#4A5D4A', marginBottom: 10 },
-  subtitle: { fontSize: 16, color: '#8C9A8C', marginBottom: 40 },
+  title: { fontSize: 30, fontWeight: '700', color: '#1A1C1A', letterSpacing: -0.8 },
+  subtitle: { fontSize: 16, color: '#8C9A8C', marginTop: 12, lineHeight: 24 },
   inputsContainer: { flex: 1 },
-  inputGroup: { marginBottom: 30 },
-  label: { fontSize: 18, fontWeight: 'bold', color: '#4A5D4A', marginBottom: 10 },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FAF3E0', borderWidth: 2, borderColor: '#E6EBE0', borderRadius: 20, paddingHorizontal: 20, height: 70 },
-  input: { flex: 1, fontSize: 24, fontWeight: 'bold', color: '#4A5D4A' },
-  unitText: { fontSize: 20, fontWeight: 'bold', color: '#8C9A8C', marginLeft: 10 },
-  nextButton: { flexDirection: 'row', backgroundColor: '#CDA434', padding: 20, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 40 },
+  inputGroup: { marginBottom: 24 },
+  label: { fontSize: 14, fontWeight: '700', color: '#4A5D4A', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 },
+  inputWrapper: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#FFFFFF', 
+    borderWidth: 1, 
+    borderColor: '#F0F2ED', 
+    borderRadius: 20, 
+    paddingHorizontal: 20, 
+    height: 70,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 5,
+    elevation: 1,
+  },
+  input: { flex: 1, fontSize: 24, fontWeight: '600', color: '#1A1C1A' },
+  unitText: { fontSize: 18, fontWeight: '700', color: '#9CAF88' },
+  footer: { paddingBottom: 50 },
+  nextButton: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1C1A',
+    padding: 22,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   nextButtonDisabled: { backgroundColor: '#E6EBE0' },
-  nextButtonText: { fontSize: 18, fontWeight: 'bold', color: '#FDFBF6', marginRight: 10 },
+  nextButtonText: { fontSize: 17, fontWeight: '700', color: '#FDFBF6', marginRight: 8 },
 });

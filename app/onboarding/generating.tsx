@@ -1,123 +1,157 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 export default function GeneratingScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const [loadingText, setLoadingText] = useState('Analizando tu perfil');
 
   useEffect(() => {
-    // Simulamos que la app está calculando la rutina durante 3 segundos
+    // 1. Lógica de mensajes dinámicos para dar realismo
+    const messages = [
+      'Analizando tu perfil...',
+      'Calculando gasto calórico...',
+      'Seleccionando ejercicios...',
+      'Personalizando tu plan...'
+    ];
+    
+    let messageIndex = 0;
+    const messageInterval = setInterval(() => {
+      messageIndex++;
+      if (messageIndex < messages.length) {
+        setLoadingText(messages[messageIndex]);
+      }
+    }, 800);
+
+    // 2. Navegación final a la Home pasando el nombre
     const timer = setTimeout(() => {
-      router.replace('/(tabs)');
+      router.replace({
+        pathname: '/(tabs)',
+        params: { userName: params.userName }
+      } as any);
     }, 3500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(messageInterval);
+    };
   }, []);
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.stepText}>Paso 4 de 4</Text>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: '100%' }]} />
-        </View>
+      {/* Steppers finales (Todos marcados como completados) */}
+      <View style={styles.stepContainer}>
+        <View style={[styles.stepDot, styles.stepDotDone]} />
+        <View style={[styles.stepDot, styles.stepDotDone]} />
+        <View style={[styles.stepDot, styles.stepDotDone]} />
+        <View style={[styles.stepDot, styles.stepDotDone]} />
       </View>
 
       <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="sparkles" size={60} color="#CDA434" />
+        <View style={styles.iconCircle}>
+          <Ionicons name="sparkles" size={40} color="#CDA434" />
         </View>
         
-        <Text style={styles.title}>Creando tu plan personalizado...</Text>
+        <Text style={styles.title}>Estamos preparando tu plan</Text>
         <Text style={styles.subtitle}>
-          Estamos ajustando los ejercicios a tus objetivos y nivel de actividad para que obtengas los mejores resultados.
+          Ajustando cada detalle a tus objetivos de {params.goal?.toString().replace('_', ' ') || 'bienestar'}.
         </Text>
 
-        <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#9CAF88" />
-          <Text style={styles.loadingText}>Analizando tus datos</Text>
+        <View style={styles.loaderBox}>
+          <ActivityIndicator size="small" color="#9CAF88" />
+          <Text style={styles.loadingMessage}>{loadingText}</Text>
         </View>
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Casi listo ✨</Text>
+        <Text style={styles.footerText}>Casi listo</Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDFBF6',
-    paddingHorizontal: 30,
-    paddingTop: 60,
+  container: { 
+    flex: 1, 
+    backgroundColor: '#FDFBF6', 
+    paddingHorizontal: 32 
   },
-  header: {
-    marginBottom: 60,
+  stepContainer: { 
+    flexDirection: 'row', 
+    marginTop: 70, 
+    marginBottom: 40, 
+    justifyContent: 'flex-start' 
   },
-  stepText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#8C9A8C',
-    marginBottom: 10,
-    textTransform: 'uppercase',
+  stepDot: { 
+    width: 8, 
+    height: 4, 
+    borderRadius: 2, 
+    backgroundColor: '#E6EBE0', 
+    marginRight: 6 
   },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#E6EBE0',
-    borderRadius: 4,
+  stepDotDone: { 
+    backgroundColor: '#9CAF88' 
   },
-  progressFill: {
-    height: 8,
-    backgroundColor: '#9CAF88',
-    borderRadius: 4,
+  content: { 
+    flex: 1, 
+    alignItems: 'center', 
+    justifyContent: 'center' 
   },
-  content: {
-    flex: 1,
+  iconCircle: { 
+    width: 100, 
+    height: 100, 
+    backgroundColor: '#FFFFFF', 
+    borderRadius: 50, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginBottom: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  title: { 
+    fontSize: 28, 
+    fontWeight: '700', 
+    color: '#1A1C1A', 
+    textAlign: 'center', 
+    letterSpacing: -0.5 
+  },
+  subtitle: { 
+    fontSize: 16, 
+    color: '#8C9A8C', 
+    textAlign: 'center', 
+    lineHeight: 24, 
+    marginTop: 16,
+    paddingHorizontal: 10
+  },
+  loaderBox: { 
+    marginTop: 60, 
     alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: 'row',
+    backgroundColor: '#F0F2ED',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 30,
   },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    backgroundColor: '#FAF3E0',
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 30,
+  loadingMessage: { 
+    marginLeft: 12,
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: '#4A5D4A' 
   },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#4A5D4A',
-    textAlign: 'center',
-    marginBottom: 15,
+  footer: { 
+    marginBottom: 50, 
+    alignItems: 'center' 
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#8C9A8C',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 40,
-  },
-  loadingBox: {
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 15,
-    fontSize: 16,
+  footerText: { 
+    fontSize: 13, 
+    color: '#C1C7C1', 
     fontWeight: '600',
-    color: '#9CAF88',
-  },
-  footer: {
-    marginBottom: 50,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#8C9A8C',
-    fontStyle: 'italic',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5
   },
 });

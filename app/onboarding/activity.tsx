@@ -5,98 +5,115 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function ActivityScreen() {
   const router = useRouter();
-  // Recogemos el objetivo seleccionado en el paso anterior
-  const { goal } = useLocalSearchParams(); 
+  const { userName, goal } = useLocalSearchParams(); 
   const [selectedActivity, setSelectedActivity] = useState('');
+
+  const activities = [
+    { id: 'sedentario', title: 'Sedentario', desc: 'Paso la mayor parte del día sentada', icon: 'cafe-outline' },
+    { id: 'moderado', title: 'Moderado', desc: 'Ejercicio de 1 a 2 veces por semana', icon: 'walk-outline' },
+    { id: 'activo', title: 'Muy Activo', desc: 'Entreno duro más de 3 veces por semana', icon: 'flash-outline' },
+  ];
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.stepText}>Paso 2 de 4</Text>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: '50%' }]} />
-        </View>
+      {/* Steppers - Paso 3 de 4 */}
+      <View style={styles.stepContainer}>
+        <View style={[styles.stepDot, styles.stepDotDone]} />
+        <View style={[styles.stepDot, styles.stepDotDone]} />
+        <View style={[styles.stepDot, styles.stepDotActive]} />
+        <View style={styles.stepDot} />
       </View>
 
-      <Text style={styles.title}>Tu nivel de actividad 🏃‍♀️</Text>
-      <Text style={styles.subtitle}>Nos ayuda a ajustar la intensidad de las rutinas.</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Nivel de actividad</Text>
+        <Text style={styles.subtitle}>Esto nos permite calcular tu gasto calórico y ajustar la intensidad.</Text>
+      </View>
 
       <View style={styles.optionsContainer}>
-        <Pressable 
-          style={[styles.optionCard, selectedActivity === 'sedentario' && styles.optionCardActive]}
-          onPress={() => setSelectedActivity('sedentario')}
-        >
-          <View style={[styles.iconContainer, selectedActivity === 'sedentario' && styles.iconContainerActive]}>
-            <Ionicons name="cafe" size={32} color={selectedActivity === 'sedentario' ? '#FDFBF6' : '#9CAF88'} />
-          </View>
-          <View style={styles.optionTextContainer}>
-            <Text style={[styles.optionTitle, selectedActivity === 'sedentario' && styles.optionTitleActive]}>Sedentario</Text>
-            <Text style={[styles.optionSubtitle, selectedActivity === 'sedentario' && styles.optionSubtitleActive]}>Paso la mayor parte del día sentada</Text>
-          </View>
-        </Pressable>
-
-        <Pressable 
-          style={[styles.optionCard, selectedActivity === 'moderado' && styles.optionCardActive]}
-          onPress={() => setSelectedActivity('moderado')}
-        >
-          <View style={[styles.iconContainer, selectedActivity === 'moderado' && styles.iconContainerActive]}>
-            <Ionicons name="walk" size={32} color={selectedActivity === 'moderado' ? '#FDFBF6' : '#CDA434'} />
-          </View>
-          <View style={styles.optionTextContainer}>
-            <Text style={[styles.optionTitle, selectedActivity === 'moderado' && styles.optionTitleActive]}>Moderado</Text>
-            <Text style={[styles.optionSubtitle, selectedActivity === 'moderado' && styles.optionSubtitleActive]}>Camino o hago ejercicio 1-2 veces por semana</Text>
-          </View>
-        </Pressable>
-
-        <Pressable 
-          style={[styles.optionCard, selectedActivity === 'activo' && styles.optionCardActive]}
-          onPress={() => setSelectedActivity('activo')}
-        >
-          <View style={[styles.iconContainer, selectedActivity === 'activo' && styles.iconContainerActive]}>
-            <Ionicons name="flash" size={32} color={selectedActivity === 'activo' ? '#FDFBF6' : '#E6CCB2'} />
-          </View>
-          <View style={styles.optionTextContainer}>
-            <Text style={[styles.optionTitle, selectedActivity === 'activo' && styles.optionTitleActive]}>Muy Activo</Text>
-            <Text style={[styles.optionSubtitle, selectedActivity === 'activo' && styles.optionSubtitleActive]}>Entreno duro más de 3 veces por semana</Text>
-          </View>
-        </Pressable>
+        {activities.map((item) => (
+          <Pressable 
+            key={item.id}
+            style={[styles.card, selectedActivity === item.id && styles.cardActive]}
+            onPress={() => setSelectedActivity(item.id)}
+          >
+            <View style={[styles.iconBox, selectedActivity === item.id && styles.iconBoxActive]}>
+              <Ionicons 
+                name={item.icon as any} 
+                size={24} 
+                color={selectedActivity === item.id ? '#FDFBF6' : '#4A5D4A'} 
+              />
+            </View>
+            <View style={styles.textColumn}>
+              <Text style={[styles.cardTitle, selectedActivity === item.id && styles.cardTitleActive]}>
+                {item.title}
+              </Text>
+              <Text style={[styles.cardDesc, selectedActivity === item.id && styles.cardDescActive]}>
+                {item.desc}
+              </Text>
+            </View>
+          </Pressable>
+        ))}
       </View>
 
-      <Pressable 
-        style={[styles.nextButton, !selectedActivity && styles.nextButtonDisabled]} 
-        disabled={!selectedActivity}
-        // Pasamos AMBOS datos a la siguiente pantalla
-        onPress={() => router.push({
-          pathname: '/onboarding/measurements',
-          params: { goal: goal, activity: selectedActivity }
-        } as any)}
-      >
-        <Text style={styles.nextButtonText}>Continuar</Text>
-        <Ionicons name="arrow-forward" size={24} color="#FDFBF6" />
-      </Pressable>
+      <View style={styles.footer}>
+        <Pressable 
+          style={[styles.nextButton, !selectedActivity && styles.nextButtonDisabled]} 
+          disabled={!selectedActivity}
+          onPress={() => router.push({
+            pathname: '/onboarding/measurements',
+            params: { userName, goal, activity: selectedActivity }
+          } as any)}
+        >
+          <Text style={styles.nextButtonText}>Siguiente paso</Text>
+          <Ionicons name="arrow-forward" size={18} color="#FDFBF6" />
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FDFBF6', paddingHorizontal: 20, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: '#FDFBF6', paddingHorizontal: 28 },
+  stepContainer: { flexDirection: 'row', marginTop: 70, marginBottom: 40, justifyContent: 'flex-start' },
+  stepDot: { width: 8, height: 4, borderRadius: 2, backgroundColor: '#E6EBE0', marginRight: 6 },
+  stepDotActive: { width: 24, backgroundColor: '#4A5D4A' },
+  stepDotDone: { backgroundColor: '#9CAF88' },
   header: { marginBottom: 40 },
-  stepText: { fontSize: 14, fontWeight: 'bold', color: '#8C9A8C', marginBottom: 10, textTransform: 'uppercase' },
-  progressBar: { height: 8, backgroundColor: '#E6EBE0', borderRadius: 4 },
-  progressFill: { height: 8, backgroundColor: '#9CAF88', borderRadius: 4 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#4A5D4A', marginBottom: 10 },
-  subtitle: { fontSize: 16, color: '#8C9A8C', marginBottom: 40 },
+  title: { fontSize: 30, fontWeight: '700', color: '#1A1C1A', letterSpacing: -0.8 },
+  subtitle: { fontSize: 16, color: '#8C9A8C', marginTop: 12, lineHeight: 24 },
   optionsContainer: { flex: 1 },
-  optionCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FAF3E0', padding: 20, borderRadius: 24, marginBottom: 20, borderWidth: 2, borderColor: '#E6EBE0' },
-  optionCardActive: { backgroundColor: '#4A5D4A', borderColor: '#4A5D4A', shadowColor: '#4A5D4A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
-  iconContainer: { width: 60, height: 60, borderRadius: 16, backgroundColor: '#FDFBF6', justifyContent: 'center', alignItems: 'center', marginRight: 20 },
-  iconContainerActive: { backgroundColor: 'rgba(253, 251, 246, 0.2)' },
-  optionTextContainer: { flex: 1 },
-  optionTitle: { fontSize: 18, fontWeight: 'bold', color: '#4A5D4A', marginBottom: 4 },
-  optionTitleActive: { color: '#FDFBF6' },
-  optionSubtitle: { fontSize: 14, color: '#8C9A8C' },
-  optionSubtitleActive: { color: '#E6EBE0' },
-  nextButton: { flexDirection: 'row', backgroundColor: '#CDA434', padding: 20, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 40 },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 22,
+    borderRadius: 24,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F0F2ED',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardActive: { backgroundColor: '#4A5D4A', borderColor: '#4A5D4A' },
+  iconBox: { width: 48, height: 48, backgroundColor: '#FDFBF6', borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
+  iconBoxActive: { backgroundColor: 'rgba(255,255,255,0.15)' },
+  textColumn: { flex: 1 },
+  cardTitle: { fontSize: 18, fontWeight: '600', color: '#1A1C1A' },
+  cardTitleActive: { color: '#FDFBF6' },
+  cardDesc: { fontSize: 13, color: '#8C9A8C', marginTop: 2 },
+  cardDescActive: { color: '#E6EBE0' },
+  footer: { paddingBottom: 50 },
+  nextButton: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1C1A',
+    padding: 22,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   nextButtonDisabled: { backgroundColor: '#E6EBE0' },
-  nextButtonText: { fontSize: 18, fontWeight: 'bold', color: '#FDFBF6', marginRight: 10 },
+  nextButtonText: { fontSize: 17, fontWeight: '700', color: '#FDFBF6', marginRight: 8 },
 });
