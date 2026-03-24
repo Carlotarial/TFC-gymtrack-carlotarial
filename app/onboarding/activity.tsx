@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function ActivityScreen() {
   const router = useRouter();
+  // Recogemos el objetivo seleccionado en el paso anterior
+  const { goal } = useLocalSearchParams(); 
   const [selectedActivity, setSelectedActivity] = useState('');
 
   return (
@@ -60,11 +62,14 @@ export default function ActivityScreen() {
         </Pressable>
       </View>
 
-      {/* Nota: Este botón marcará error rojo temporalmente hasta que creemos el paso 3 */}
       <Pressable 
         style={[styles.nextButton, !selectedActivity && styles.nextButtonDisabled]} 
         disabled={!selectedActivity}
-        onPress={() => router.push('/onboarding/measurements' as any)}
+        // Pasamos AMBOS datos a la siguiente pantalla
+        onPress={() => router.push({
+          pathname: '/onboarding/measurements',
+          params: { goal: goal, activity: selectedActivity }
+        } as any)}
       >
         <Text style={styles.nextButtonText}>Continuar</Text>
         <Ionicons name="arrow-forward" size={24} color="#FDFBF6" />
@@ -74,112 +79,24 @@ export default function ActivityScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FDFBF6',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-  },
-  header: {
-    marginBottom: 40,
-  },
-  stepText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#8C9A8C',
-    marginBottom: 10,
-    textTransform: 'uppercase',
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#E6EBE0',
-    borderRadius: 4,
-  },
-  progressFill: {
-    height: 8,
-    backgroundColor: '#9CAF88',
-    borderRadius: 4,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#4A5D4A',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#8C9A8C',
-    marginBottom: 40,
-  },
-  optionsContainer: {
-    flex: 1,
-  },
-  optionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FAF3E0',
-    padding: 20,
-    borderRadius: 24,
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: '#E6EBE0',
-  },
-  optionCardActive: {
-    backgroundColor: '#4A5D4A',
-    borderColor: '#4A5D4A',
-    shadowColor: '#4A5D4A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
-    backgroundColor: '#FDFBF6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 20,
-  },
-  iconContainerActive: {
-    backgroundColor: 'rgba(253, 251, 246, 0.2)',
-  },
-  optionTextContainer: {
-    flex: 1,
-  },
-  optionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4A5D4A',
-    marginBottom: 4,
-  },
-  optionTitleActive: {
-    color: '#FDFBF6',
-  },
-  optionSubtitle: {
-    fontSize: 14,
-    color: '#8C9A8C',
-  },
-  optionSubtitleActive: {
-    color: '#E6EBE0',
-  },
-  nextButton: {
-    flexDirection: 'row',
-    backgroundColor: '#CDA434',
-    padding: 20,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 40,
-  },
-  nextButtonDisabled: {
-    backgroundColor: '#E6EBE0',
-  },
-  nextButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FDFBF6',
-    marginRight: 10,
-  },
+  container: { flex: 1, backgroundColor: '#FDFBF6', paddingHorizontal: 20, paddingTop: 60 },
+  header: { marginBottom: 40 },
+  stepText: { fontSize: 14, fontWeight: 'bold', color: '#8C9A8C', marginBottom: 10, textTransform: 'uppercase' },
+  progressBar: { height: 8, backgroundColor: '#E6EBE0', borderRadius: 4 },
+  progressFill: { height: 8, backgroundColor: '#9CAF88', borderRadius: 4 },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#4A5D4A', marginBottom: 10 },
+  subtitle: { fontSize: 16, color: '#8C9A8C', marginBottom: 40 },
+  optionsContainer: { flex: 1 },
+  optionCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FAF3E0', padding: 20, borderRadius: 24, marginBottom: 20, borderWidth: 2, borderColor: '#E6EBE0' },
+  optionCardActive: { backgroundColor: '#4A5D4A', borderColor: '#4A5D4A', shadowColor: '#4A5D4A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 },
+  iconContainer: { width: 60, height: 60, borderRadius: 16, backgroundColor: '#FDFBF6', justifyContent: 'center', alignItems: 'center', marginRight: 20 },
+  iconContainerActive: { backgroundColor: 'rgba(253, 251, 246, 0.2)' },
+  optionTextContainer: { flex: 1 },
+  optionTitle: { fontSize: 18, fontWeight: 'bold', color: '#4A5D4A', marginBottom: 4 },
+  optionTitleActive: { color: '#FDFBF6' },
+  optionSubtitle: { fontSize: 14, color: '#8C9A8C' },
+  optionSubtitleActive: { color: '#E6EBE0' },
+  nextButton: { flexDirection: 'row', backgroundColor: '#CDA434', padding: 20, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 40 },
+  nextButtonDisabled: { backgroundColor: '#E6EBE0' },
+  nextButtonText: { fontSize: 18, fontWeight: 'bold', color: '#FDFBF6', marginRight: 10 },
 });

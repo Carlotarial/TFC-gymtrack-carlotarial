@@ -11,9 +11,9 @@ export default function ObjectiveScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.stepText}>Paso 1 de 4</Text>
-        <View style={styles.progressBar}>
+        <div style={styles.progressBar}>
           <View style={[styles.progressFill, { width: '25%' }]} />
-        </View>
+        </div>
       </View>
 
       <Text style={styles.title}>¿Cuál es tu objetivo principal? 🎯</Text>
@@ -63,7 +63,10 @@ export default function ObjectiveScreen() {
       <Pressable 
         style={[styles.nextButton, !selectedGoal && styles.nextButtonDisabled]} 
         disabled={!selectedGoal}
-        onPress={() => router.push('/onboarding/activity')}
+        onPress={() => router.push({
+          pathname: '/onboarding/activity',
+          params: { goal: selectedGoal }
+        } as any)}
       >
         <Text style={styles.nextButtonText}>Continuar</Text>
         <Ionicons name="arrow-forward" size={24} color="#FDFBF6" />
