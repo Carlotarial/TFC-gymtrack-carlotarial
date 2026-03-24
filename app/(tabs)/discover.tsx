@@ -71,7 +71,7 @@ export default function DiscoverScreen() {
               style={s.workoutCard}
               onPress={() => router.push({ 
                 pathname: '/routine', 
-                params: { title: workout.title } 
+                params: { id: workout.id, title: workout.title } 
               } as any)}
             >
               <View style={staticStyles.workoutInfo}>
@@ -93,22 +93,29 @@ export default function DiscoverScreen() {
         )}
       </View>
 
-      {/* Grid de Ejercicios Sugeridos */}
+      {/* Grid de Ejercicios y Movimientos sueltos */}
       <View style={staticStyles.section}>
-        <Text style={s.sectionTitle}>Nuevos movimientos</Text>
+        <Text style={s.sectionTitle}>Aprende la técnica</Text>
         <View style={staticStyles.grid}>
-          <View style={staticStyles.gridItem}>
+          <Pressable 
+            style={staticStyles.gridItem} 
+            onPress={() => router.push({ pathname: '/movement', params: { id: 'e1' } } as any)}
+          >
             <View style={s.imageBox}>
-              <Ionicons name="barbell-outline" size={32} color={colors.accentDark} />
+              <Ionicons name="fitness-outline" size={32} color={colors.accentDark} />
             </View>
-            <Text style={s.gridTitle}>Peso Muerto</Text>
-          </View>
-          <View style={staticStyles.gridItem}>
+            <Text style={s.gridTitle}>Sentadilla</Text>
+          </Pressable>
+
+          <Pressable 
+            style={staticStyles.gridItem} 
+            onPress={() => router.push({ pathname: '/movement', params: { id: 'e7' } } as any)}
+          >
             <View style={s.imageBox}>
-              <Ionicons name="body-outline" size={32} color={colors.accentDark} />
+              <Ionicons name="accessibility-outline" size={32} color={colors.accentDark} />
             </View>
             <Text style={s.gridTitle}>Plancha</Text>
-          </View>
+          </Pressable>
         </View>
       </View>
 

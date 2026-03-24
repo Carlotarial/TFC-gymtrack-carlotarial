@@ -1,13 +1,18 @@
 import { useTheme, AppColors } from '@/context/ThemeContext';
-import { ROUTINE_EXERCISES } from '@/data/exercises';
+import { getFullExerciseDetails } from '@/data/exercises';
+import { getWorkoutById, ALL_WORKOUTS } from '@/data/workouts';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function RoutineScreen() {
   const router = useRouter();
-  const { goal, title } = useLocalSearchParams(); 
+  const { id } = useLocalSearchParams(); 
   const { colors } = useTheme();
+
+  // Buscar el workout específico, o el primero por defecto si no lo encuentra.
+  const workout = id ? getWorkoutById(id as string) : ALL_WORKOUTS[0];
+  const exercises = workout ? getFullExerciseDetails(workout.exercises) : [];
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -17,14 +22,9 @@ export default function RoutineScreen() {
     }
   };
 
-  const getRoutineTitle = () => {
-    if (title) return title;
-    if (goal === 'perder_peso') return 'Circuito Metabólico';
-    if (goal === 'ganar_musculo') return 'Fuerza e Hipertrofia';
-    return 'Tonificación Integral';
-  };
-
   const s = dynamicStyles(colors);
+
+  if (!workout) return null;
 
   return (
     <View style={s.container}>
@@ -32,7 +32,7 @@ export default function RoutineScreen() {
         <Pressable onPress={handleBack} style={staticStyles.backButton}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={s.headerTitle}>{getRoutineTitle()}</Text>
+        <Text style={s.headerTitle}>{workout.title}</Text>
         <View style={{ width: 44 }} /> 
       </View>
 
@@ -40,36 +40,39 @@ export default function RoutineScreen() {
         <View style={s.infoBanner}>
           <View style={staticStyles.infoItem}>
             <Text style={s.infoLabel}>Duración</Text>
-            <Text style={s.infoValue}>45 min</Text>
+            <Text style={s.infoValue}>{workout.duration}</Text>
           </View>
           <View style={s.divider} />
           <View style={staticStyles.infoItem}>
             <Text style={s.infoLabel}>Intensidad</Text>
-            <Text style={s.infoValue}>Media</Text>
+            <Text style={s.infoValue}>{workout.intensity}</Text>
           </View>
           <View style={s.divider} />
           <View style={staticStyles.infoItem}>
             <Text style={s.infoLabel}>Calorías</Text>
-            <Text style={s.infoValue}>320 kcal</Text>
+            <Text style={s.infoValue}>{workout.kcalEstimate} kcal</Text>
           </View>
         </View>
 
         <Text style={s.sectionTitle}>Ejercicios de la sesión</Text>
 
-        {ROUTINE_EXERCISES.map((item, index) => (
-          <View key={index} style={s.exerciseCard}>
+        {exercises.map((item, index) => (
+          <View key={`${item.id}-${index}`} style={s.exerciseCard}>
             <View style={s.iconWrapper}>
-              <Ionicons name={item.icon} size={22} color={colors.accentDark} />
+              <Ionicons name={item.icon as any} size={22} color={colors.accentDark} />
             </View>
             <View style={staticStyles.exerciseInfo}>
               <Text style={s.exerciseName}>{item.name}</Text>
-              <Text style={s.exerciseReps}>{item.reps}</Text>
+              <Text style={s.exerciseReps}>{item.sets}</Text>
             </View>
             <Ionicons name="play-circle-outline" size={24} color={colors.textMuted} />
           </View>
         ))}
 
-        <Pressable style={s.startButton} onPress={() => router.push('/workout')}>
+        <Pressable 
+          style={s.startButton} 
+          onPress={() => router.push({ pathname: '/workout', params: { id: workout.id } } as any)}
+        >
           <Text style={s.startButtonText}>Comenzar entrenamiento</Text>
         </Pressable>
       </ScrollView>

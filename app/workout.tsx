@@ -3,7 +3,7 @@ import { useTimer } from '@/hooks/useTimer';
 import { useWorkoutPlayer } from '@/hooks/useWorkoutPlayer';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft, FadeInDown, Easing } from 'react-native-reanimated';
 
@@ -11,7 +11,8 @@ export default function WorkoutScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const timer = useTimer(true);
-  const player = useWorkoutPlayer();
+  const { id } = useLocalSearchParams();
+  const player = useWorkoutPlayer(id as string);
 
   const handleNextExercise = () => {
     if (!player.isLastExercise) {

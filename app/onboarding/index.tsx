@@ -1,6 +1,7 @@
 import { useTheme, AppColors } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -36,6 +37,12 @@ export default function NameScreen() {
       </View>
 
       <View style={staticStyles.content}>
+        {/* LOGO DE GYMTRACK: Descomenta la línea de <Image> de abajo una vez metas el archivo logo.png en tu carpeta assets/images/ */}
+        <View style={s.logoContainer}>
+          {/* <Image source={require('../../assets/images/logo.png')} style={s.logoImage} contentFit="contain" /> */}
+          <Ionicons name="barbell" size={44} color={colors.accentDark} />
+        </View>
+
         <View style={s.welcomeBadge}>
           <Text style={s.badgeText}>Bienvenido a GymTrack</Text>
         </View>
@@ -88,6 +95,8 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   stepContainer: { flexDirection: 'row', marginTop: 70, marginBottom: 20, justifyContent: 'flex-start' },
   stepDot: { width: 12, height: 4, borderRadius: 2, backgroundColor: c.accentLight, marginRight: 6 },
   stepDotActive: { width: 32, backgroundColor: c.accentDark },
+  logoContainer: { width: 80, height: 80, backgroundColor: c.surface, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 24, alignSelf: 'flex-start', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2, borderWidth: 1, borderColor: c.surfaceBorder },
+  logoImage: { width: 44, height: 44 },
   welcomeBadge: { backgroundColor: c.accentLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, alignSelf: 'flex-start', marginBottom: 20 },
   badgeText: { fontSize: 12, fontWeight: '700', color: c.accentDark, textTransform: 'uppercase', letterSpacing: 1 },
   title: { fontSize: 34, fontWeight: '800', color: c.text, letterSpacing: -1, lineHeight: 40 },

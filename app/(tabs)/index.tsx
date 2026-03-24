@@ -92,7 +92,7 @@ export default function HomeScreen() {
             <Pressable
               key={rec.id}
               style={s.gridCard}
-              onPress={() => router.push({ pathname: '/routine', params: { title: rec.title } } as any)}
+              onPress={() => router.push({ pathname: '/routine', params: { id: rec.id, title: rec.title } } as any)}
             >
               <View style={[staticStyles.cardIconBox, { backgroundColor: colors.accentLight }]}>
                 <Ionicons name={rec.icon as any} size={24} color={colors.accentDark} />
