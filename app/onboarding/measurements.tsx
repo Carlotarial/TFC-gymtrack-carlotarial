@@ -1,3 +1,4 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -5,7 +6,8 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput,
 
 export default function MeasurementsScreen() {
   const router = useRouter();
-  const { userName, goal, activity } = useLocalSearchParams(); 
+  const { userName, goal, activity } = useLocalSearchParams();
+  const { updateUser } = useUser();
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
 
@@ -67,10 +69,13 @@ export default function MeasurementsScreen() {
         <Pressable 
           style={[styles.nextButton, !isValid && styles.nextButtonDisabled]} 
           disabled={!isValid}
-          onPress={() => router.push({
-            pathname: '/onboarding/generating',
-            params: { userName, goal, activity, weight, height }
-          } as any)}
+          onPress={async () => {
+            await updateUser({ weight, height });
+            router.push({
+              pathname: '/onboarding/generating',
+              params: { userName, goal, activity, weight, height }
+            } as any);
+          }}
         >
           <Text style={styles.nextButtonText}>Finalizar test</Text>
           <Ionicons name="checkmark-circle" size={20} color="#FDFBF6" />

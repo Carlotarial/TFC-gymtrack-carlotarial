@@ -1,5 +1,6 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   SafeAreaView,
@@ -13,13 +14,12 @@ import {
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const localParams = useLocalSearchParams();
-  const globalParams = useGlobalSearchParams();
+  const { user, resetUser } = useUser();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
-  // 1. Captura de datos dinámicos
-  const userName = (localParams.userName || globalParams.userName || 'Usuario GymTrack') as string;
+  // Datos dinámicos del contexto
+  const userName = user.name || 'Usuario GymTrack';
   
   const { userInitial, userEmail } = useMemo(() => {
     const initial = userName.charAt(0).toUpperCase();
@@ -27,9 +27,10 @@ export default function SettingsScreen() {
     return { userInitial: initial, userEmail: email };
   }, [userName]);
 
-  // 2. Función de Logout (Directa para evitar fallos de Alert)
-  const handleLogout = () => {
-    router.replace('/onboarding'); 
+  // Función de Logout — limpia AsyncStorage y estado global
+  const handleLogout = async () => {
+    await resetUser();
+    router.replace('/onboarding' as any); 
   };
 
   return (
@@ -37,7 +38,7 @@ export default function SettingsScreen() {
       <ScrollView 
         style={styles.container} 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }} // Espacio extra para el botón final
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View style={styles.header}>
           <Text style={styles.title}>Ajustes</Text>
@@ -85,7 +86,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* SECCIÓN: GENERAL (Restaurada) */}
+        {/* SECCIÓN: GENERAL */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>General</Text>
 

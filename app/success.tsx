@@ -1,9 +1,26 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function SuccessScreen() {
   const router = useRouter();
+  const { seconds } = useLocalSearchParams();
+  const { completeWorkout } = useUser();
+  const hasRecorded = useRef(false);
+
+  const elapsedSeconds = parseInt(seconds as string, 10) || 0;
+  const minutes = Math.floor(elapsedSeconds / 60);
+  const estimatedKcal = Math.round((elapsedSeconds / 60) * 7); // ~7 kcal/min estimación
+
+  // Registrar la sesión completada al montar (solo una vez)
+  useEffect(() => {
+    if (!hasRecorded.current) {
+      hasRecorded.current = true;
+      completeWorkout('Entrenamiento', elapsedSeconds, estimatedKcal);
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -17,20 +34,20 @@ export default function SuccessScreen() {
 
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>45</Text>
+            <Text style={styles.statNumber}>{minutes > 0 ? minutes : '<1'}</Text>
             <Text style={styles.statLabel}>Minutos</Text>
           </View>
           
           <View style={styles.statDivider} />
           
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>320</Text>
+            <Text style={styles.statNumber}>{estimatedKcal}</Text>
             <Text style={styles.statLabel}>Kcal</Text>
           </View>
         </View>
       </View>
 
-      <Pressable style={styles.homeButton} onPress={() => router.push('/(tabs)')}>
+      <Pressable style={styles.homeButton} onPress={() => router.push('/(tabs)' as any)}>
         <Text style={styles.homeButtonText}>Volver al Inicio</Text>
         <Ionicons name="home" size={20} color="#FDFBF6" />
       </Pressable>

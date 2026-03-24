@@ -1,18 +1,40 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const { user } = useUser();
   
-  const userName = params.userName || 'Usuario GymTrack';
+  const userName = user.name || 'Usuario GymTrack';
   
-  // Datos de ejemplo para las nuevas secciones
-  const [sessionsCompleted] = useState(3);
+  // Datos reactivos del contexto
+  const sessionsCompleted = user.sessionsCompleted;
   const totalSessions = 4;
-  const progressPercent = (sessionsCompleted / totalSessions) * 100;
+  const progressPercent = Math.min((sessionsCompleted / totalSessions) * 100, 100);
+
+  // Recomendaciones inteligentes basadas en el objetivo
+  const getRecommendations = () => {
+    if (user.goal === 'perder_peso') {
+      return [
+        { title: 'Circuito HIIT', intensity: 'Intensidad Alta', icon: 'flame-outline', bgColor: '#FAF3E0', iconColor: '#CDA434' },
+        { title: 'Cardio Activo', intensity: 'Intensidad Media', icon: 'bicycle-outline', bgColor: '#E6EBE0', iconColor: '#4A5D4A' },
+      ];
+    }
+    if (user.goal === 'ganar_musculo') {
+      return [
+        { title: 'Fuerza Total', intensity: 'Intensidad Alta', icon: 'barbell-outline', bgColor: '#E6EBE0', iconColor: '#4A5D4A' },
+        { title: 'Hipertrofia', intensity: 'Intensidad Media', icon: 'fitness-outline', bgColor: '#FAF3E0', iconColor: '#CDA434' },
+      ];
+    }
+    return [
+      { title: 'Tren Inferior', intensity: 'Intensidad Media', icon: 'fitness-outline', bgColor: '#E6EBE0', iconColor: '#4A5D4A' },
+      { title: 'Zona Core', intensity: 'Intensidad Suave', icon: 'accessibility-outline', bgColor: '#FAF3E0', iconColor: '#CDA434' },
+    ];
+  };
+
+  const recommendations = getRecommendations();
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -27,25 +49,25 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* Métricas Rápidas (NUEVO) */}
+      {/* Métricas Rápidas — Datos reales del contexto */}
       <View style={styles.metricsRow}>
         <View style={styles.metricItem}>
-          <Text style={styles.metricValue}>7</Text>
+          <Text style={styles.metricValue}>{user.streak}</Text>
           <Text style={styles.metricLabel}>Días racha</Text>
         </View>
         <View style={styles.metricDivider} />
         <View style={styles.metricItem}>
-          <Text style={styles.metricValue}>520</Text>
-          <Text style={styles.metricLabel}>Kcal hoy</Text>
+          <Text style={styles.metricValue}>{user.kcalBurned}</Text>
+          <Text style={styles.metricLabel}>Kcal total</Text>
         </View>
         <View style={styles.metricDivider} />
         <View style={styles.metricItem}>
-          <Text style={styles.metricValue}>1.2L</Text>
+          <Text style={styles.metricValue}>{user.waterIntake.toFixed(1)}L</Text>
           <Text style={styles.metricLabel}>Agua</Text>
         </View>
       </View>
 
-      {/* Tarjeta de Progreso */}
+      {/* Tarjeta de Progreso — Datos reales */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Progreso semanal</Text>
         <View style={styles.progressCard}>
@@ -64,35 +86,27 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Entrenamientos recomendados */}
+      {/* Entrenamientos recomendados según objetivo */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Siguiente sesión</Text>
         <View style={styles.grid}>
-          <Pressable 
-            style={styles.gridCard} 
-            onPress={() => router.push({ pathname: '/routine', params: { title: 'Tren Inferior' } } as any)}
-          >
-            <View style={[styles.cardIconBox, { backgroundColor: '#E6EBE0' }]}>
-              <Ionicons name="fitness-outline" size={24} color="#4A5D4A" />
-            </View>
-            <Text style={styles.cardTitle}>Tren Inferior</Text>
-            <Text style={styles.cardTag}>Intensidad Media</Text>
-          </Pressable>
-
-          <Pressable 
-            style={styles.gridCard} 
-            onPress={() => router.push({ pathname: '/routine', params: { title: 'Zona Core' } } as any)}
-          >
-            <View style={[styles.cardIconBox, { backgroundColor: '#FAF3E0' }]}>
-              <Ionicons name="accessibility-outline" size={24} color="#CDA434" />
-            </View>
-            <Text style={styles.cardTitle}>Zona Core</Text>
-            <Text style={styles.cardTag}>Intensidad Suave</Text>
-          </Pressable>
+          {recommendations.map((rec, index) => (
+            <Pressable 
+              key={index}
+              style={styles.gridCard} 
+              onPress={() => router.push({ pathname: '/routine', params: { title: rec.title } } as any)}
+            >
+              <View style={[styles.cardIconBox, { backgroundColor: rec.bgColor }]}>
+                <Ionicons name={rec.icon as any} size={24} color={rec.iconColor} />
+              </View>
+              <Text style={styles.cardTitle}>{rec.title}</Text>
+              <Text style={styles.cardTag}>{rec.intensity}</Text>
+            </Pressable>
+          ))}
         </View>
       </View>
 
-      {/* Tip del día (NUEVO) */}
+      {/* Tip del día */}
       <View style={styles.tipCard}>
         <Ionicons name="bulb-outline" size={24} color="#9CAF88" />
         <View style={styles.tipContent}>

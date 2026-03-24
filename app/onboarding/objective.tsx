@@ -1,3 +1,4 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -8,6 +9,7 @@ const { width } = Dimensions.get('window');
 export default function ObjectiveScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { updateUser } = useUser();
   const [selectedGoal, setSelectedGoal] = useState('');
 
   const goals = [
@@ -59,10 +61,13 @@ export default function ObjectiveScreen() {
         <Pressable 
           style={[styles.nextButton, !selectedGoal && styles.nextButtonDisabled]} 
           disabled={!selectedGoal}
-          onPress={() => router.push({
-            pathname: '/onboarding/activity',
-            params: { userName: params.userName, goal: selectedGoal }
-          } as any)}
+          onPress={async () => {
+            await updateUser({ goal: selectedGoal });
+            router.push({
+              pathname: '/onboarding/activity',
+              params: { userName: params.userName, goal: selectedGoal }
+            } as any);
+          }}
         >
           <Text style={styles.nextButtonText}>Siguiente paso</Text>
           <Ionicons name="arrow-forward" size={18} color="#FDFBF6" />

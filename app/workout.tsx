@@ -47,7 +47,7 @@ export default function WorkoutScreen() {
       setIsLoading(true);
       setCurrentExerciseIndex(currentExerciseIndex + 1);
     } else {
-      router.push('/success' as any);
+      router.push({ pathname: '/success', params: { seconds: seconds.toString() } } as any);
     }
   };
 

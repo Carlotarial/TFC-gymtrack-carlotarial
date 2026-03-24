@@ -1,3 +1,4 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -7,7 +8,16 @@ const { width } = Dimensions.get('window');
 
 export default function NameScreen() {
   const router = useRouter();
+  const { updateUser } = useUser();
   const [name, setName] = useState('');
+
+  const handleContinue = async () => {
+    await updateUser({ name });
+    router.push({
+      pathname: '/onboarding/objective',
+      params: { userName: name }
+    } as any);
+  };
 
   return (
     <KeyboardAvoidingView 
@@ -54,10 +64,7 @@ export default function NameScreen() {
         <Pressable 
           style={[styles.nextButton, !name && styles.nextButtonDisabled]} 
           disabled={!name}
-          onPress={() => router.push({
-            pathname: '/onboarding/objective',
-            params: { userName: name }
-          } as any)}
+          onPress={handleContinue}
         >
           <Text style={styles.nextButtonText}>Continuar</Text>
           <Ionicons name="chevron-forward" size={18} color="#FDFBF6" />

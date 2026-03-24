@@ -1,11 +1,12 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 export default function GeneratingScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const { user } = useUser();
   const [loadingText, setLoadingText] = useState('Analizando tu perfil');
 
   useEffect(() => {
@@ -25,12 +26,9 @@ export default function GeneratingScreen() {
       }
     }, 800);
 
-    // 2. Navegación final a la Home pasando el nombre
+    // 2. Navegación final a la Home (context ya tiene los datos)
     const timer = setTimeout(() => {
-      router.replace({
-        pathname: '/(tabs)',
-        params: { userName: params.userName }
-      } as any);
+      router.replace('/(tabs)' as any);
     }, 3500);
 
     return () => {
@@ -56,7 +54,7 @@ export default function GeneratingScreen() {
         
         <Text style={styles.title}>Estamos preparando tu plan</Text>
         <Text style={styles.subtitle}>
-          Ajustando cada detalle a tus objetivos de {params.goal?.toString().replace('_', ' ') || 'bienestar'}.
+          Ajustando cada detalle a tus objetivos de {user.goal?.replace('_', ' ') || 'bienestar'}.
         </Text>
 
         <View style={styles.loaderBox}>

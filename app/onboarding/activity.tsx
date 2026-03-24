@@ -1,3 +1,4 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -5,7 +6,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function ActivityScreen() {
   const router = useRouter();
-  const { userName, goal } = useLocalSearchParams(); 
+  const { userName, goal } = useLocalSearchParams();
+  const { updateUser } = useUser();
   const [selectedActivity, setSelectedActivity] = useState('');
 
   const activities = [
@@ -59,10 +61,13 @@ export default function ActivityScreen() {
         <Pressable 
           style={[styles.nextButton, !selectedActivity && styles.nextButtonDisabled]} 
           disabled={!selectedActivity}
-          onPress={() => router.push({
-            pathname: '/onboarding/measurements',
-            params: { userName, goal, activity: selectedActivity }
-          } as any)}
+          onPress={async () => {
+            await updateUser({ activityLevel: selectedActivity });
+            router.push({
+              pathname: '/onboarding/measurements',
+              params: { userName, goal, activity: selectedActivity }
+            } as any);
+          }}
         >
           <Text style={styles.nextButtonText}>Siguiente paso</Text>
           <Ionicons name="arrow-forward" size={18} color="#FDFBF6" />

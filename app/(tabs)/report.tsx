@@ -1,9 +1,44 @@
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
-
-const { width } = Dimensions.get('window');
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function ReportScreen() {
+  const { user } = useUser();
+
+  // Calcular minutos totales del historial
+  const totalMinutes = Math.round(
+    user.workoutHistory.reduce((acc, s) => acc + s.durationSecs, 0) / 60
+  );
+
+  // Calcular actividad por día de la semana (L-D) a partir del historial
+  const getWeeklyActivity = () => {
+    const dayMap = [0, 0, 0, 0, 0, 0, 0]; // L M X J V S D
+    user.workoutHistory.forEach((session) => {
+      const date = new Date(session.date);
+      const day = date.getDay(); // 0=domingo
+      // Convertir a L=0, M=1... D=6
+      const index = day === 0 ? 6 : day - 1;
+      dayMap[index] += session.kcal;
+    });
+    // Normalizar a porcentajes (max = 100%)
+    const max = Math.max(...dayMap, 1);
+    return dayMap.map((val) => Math.round((val / max) * 100));
+  };
+
+  const weeklyBars = getWeeklyActivity();
+  const hasActivity = weeklyBars.some((v) => v > 0);
+
+  // Formatear fecha relativa
+  const formatRelativeDate = (isoString: string) => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Hoy';
+    if (diffDays === 1) return 'Ayer';
+    return `Hace ${diffDays} días`;
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
@@ -11,11 +46,11 @@ export default function ReportScreen() {
         <Text style={styles.subtitle}>Análisis detallado de tu actividad</Text>
       </View>
 
-      {/* Stats Grid Refinado */}
+      {/* Stats Grid — Datos reales */}
       <View style={styles.statsGrid}>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Calorías</Text>
-          <Text style={styles.statValue}>1,250</Text>
+          <Text style={styles.statValue}>{user.kcalBurned.toLocaleString()}</Text>
           <View style={[styles.miniBadge, { backgroundColor: '#E6EBE0' }]}>
             <Text style={styles.badgeText}>kcal</Text>
           </View>
@@ -23,7 +58,7 @@ export default function ReportScreen() {
         
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Tiempo</Text>
-          <Text style={styles.statValue}>180</Text>
+          <Text style={styles.statValue}>{totalMinutes}</Text>
           <View style={[styles.miniBadge, { backgroundColor: '#F0F2ED' }]}>
             <Text style={styles.badgeText}>min</Text>
           </View>
@@ -31,29 +66,38 @@ export default function ReportScreen() {
 
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Sesiones</Text>
-          <Text style={styles.statValue}>4</Text>
+          <Text style={styles.statValue}>{user.sessionsCompleted}</Text>
           <View style={[styles.miniBadge, { backgroundColor: '#FAF3E0' }]}>
             <Text style={styles.badgeText}>rutinas</Text>
           </View>
         </View>
       </View>
 
-      {/* Gráfica Estilizada */}
+      {/* Gráfica Semanal — Datos reales */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Actividad semanal</Text>
         <View style={styles.chartCard}>
-          <View style={styles.chartHeader}>
-            <Text style={styles.chartMainValue}>+12%</Text>
-            <Text style={styles.chartSubtext}>vs semana anterior</Text>
-          </View>
-          
-          <View style={styles.mockChart}>
-            {[60, 45, 75, 50, 85, 40, 65].map((height, index) => (
-              <View key={index} style={styles.barWrapper}>
-                <View style={[styles.bar, { height: `${height}%` }, index === 4 && styles.barActive]} />
+          {hasActivity ? (
+            <>
+              <View style={styles.chartHeader}>
+                <Text style={styles.chartMainValue}>{user.sessionsCompleted} sesiones</Text>
+                <Text style={styles.chartSubtext}>esta semana</Text>
               </View>
-            ))}
-          </View>
+              
+              <View style={styles.mockChart}>
+                {weeklyBars.map((height, index) => (
+                  <View key={index} style={styles.barWrapper}>
+                    <View style={[styles.bar, { height: `${Math.max(height, 5)}%` }, height > 0 && styles.barActive]} />
+                  </View>
+                ))}
+              </View>
+            </>
+          ) : (
+            <View style={styles.emptyChart}>
+              <Ionicons name="bar-chart-outline" size={32} color="#E6EBE0" />
+              <Text style={styles.emptyText}>Completa tu primer entrenamiento para ver tu progreso aquí</Text>
+            </View>
+          )}
           
           <View style={styles.chartLabels}>
             {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) => (
@@ -63,35 +107,36 @@ export default function ReportScreen() {
         </View>
       </View>
 
-      {/* Historial Reciente */}
+      {/* Historial Real */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Historial de sesiones</Text>
         
-        <View style={styles.historyCard}>
-          <View style={styles.historyItem}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="fitness-outline" size={20} color="#4A5D4A" />
-            </View>
-            <View style={styles.historyInfo}>
-              <Text style={styles.historyTitle}>Tren Inferior</Text>
-              <Text style={styles.historyMeta}>Hoy • 45 min • 320 kcal</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#C1C7C1" />
+        {user.workoutHistory.length > 0 ? (
+          <View style={styles.historyCard}>
+            {user.workoutHistory.slice(0, 5).map((session, index) => (
+              <View key={session.id}>
+                {index > 0 && <View style={styles.historyDivider} />}
+                <View style={styles.historyItem}>
+                  <View style={styles.iconCircle}>
+                    <Ionicons name="fitness-outline" size={20} color="#4A5D4A" />
+                  </View>
+                  <View style={styles.historyInfo}>
+                    <Text style={styles.historyTitle}>{session.title}</Text>
+                    <Text style={styles.historyMeta}>
+                      {formatRelativeDate(session.date)} • {Math.round(session.durationSecs / 60)} min • {session.kcal} kcal
+                    </Text>
+                  </View>
+                  <Ionicons name="checkmark-circle" size={20} color="#9CAF88" />
+                </View>
+              </View>
+            ))}
           </View>
-
-          <View style={styles.historyDivider} />
-
-          <View style={styles.historyItem}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="accessibility-outline" size={20} color="#4A5D4A" />
-            </View>
-            <View style={styles.historyInfo}>
-              <Text style={styles.historyTitle}>Zona Core</Text>
-              <Text style={styles.historyMeta}>Ayer • 20 min • 150 kcal</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="#C1C7C1" />
+        ) : (
+          <View style={styles.emptyHistory}>
+            <Ionicons name="calendar-outline" size={40} color="#E6EBE0" />
+            <Text style={styles.emptyHistoryText}>Aún no tienes sesiones completadas</Text>
           </View>
-        </View>
+        )}
       </View>
 
       <View style={{ height: 40 }} />
@@ -136,6 +181,8 @@ const styles = StyleSheet.create({
   barActive: { backgroundColor: '#9CAF88' },
   chartLabels: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 2 },
   chartLabelText: { fontSize: 12, color: '#C1C7C1', fontWeight: '600' },
+  emptyChart: { alignItems: 'center', paddingVertical: 24 },
+  emptyText: { fontSize: 14, color: '#8C9A8C', textAlign: 'center', marginTop: 12, lineHeight: 20 },
   historyCard: { backgroundColor: '#FFFFFF', borderRadius: 24, paddingHorizontal: 20, borderWidth: 1, borderColor: '#F0F2ED' },
   historyItem: { flexDirection: 'row', paddingVertical: 20, alignItems: 'center' },
   iconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FDFBF6', justifyContent: 'center', alignItems: 'center', marginRight: 16 },
@@ -143,4 +190,6 @@ const styles = StyleSheet.create({
   historyTitle: { fontSize: 16, fontWeight: '600', color: '#1A1C1A' },
   historyMeta: { fontSize: 13, color: '#8C9A8C', marginTop: 2 },
   historyDivider: { height: 1, backgroundColor: '#F0F2ED' },
+  emptyHistory: { alignItems: 'center', paddingVertical: 40, backgroundColor: '#FFFFFF', borderRadius: 24, borderWidth: 1, borderColor: '#F0F2ED' },
+  emptyHistoryText: { fontSize: 15, color: '#8C9A8C', marginTop: 12 },
 });
