@@ -1,13 +1,13 @@
 import { useTheme, AppColors } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { formatRelativeDate, useWeeklyStats } from '@/hooks/useWeeklyStats';
-import { Ionicons } from '@expo/vector-icons';
 import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
+import Animated, { Easing, FadeInDown } from 'react-native-reanimated';
 
 export default function ReportScreen() {
   const { user } = useUser();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const weekly = useWeeklyStats(user.workoutHistory);
 
   const totalMinutes = Math.round(
@@ -19,39 +19,39 @@ export default function ReportScreen() {
 
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
-      <View style={s.header}>
-        <Text style={s.title}>Tu Progreso</Text>
-        <Text style={s.subtitle}>Análisis detallado de tu actividad</Text>
-      </View>
+      <Animated.View entering={FadeInDown.duration(600).easing(Easing.out(Easing.exp))} style={s.header}>
+        <Text style={s.title}>Tu Progreso 📈</Text>
+        <Text style={s.subtitle}>Todo esfuerzo tiene su recompensa</Text>
+      </Animated.View>
 
       {/* Stats Grid */}
-      <View style={staticStyles.statsGrid}>
+      <Animated.View entering={FadeInDown.delay(100)} style={staticStyles.statsGrid}>
         <View style={s.statCard}>
           <Text style={s.statLabel}>Calorías</Text>
           <Text style={s.statValue}>{user.kcalBurned.toLocaleString()}</Text>
           <View style={[staticStyles.miniBadge, { backgroundColor: colors.accentLight }]}>
-            <Text style={s.badgeText}>kcal</Text>
+             <Text style={s.badgeText}>🔥 KCAL</Text>
           </View>
         </View>
         <View style={s.statCard}>
           <Text style={s.statLabel}>Tiempo</Text>
           <Text style={s.statValue}>{totalMinutes}</Text>
-          <View style={[staticStyles.miniBadge, { backgroundColor: colors.barInactive }]}>
-            <Text style={s.badgeText}>min</Text>
+          <View style={[staticStyles.miniBadge, { backgroundColor: colors.goldLight }]}>
+            <Text style={[s.badgeText, { color: colors.gold }]}>⏱️ MIN</Text>
           </View>
         </View>
         <View style={s.statCard}>
           <Text style={s.statLabel}>Sesiones</Text>
           <Text style={s.statValue}>{user.sessionsCompleted}</Text>
-          <View style={[staticStyles.miniBadge, { backgroundColor: colors.goldLight }]}>
-            <Text style={s.badgeText}>rutinas</Text>
+          <View style={[staticStyles.miniBadge, { backgroundColor: colors.barInactive }]}>
+            <Text style={[s.badgeText, { color: colors.textSecondary }]}>🏆 TOTAL</Text>
           </View>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Gráfica Real Semanal */}
-      <View style={staticStyles.section}>
-        <Text style={s.sectionTitle}>Actividad semanal (Kcal)</Text>
+      <Animated.View entering={FadeInDown.delay(200)} style={staticStyles.section}>
+        <Text style={s.sectionTitle}>Semana Dinámica</Text>
         <View style={s.chartCard}>
           {weekly.totalKcal > 0 ? (
             <BarChart
@@ -59,7 +59,7 @@ export default function ReportScreen() {
                 labels: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
                 datasets: [{ data: weekly.dailyKcal }],
               }}
-              width={screenWidth - 80} // 48 padding de container + 32 padding de card
+              width={screenWidth - 80}
               height={220}
               yAxisLabel=""
               yAxisSuffix=""
@@ -68,58 +68,56 @@ export default function ReportScreen() {
                 backgroundGradientFrom: colors.surface,
                 backgroundGradientTo: colors.surface,
                 decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(156, 175, 136, ${opacity})`, // Verde salvia base (#9CAF88)
+                color: (opacity = 1) => isDark ? `rgba(196, 181, 253, ${opacity})` : `rgba(167, 139, 250, ${opacity})`,
                 labelColor: (opacity = 1) => colors.textSecondary,
-                style: { borderRadius: 16 },
+                style: { borderRadius: 24 },
                 barPercentage: 0.6,
+                propsForBackgroundLines: { strokeDasharray: '', stroke: colors.surfaceBorder, strokeWidth: 1 }
               }}
               style={{
                 marginVertical: 8,
-                borderRadius: 16,
-                marginLeft: -10, // Ajuste visual de la librería
+                borderRadius: 24,
+                marginLeft: -10,
               }}
               showValuesOnTopOfBars
               fromZero
             />
           ) : (
             <View style={staticStyles.emptyChart}>
-              <Ionicons name="bar-chart-outline" size={32} color={colors.accentLight} />
-              <Text style={s.emptyText}>Completa tu primer entrenamiento para ver tu progreso aquí</Text>
+              <Text style={{fontSize: 40}}>📊</Text>
+              <Text style={s.emptyText}>Completa tu primer reto para ver tus gráficas pastel brillantes.</Text>
             </View>
           )}
         </View>
-      </View>
+      </Animated.View>
 
       {/* Historial Real */}
-      <View style={staticStyles.section}>
-        <Text style={s.sectionTitle}>Historial de sesiones</Text>
+      <Animated.View entering={FadeInDown.delay(300)} style={staticStyles.section}>
+        <Text style={s.sectionTitle}>Historial Reciente</Text>
         {user.workoutHistory.length > 0 ? (
           <View style={s.historyCard}>
             {user.workoutHistory.slice(0, 5).map((session, index) => (
               <View key={session.id}>
                 {index > 0 && <View style={s.historyDivider} />}
                 <View style={staticStyles.historyItem}>
-                  <View style={s.iconCircle}>
-                    <Ionicons name="fitness-outline" size={20} color={colors.accentDark} />
-                  </View>
+                   <Text style={{fontSize: 24, marginRight: 16}}>✨</Text>
                   <View style={staticStyles.historyInfo}>
                     <Text style={s.historyTitle}>{session.title}</Text>
                     <Text style={s.historyMeta}>
                       {formatRelativeDate(session.date)} • {Math.round(session.durationSecs / 60)} min • {session.kcal} kcal
                     </Text>
                   </View>
-                  <Ionicons name="checkmark-circle" size={20} color={colors.accent} />
                 </View>
               </View>
             ))}
           </View>
         ) : (
           <View style={s.emptyHistory}>
-            <Ionicons name="calendar-outline" size={40} color={colors.accentLight} />
-            <Text style={s.emptyHistoryText}>Aún no tienes sesiones completadas</Text>
+            <Text style={{fontSize: 40}}>🌱</Text>
+            <Text style={s.emptyHistoryText}>Tu historial está esperando su primer entrenamiento</Text>
           </View>
         )}
-      </View>
+      </Animated.View>
 
       <View style={{ height: 40 }} />
     </ScrollView>
@@ -127,10 +125,10 @@ export default function ReportScreen() {
 }
 
 const staticStyles = StyleSheet.create({
-  statsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 },
-  miniBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  section: { marginBottom: 32 },
-  emptyChart: { alignItems: 'center', paddingVertical: 24 },
+  statsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 36 },
+  miniBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, marginTop: 'auto' },
+  section: { marginBottom: 36 },
+  emptyChart: { alignItems: 'center', paddingVertical: 32 },
   historyItem: { flexDirection: 'row', paddingVertical: 20, alignItems: 'center' },
   historyInfo: { flex: 1 },
 });
@@ -138,20 +136,24 @@ const staticStyles = StyleSheet.create({
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
   header: { marginTop: 80, marginBottom: 32 },
-  title: { fontSize: 32, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
-  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4 },
-  statCard: { backgroundColor: c.surface, width: '31%', borderRadius: 24, padding: 16, borderWidth: 1, borderColor: c.surfaceBorder, alignItems: 'flex-start' },
-  statLabel: { fontSize: 12, color: c.textSecondary, fontWeight: '600', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
-  statValue: { fontSize: 22, fontWeight: '700', color: c.text, marginBottom: 8 },
-  badgeText: { fontSize: 10, fontWeight: '700', color: c.accentDark },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: c.text, marginBottom: 16 },
-  chartCard: { backgroundColor: c.surface, borderRadius: 24, paddingVertical: 16, paddingHorizontal: 16, borderWidth: 1, borderColor: c.surfaceBorder },
-  emptyText: { fontSize: 14, color: c.textSecondary, textAlign: 'center', marginTop: 12, lineHeight: 20 },
-  historyCard: { backgroundColor: c.surface, borderRadius: 24, paddingHorizontal: 20, borderWidth: 1, borderColor: c.surfaceBorder },
-  iconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: c.background, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-  historyTitle: { fontSize: 16, fontWeight: '600', color: c.text },
-  historyMeta: { fontSize: 13, color: c.textSecondary, marginTop: 2 },
-  historyDivider: { height: 1, backgroundColor: c.divider },
-  emptyHistory: { alignItems: 'center', paddingVertical: 40, backgroundColor: c.surface, borderRadius: 24, borderWidth: 1, borderColor: c.surfaceBorder },
-  emptyHistoryText: { fontSize: 15, color: c.textSecondary, marginTop: 12 },
+  title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
+  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
+  
+  statCard: { backgroundColor: c.surface, width: '31%', borderRadius: 28, padding: 20, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 4, alignItems: 'flex-start', minHeight: 120 },
+  statLabel: { fontSize: 12, color: c.textSecondary, fontWeight: '700', marginBottom: 8, letterSpacing: 0.5 },
+  statValue: { fontSize: 26, fontWeight: '800', color: c.text, letterSpacing: -0.5 },
+  badgeText: { fontSize: 10, fontWeight: '800', color: c.accentDark },
+  
+  sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, marginBottom: 16, letterSpacing: -0.5 },
+  
+  chartCard: { backgroundColor: c.surface, borderRadius: 36, paddingVertical: 24, paddingHorizontal: 16, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
+  emptyText: { fontSize: 15, color: c.textSecondary, textAlign: 'center', marginTop: 16, lineHeight: 22, fontWeight: '500' },
+  
+  historyCard: { backgroundColor: c.surface, borderRadius: 36, paddingHorizontal: 24, paddingVertical: 8, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
+  historyTitle: { fontSize: 16, fontWeight: '700', color: c.text },
+  historyMeta: { fontSize: 13, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
+  historyDivider: { height: 1, backgroundColor: c.surfaceBorder },
+  
+  emptyHistory: { alignItems: 'center', paddingVertical: 40, backgroundColor: c.surface, borderRadius: 36, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 2 },
+  emptyHistoryText: { fontSize: 15, color: c.textSecondary, marginTop: 16, fontWeight: '500' },
 });

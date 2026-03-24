@@ -31,45 +31,43 @@ export default function HomeScreen() {
       {/* Cabecera */}
       <Animated.View entering={FadeInDown.duration(600).easing(Easing.out(Easing.exp))} style={s.header}>
         <View>
-          <Text style={s.greeting}>¡Hola, {userName}!</Text>
-          <Text style={s.subtitle}>Tu cuerpo te lo agradecerá hoy.</Text>
+          <Text style={s.greeting}>Hola, {userName} ✨</Text>
+          <Text style={s.subtitle}>Preparados para brillar hoy.</Text>
         </View>
         <Pressable style={s.notificationBtn}>
-          <Ionicons name="notifications-outline" size={24} color={colors.text} />
+          <Ionicons name="notifications-outline" size={24} color={colors.accentDark} />
         </Pressable>
       </Animated.View>
 
-      {/* Métricas Rápidas */}
+      {/* Métricas Rápidas (Estilo Burbujas) */}
       <Animated.View entering={FadeInDown.delay(100).duration(600).easing(Easing.out(Easing.exp))} style={s.metricsRow}>
         <View style={staticStyles.metricItem}>
+           <Text style={s.metricEmoji}>🔥</Text>
           <Text style={s.metricValue}>{user.streak}</Text>
-          <Text style={s.metricLabel}>Días racha</Text>
+          <Text style={s.metricLabel}>Racha</Text>
         </View>
         <View style={s.metricDivider} />
         <View style={staticStyles.metricItem}>
+          <Text style={s.metricEmoji}>⚡</Text>
           <Text style={s.metricValue}>{user.kcalBurned}</Text>
-          <Text style={s.metricLabel}>Kcal total</Text>
+          <Text style={s.metricLabel}>Energía</Text>
         </View>
         <View style={s.metricDivider} />
         <Pressable style={staticStyles.metricItem} onPress={handleAddWater}>
+          <Text style={s.metricEmoji}>💧</Text>
           <Text style={s.metricValue}>{user.waterIntake.toFixed(1)}L</Text>
-          <View style={staticStyles.waterRow}>
-            <Text style={s.metricLabel}>Agua </Text>
-            <View style={s.waterPlusBtn}>
-              <Ionicons name="add" size={12} color={colors.accentDark} />
-            </View>
-          </View>
+          <Text style={s.metricLabel}>Beber</Text>
         </Pressable>
       </Animated.View>
 
-      {/* Progreso Semanal */}
+      {/* Progreso Semanal Pastel */}
       <Animated.View entering={FadeInDown.delay(200).duration(600).easing(Easing.out(Easing.exp))} style={staticStyles.section}>
         <Text style={s.sectionTitle}>Progreso semanal</Text>
         <View style={s.card}>
           <View style={staticStyles.progressInfo}>
             <View>
-              <Text style={s.progressValue}>{sessionsCompleted} de {totalSessions}</Text>
-              <Text style={s.progressLabel}>Sesiones completadas</Text>
+              <Text style={s.progressValue}>{sessionsCompleted} <Text style={{color: colors.textMuted}}>/ {totalSessions}</Text></Text>
+              <Text style={s.progressLabel}>Entrenamientos listos</Text>
             </View>
             <View style={s.percentageBadge}>
               <Text style={s.percentageText}>{Math.round(progressPercent)}%</Text>
@@ -84,7 +82,7 @@ export default function HomeScreen() {
         </View>
       </Animated.View>
 
-      {/* Recomendaciones inteligentes */}
+      {/* Recomendaciones inteligentes (Cards suaves) */}
       <Animated.View entering={FadeInDown.delay(300).duration(600).easing(Easing.out(Easing.exp))} style={staticStyles.section}>
         <Text style={s.sectionTitle}>Siguiente sesión</Text>
         <View style={staticStyles.grid}>
@@ -94,8 +92,8 @@ export default function HomeScreen() {
               style={s.gridCard}
               onPress={() => router.push({ pathname: '/routine', params: { id: rec.id, title: rec.title } } as any)}
             >
-              <View style={[staticStyles.cardIconBox, { backgroundColor: colors.accentLight }]}>
-                <Ionicons name={rec.icon as any} size={24} color={colors.accentDark} />
+              <View style={[s.cardIconBox]}>
+                <Ionicons name={rec.icon as any} size={28} color={colors.accentDark} />
               </View>
               <Text style={s.cardTitle}>{rec.title}</Text>
               <Text style={s.cardTag}>{rec.intensity}</Text>
@@ -106,7 +104,9 @@ export default function HomeScreen() {
 
       {/* Tip del día rotativo */}
       <Animated.View entering={FadeInDown.delay(400).duration(600).easing(Easing.out(Easing.exp))} style={s.tipCard}>
-        <Ionicons name={tip.icon as any} size={24} color={colors.accent} />
+        <View style={s.tipIconBox}>
+           <Text style={{fontSize: 22}}>💡</Text>
+        </View>
         <View style={staticStyles.tipContent}>
           <Text style={s.tipTitle}>{tip.title}</Text>
           <Text style={s.tipText}>{tip.text}</Text>
@@ -120,39 +120,45 @@ export default function HomeScreen() {
 
 // Estilos estáticos
 const staticStyles = StyleSheet.create({
-  metricItem: { alignItems: 'center' },
-  waterRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
-  section: { marginBottom: 32 },
+  metricItem: { alignItems: 'center', flex: 1 },
+  section: { marginBottom: 35 },
   progressInfo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   grid: { flexDirection: 'row', justifyContent: 'space-between' },
-  cardIconBox: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
   tipContent: { marginLeft: 16, flex: 1 },
 });
 
 // Estilos dinámicos
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
-  header: { marginTop: 80, marginBottom: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  greeting: { fontSize: 28, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
-  subtitle: { fontSize: 15, color: c.textSecondary, marginTop: 4 },
-  notificationBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: c.surfaceBorder },
-  metricsRow: { flexDirection: 'row', backgroundColor: c.surface, borderRadius: 24, padding: 20, marginBottom: 32, alignItems: 'center', justifyContent: 'space-around', borderWidth: 1, borderColor: c.surfaceBorder },
-  metricValue: { fontSize: 18, fontWeight: '700', color: c.text },
-  metricLabel: { fontSize: 12, color: c.textSecondary },
-  metricDivider: { width: 1, height: 30, backgroundColor: c.divider },
-  waterPlusBtn: { width: 18, height: 18, borderRadius: 9, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center' },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: c.text, marginBottom: 16 },
-  card: { backgroundColor: c.surface, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: c.surfaceBorder },
-  progressValue: { fontSize: 24, fontWeight: '700', color: c.text },
-  progressLabel: { fontSize: 14, color: c.textSecondary },
-  percentageBadge: { backgroundColor: c.accentLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  percentageText: { fontSize: 12, fontWeight: '700', color: c.accentDark },
-  barBackground: { height: 8, backgroundColor: c.barInactive, borderRadius: 4, overflow: 'hidden' as const },
-  barFill: { height: 8, backgroundColor: c.barActive, borderRadius: 4 },
-  gridCard: { width: '47%' as any, backgroundColor: c.surface, borderRadius: 24, padding: 20, borderWidth: 1, borderColor: c.surfaceBorder },
-  cardTitle: { fontSize: 15, fontWeight: '600', color: c.text },
-  cardTag: { fontSize: 12, color: c.textSecondary, marginTop: 4 },
-  tipCard: { flexDirection: 'row' as const, backgroundColor: c.accentLight, padding: 20, borderRadius: 24, alignItems: 'center' as const },
-  tipTitle: { fontSize: 14, fontWeight: '700', color: c.accentDark, marginBottom: 2 },
-  tipText: { fontSize: 13, color: c.textSecondary, lineHeight: 18 },
+  header: { marginTop: 80, marginBottom: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  greeting: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
+  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
+  
+  notificationBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center', shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 24, elevation: 4 },
+  
+  metricsRow: { flexDirection: 'row', backgroundColor: c.surface, borderRadius: 32, paddingVertical: 24, paddingHorizontal: 10, marginBottom: 40, alignItems: 'center', justifyContent: 'space-around', shadowColor: c.accentDark, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.06, shadowRadius: 32, elevation: 5 },
+  metricEmoji: { fontSize: 24, marginBottom: 8 },
+  metricValue: { fontSize: 20, fontWeight: '800', color: c.text },
+  metricLabel: { fontSize: 13, color: c.textSecondary, fontWeight: '600', marginTop: 2 },
+  metricDivider: { width: 1, height: 40, backgroundColor: c.divider },
+  
+  sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, marginBottom: 20, letterSpacing: -0.5 },
+  
+  card: { backgroundColor: c.surface, borderRadius: 32, padding: 28, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
+  progressValue: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
+  progressLabel: { fontSize: 14, color: c.textSecondary, fontWeight: '600', marginTop: 4 },
+  percentageBadge: { backgroundColor: c.accentLight, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16 },
+  percentageText: { fontSize: 14, fontWeight: '800', color: c.accentDark },
+  barBackground: { height: 12, backgroundColor: c.barInactive, borderRadius: 6, overflow: 'hidden' as const },
+  barFill: { height: 12, backgroundColor: c.barActive, borderRadius: 6 },
+  
+  gridCard: { width: '47%' as any, backgroundColor: c.surface, borderRadius: 32, padding: 24, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
+  cardIconBox: { width: 54, height: 54, borderRadius: 20, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
+  cardTag: { fontSize: 13, color: c.textSecondary, marginTop: 6, fontWeight: '600' },
+  
+  tipCard: { flexDirection: 'row' as const, backgroundColor: c.goldLight, padding: 24, borderRadius: 32, alignItems: 'center' as const, shadowColor: c.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 3 },
+  tipIconBox: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', opacity: 0.9 },
+  tipTitle: { fontSize: 15, fontWeight: '800', color: c.gold, marginBottom: 4 },
+  tipText: { fontSize: 14, color: c.textSecondary, lineHeight: 22, fontWeight: '500' },
 });

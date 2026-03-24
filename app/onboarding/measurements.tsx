@@ -3,7 +3,7 @@ import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 
 export default function MeasurementsScreen() {
@@ -22,17 +22,21 @@ export default function MeasurementsScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={s.container}
     >
-      <Animated.View entering={FadeInRight.duration(400)} style={{ flex: 1 }}>
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }} 
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View entering={FadeInRight.duration(400)} style={{ flex: 1 }}>
         <View style={staticStyles.stepContainer}>
-          <View style={[s.stepDot, s.stepDotDone]} />
-          <View style={[s.stepDot, s.stepDotDone]} />
-          <View style={[s.stepDot, s.stepDotDone]} />
-          <View style={[s.stepDot, s.stepDotActive]} />
+          { [1, 2, 3, 4].map((step) => (
+            <View key={step} style={[s.stepDot, step === 4 && s.stepDotActive, step < 4 && s.stepDotDone]} />
+          ))}
         </View>
 
         <View style={staticStyles.header}>
-          <Text style={s.title}>Tus medidas</Text>
-          <Text style={s.subtitle}>Esto nos permite calcular tu IMC y ajustar tus objetivos calóricos.</Text>
+          <Text style={s.title}>Tus medidas 📏</Text>
+          <Text style={s.subtitle}>Esto nos permite calcular tu IMC y ajustar tus objetivos calóricos con la máxima precisión.</Text>
         </View>
 
         <View style={staticStyles.inputsContainer}>
@@ -47,6 +51,9 @@ export default function MeasurementsScreen() {
                 value={weight}
                 onChangeText={setWeight}
                 maxLength={3}
+                selectionColor={colors.accentDark}
+                cursorColor={colors.accentDark}
+                underlineColorAndroid="transparent"
               />
               <Text style={s.unitText}>kg</Text>
             </View>
@@ -63,6 +70,9 @@ export default function MeasurementsScreen() {
                 value={height}
                 onChangeText={setHeight}
                 maxLength={3}
+                selectionColor={colors.accentDark}
+                cursorColor={colors.accentDark}
+                underlineColorAndroid="transparent"
               />
               <Text style={s.unitText}>cm</Text>
             </View>
@@ -82,10 +92,11 @@ export default function MeasurementsScreen() {
             }}
           >
             <Text style={s.nextButtonText}>Finalizar test</Text>
-            <Ionicons name="checkmark-circle" size={20} color={colors.buttonPrimaryText} />
+            <Ionicons name="sparkles" size={20} color={colors.buttonPrimaryText} />
           </Pressable>
         </View>
       </Animated.View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -94,22 +105,24 @@ const staticStyles = StyleSheet.create({
   stepContainer: { flexDirection: 'row', marginTop: 70, marginBottom: 40, justifyContent: 'flex-start' },
   header: { marginBottom: 40 },
   inputsContainer: { flex: 1 },
-  inputGroup: { marginBottom: 24 },
+  inputGroup: { marginBottom: 28 },
   footer: { paddingBottom: 50 },
 });
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 28 },
-  stepDot: { width: 8, height: 4, borderRadius: 2, backgroundColor: c.accentLight, marginRight: 6 },
-  stepDotActive: { width: 24, backgroundColor: c.accentDark },
-  stepDotDone: { backgroundColor: c.accent },
-  title: { fontSize: 30, fontWeight: '700', color: c.text, letterSpacing: -0.8 },
-  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 12, lineHeight: 24 },
-  label: { fontSize: 14, fontWeight: '700', color: c.accentDark, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, borderWidth: 1, borderColor: c.surfaceBorder, borderRadius: 20, paddingHorizontal: 20, height: 70, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.02, shadowRadius: 5, elevation: 1 },
-  input: { flex: 1, fontSize: 24, fontWeight: '600', color: c.text },
-  unitText: { fontSize: 18, fontWeight: '700', color: c.accent },
-  nextButton: { flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 22, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
-  nextButtonDisabled: { backgroundColor: c.buttonDisabled },
-  nextButtonText: { fontSize: 17, fontWeight: '700', color: c.buttonPrimaryText, marginRight: 8 },
+  container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 32 },
+  stepDot: { width: 12, height: 6, borderRadius: 3, backgroundColor: c.surfaceBorder, marginRight: 8 },
+  stepDotActive: { width: 32, backgroundColor: c.accent },
+  stepDotDone: { backgroundColor: c.gold },
+  title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
+  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 12, lineHeight: 24, fontWeight: '500' },
+  
+  label: { fontSize: 14, fontWeight: '800', color: c.accentDark, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1.5 },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, borderRadius: 28, paddingHorizontal: 28, height: 80, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.04, shadowRadius: 20, elevation: 2 },
+  input: { flex: 1, fontSize: 32, fontWeight: '800', color: c.text },
+  unitText: { fontSize: 20, fontWeight: '800', color: c.accent },
+  
+  nextButton: { flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 24, borderRadius: 32, alignItems: 'center', justifyContent: 'center', shadowColor: c.accent, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 24 },
+  nextButtonDisabled: { backgroundColor: c.buttonDisabled, shadowOpacity: 0 },
+  nextButtonText: { fontSize: 18, fontWeight: '800', color: c.buttonPrimaryText, marginRight: 8 },
 });

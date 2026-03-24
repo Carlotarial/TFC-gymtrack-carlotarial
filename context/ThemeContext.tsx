@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
-// Paleta de colores de la app (Verde salvia, Crema, Negro mate)
+// Nueva paleta estética: Tonos Pastel Modernos (Violeta Pastel + Peach)
 export interface AppColors {
   background: string;
   surface: string;
@@ -10,11 +10,11 @@ export interface AppColors {
   text: string;
   textSecondary: string;
   textMuted: string;
-  accent: string;          // Verde salvia
-  accentLight: string;
-  accentDark: string;
-  gold: string;            // Dorado/Oro
-  goldLight: string;
+  accent: string;          // Color primario pastel (ej. Violeta)
+  accentLight: string;     // Fondo suave pastel
+  accentDark: string;      // Texto contraste
+  gold: string;            // Secundario pastel (ej. Peach/Rosa)
+  goldLight: string;       // Fondo suave peach
   buttonPrimary: string;
   buttonPrimaryText: string;
   buttonDisabled: string;
@@ -27,49 +27,49 @@ export interface AppColors {
 }
 
 export const LightColors: AppColors = {
-  background: '#FDFBF6',
-  surface: '#FFFFFF',
-  surfaceBorder: '#F0F2ED',
-  text: '#1A1C1A',
-  textSecondary: '#8C9A8C',
-  textMuted: '#C1C7C1',
-  accent: '#9CAF88',
-  accentLight: '#E6EBE0',
-  accentDark: '#4A5D4A',
-  gold: '#CDA434',
-  goldLight: '#FAF3E0',
-  buttonPrimary: '#1A1C1A',
-  buttonPrimaryText: '#FDFBF6',
-  buttonDisabled: '#E6EBE0',
-  barActive: '#9CAF88',
-  barInactive: '#F0F2ED',
-  tabActive: '#4A4A4A',
-  tabInactive: '#A1A1AA',
-  divider: '#F0F2ED',
-  overlay: 'rgba(0,0,0,0.02)',
+  background: '#F8FAFC',     // Gris/Azul extra claro y limpio
+  surface: '#FFFFFF',        // Blanco puro para tarjetas
+  surfaceBorder: '#F1F5F9',  // Gris muy suave
+  text: '#1E293B',           // Pizarra oscuro
+  textSecondary: '#64748B',  // Pizarra medio
+  textMuted: '#CBD5E1',      
+  accent: '#A78BFA',         // VIOLETA PASTEL (Principal)
+  accentLight: '#EDE9FE',    // Fondo violeta clarito para badges
+  accentDark: '#6D28D9',     // Violeta fuerte para textos o iconos
+  gold: '#FDA4AF',           // ROSA/PEACH PASTEL (Secundario/Fuego/Racha)
+  goldLight: '#FFE4E6',      // Fondo rosado clarito
+  buttonPrimary: '#A78BFA',  // Botón Violeta
+  buttonPrimaryText: '#FFFFFF', 
+  buttonDisabled: '#F1F5F9',
+  barActive: '#A78BFA',
+  barInactive: '#F1F5F9',
+  tabActive: '#8B5CF6',
+  tabInactive: '#94A3B8',
+  divider: '#F1F5F9',
+  overlay: 'rgba(167, 139, 250, 0.08)', // Overlay teñido de violeta
 };
 
 export const DarkColors: AppColors = {
-  background: '#0D0F0D',
-  surface: '#1A1C1A',
-  surfaceBorder: '#2A2E2A',
-  text: '#F0F2ED',
-  textSecondary: '#8C9A8C',
-  textMuted: '#5A625A',
-  accent: '#9CAF88',
-  accentLight: '#2A3328',
-  accentDark: '#B8C8A8',
-  gold: '#CDA434',
-  goldLight: '#2E2810',
-  buttonPrimary: '#E6EBE0',
-  buttonPrimaryText: '#1A1C1A',
-  buttonDisabled: '#2A2E2A',
-  barActive: '#9CAF88',
-  barInactive: '#2A2E2A',
-  tabActive: '#E6EBE0',
-  tabInactive: '#5A625A',
-  divider: '#2A2E2A',
-  overlay: 'rgba(255,255,255,0.03)',
+  background: '#0F172A',     // Deep Slate oscuro
+  surface: '#1E293B',        // Tarjetas oscuras
+  surfaceBorder: '#334155',  
+  text: '#F8FAFC',           // Texto brillante
+  textSecondary: '#94A3B8',  
+  textMuted: '#475569',      
+  accent: '#C4B5FD',         // VIOLETA PASTEL brilloso en oscuro
+  accentLight: '#4C1D95',    // Fondo badge oscuro violeta
+  accentDark: '#DDD6FE',     // Texto oscuro violeta
+  gold: '#FDA4AF',           // Rosa pastel 
+  goldLight: '#881337',      // Fondo badge rojo/rosa oscuro
+  buttonPrimary: '#A78BFA',  // Mantenemos botón primario visible
+  buttonPrimaryText: '#0F172A', 
+  buttonDisabled: '#334155',
+  barActive: '#C4B5FD',
+  barInactive: '#334155',
+  tabActive: '#C4B5FD',
+  tabInactive: '#64748B',
+  divider: '#334155',
+  overlay: 'rgba(196, 181, 253, 0.05)',
 };
 
 type ThemeMode = 'light' | 'dark' | 'system';
@@ -92,7 +92,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const systemScheme = useColorScheme();
   const [mode, setModeState] = useState<ThemeMode>('system');
 
-  // Cargar preferencia guardada
   useEffect(() => {
     AsyncStorage.getItem('@theme_mode').then((saved) => {
       if (saved === 'light' || saved === 'dark' || saved === 'system') {

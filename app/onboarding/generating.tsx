@@ -1,23 +1,22 @@
 import { useTheme, AppColors } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInRight } from 'react-native-reanimated';
+import Animated, { FadeInUp, ZoomIn } from 'react-native-reanimated';
 
 export default function GeneratingScreen() {
   const router = useRouter();
   const { user } = useUser();
   const { colors } = useTheme();
-  const [loadingText, setLoadingText] = useState('Analizando tu perfil');
+  const [loadingText, setLoadingText] = useState('Analizando biometría');
 
   useEffect(() => {
     const messages = [
-      'Analizando tu perfil...',
-      'Calculando gasto calórico...',
-      'Seleccionando ejercicios...',
-      'Personalizando tu plan...'
+      'Cruzando datos de nivel de actividad...',
+      'Calculando gasto calórico basal (TDEE)...',
+      'Filtrando base de datos de ejercicios...',
+      'Estructurando microciclo semanal...'
     ];
     
     let messageIndex = 0;
@@ -30,7 +29,7 @@ export default function GeneratingScreen() {
 
     const timer = setTimeout(() => {
       router.replace('/(tabs)' as any);
-    }, 3500);
+    }, 3600);
 
     return () => {
       clearTimeout(timer);
@@ -41,34 +40,35 @@ export default function GeneratingScreen() {
   const s = dynamicStyles(colors);
 
   return (
-    <Animated.View entering={FadeInRight.duration(400)} style={s.container}>
+    <View style={s.container}>
       <View style={staticStyles.stepContainer}>
-        <View style={[s.stepDot, s.stepDotDone]} />
-        <View style={[s.stepDot, s.stepDotDone]} />
-        <View style={[s.stepDot, s.stepDotDone]} />
-        <View style={[s.stepDot, s.stepDotDone]} />
+        { [1, 2, 3, 4].map((step) => (
+          <View key={step} style={[s.stepDot, s.stepDotDone]} />
+        ))}
       </View>
 
       <View style={staticStyles.content}>
-        <View style={s.iconCircle}>
-          <Ionicons name="sparkles" size={40} color={colors.gold} />
-        </View>
+        <Animated.View entering={ZoomIn.duration(800).springify().delay(200)} style={s.iconCircle}>
+          <Text style={{fontSize: 70}}>📋</Text>
+        </Animated.View>
         
-        <Text style={s.title}>Estamos preparando tu plan</Text>
-        <Text style={s.subtitle}>
-          Ajustando cada detalle a tus objetivos de {user.goal?.replace('_', ' ') || 'bienestar'}.
-        </Text>
+        <Animated.View entering={FadeInUp.delay(400)}>
+          <Text style={s.title}>Estructurando plan</Text>
+          <Text style={s.subtitle}>
+            Cuantificando cargas y ajustando volumen para tu fase de {user.goal?.replace('_', ' ') || 'acondicionamiento'}.
+          </Text>
+        </Animated.View>
 
-        <View style={s.loaderBox}>
-          <ActivityIndicator size="small" color={colors.accent} />
+        <Animated.View entering={FadeInUp.delay(600)} style={s.loaderBox}>
+          <ActivityIndicator size="small" color={colors.accentDark} />
           <Text style={s.loadingMessage}>{loadingText}</Text>
-        </View>
+        </Animated.View>
       </View>
 
       <View style={staticStyles.footer}>
-        <Text style={s.footerText}>Casi listo</Text>
+        <Text style={s.footerText}>Sincronizando base de datos...</Text>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -79,13 +79,13 @@ const staticStyles = StyleSheet.create({
 });
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 32 },
-  stepDot: { width: 8, height: 4, borderRadius: 2, backgroundColor: c.accentLight, marginRight: 6 },
-  stepDotDone: { backgroundColor: c.accent },
-  iconCircle: { width: 100, height: 100, backgroundColor: c.surface, borderRadius: 50, justifyContent: 'center', alignItems: 'center', marginBottom: 32, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
-  title: { fontSize: 28, fontWeight: '700', color: c.text, textAlign: 'center', letterSpacing: -0.5 },
-  subtitle: { fontSize: 16, color: c.textSecondary, textAlign: 'center', lineHeight: 24, marginTop: 16, paddingHorizontal: 10 },
-  loaderBox: { marginTop: 60, alignItems: 'center', flexDirection: 'row', backgroundColor: c.surfaceBorder, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 30 },
-  loadingMessage: { marginLeft: 12, fontSize: 14, fontWeight: '600', color: c.accentDark },
-  footerText: { fontSize: 13, color: c.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1.5 },
+  container: { flex: 1, backgroundColor: c.accent, paddingHorizontal: 32 },
+  stepDot: { width: 12, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.3)', marginRight: 8 },
+  stepDotDone: { backgroundColor: c.background },
+  iconCircle: { width: 150, height: 150, backgroundColor: c.background, borderRadius: 75, justifyContent: 'center', alignItems: 'center', marginBottom: 40, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.15, shadowRadius: 30, elevation: 5 },
+  title: { fontSize: 36, fontWeight: '800', color: c.background, textAlign: 'center', letterSpacing: -1 },
+  subtitle: { fontSize: 17, color: c.background, textAlign: 'center', lineHeight: 26, marginTop: 16, paddingHorizontal: 10, opacity: 0.9, fontWeight: '500' },
+  loaderBox: { marginTop: 60, alignItems: 'center', flexDirection: 'row', backgroundColor: c.background, paddingHorizontal: 28, paddingVertical: 18, borderRadius: 32, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 20 },
+  loadingMessage: { marginLeft: 16, fontSize: 15, fontWeight: '700', color: c.accentDark },
+  footerText: { fontSize: 13, color: c.background, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 2, opacity: 0.8 },
 });
