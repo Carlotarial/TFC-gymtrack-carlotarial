@@ -3,8 +3,9 @@ import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import Animated, {
+  FadeIn,
   FadeInUp,
   useAnimatedStyle,
   useSharedValue,
@@ -16,11 +17,10 @@ import Animated, {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const FITNESS_TIPS = [
-  "La hidratación constante mejora el rendimiento muscular.",
-  "El descanso es donde ocurre el crecimiento real.",
-  "Pequeños progresos diarios suman grandes resultados.",
-  "La técnica correcta previene lesiones a largo plazo.",
-  "Mantener el core activo protege tu columna vertebral.",
+  "La hidratación constante mejora el rendimiento.",
+  "El descanso es clave para el crecimiento real.",
+  "Pequeños progresos suman grandes resultados.",
+  "La técnica correcta previene lesiones.",
   "La constancia es la llave del éxito físico."
 ];
 
@@ -34,11 +34,10 @@ export default function GeneratingScreen() {
   const pulse = useSharedValue(1);
 
   useEffect(() => {
-    // Animación de pulso infinita
     pulse.value = withRepeat(
       withSequence(
-        withTiming(1.1, { duration: 1000 }),
-        withTiming(1, { duration: 1000 })
+        withTiming(1.08, { duration: 1200 }),
+        withTiming(1, { duration: 1200 })
       ),
       -1,
       true
@@ -46,9 +45,8 @@ export default function GeneratingScreen() {
 
     const messages = [
       { text: 'Analizando biometría...', p: 0.25 },
-      { text: 'Cruzando datos de nivel de actividad...', p: 0.45 },
-      { text: 'Calculando TDEE y macros...', p: 0.65 },
-      { text: 'Filtrando base de ejercicios...', p: 0.85 },
+      { text: 'Calculando TDEE y macros...', p: 0.55 },
+      { text: 'Filtrando ejercicios...', p: 0.75 },
       { text: 'Estructurando tu programa...', p: 1.0 }
     ];
 
@@ -57,20 +55,19 @@ export default function GeneratingScreen() {
       index++;
       if (index < messages.length) {
         setLoadingText(messages[index].text);
-        progress.value = withTiming(messages[index].p, { duration: 1500 });
+        progress.value = withTiming(messages[index].p, { duration: 2000 });
       }
-    }, 1500);
+    }, 2000);
 
-    // Ciclo de tips
     let tipIndex = 0;
     const tipInterval = setInterval(() => {
         tipIndex = (tipIndex + 1) % FITNESS_TIPS.length;
         setCurrentTip(FITNESS_TIPS[tipIndex]);
-    }, 3500);
+    }, 4000);
 
     const timer = setTimeout(() => {
       router.replace('/(tabs)' as any);
-    }, 9000); // Más largo para que se lean los tips cómodamente
+    }, 8500);
 
     return () => {
       clearTimeout(timer);
@@ -84,82 +81,63 @@ export default function GeneratingScreen() {
   }));
 
   const progressStyle = useAnimatedStyle(() => ({
-    width: (SCREEN_WIDTH - 64) * progress.value
+    width: (SCREEN_WIDTH * 0.7) * progress.value
   }));
 
   const s = dynamicStyles(colors);
 
   return (
     <View style={s.container}>
-      <View style={staticStyles.stepContainer}>
-        {[1, 2, 3, 4].map((step) => (
-          <View key={step} style={[s.stepDot, s.stepDotDone]} />
-        ))}
-      </View>
-
       <View style={staticStyles.content}>
-        <Animated.View style={[s.iconCircle, pulseStyle]}>
-          <Ionicons name="fitness-outline" size={75} color={colors.accent} />
+        <Animated.View style={[s.iconBox, pulseStyle]}>
+          <Ionicons name="fitness" size={48} color={colors.accent} />
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(200).duration(800)}>
-          <Text style={s.title}>Personalizando tu Plan</Text>
-          <Text style={s.subtitle}>
-            Optimizando tu rutina basándonos en tu perfil biométrico y objetivos físicos prioritarios.
-          </Text>
+        <Animated.View entering={FadeInUp.duration(800)}>
+          <Text style={s.title}>Personalizando...</Text>
+          <Text style={s.subtitle}>Preparando tu experiencia de entrenamiento exclusiva.</Text>
         </Animated.View>
 
-        <View style={s.progressContainer}>
-          <View style={s.progressBackground}>
-            <Animated.View style={[s.progressFill, progressStyle]} />
+        <View style={s.progressRow}>
+          <View style={s.progressBarTrack}>
+            <Animated.View style={[s.progressBarFill, progressStyle]} />
           </View>
-          <View style={s.loaderBox}>
-            <ActivityIndicator size="small" color={colors.accent} />
-            <Text style={s.loadingMessage}>{loadingText}</Text>
-          </View>
+          <Text style={s.loadingMessage}>{loadingText}</Text>
         </View>
-
-        {/* FITNESS TIPS SECTION */}
-        <Animated.View 
-            key={currentTip} // Re-render animation on tip change
-            entering={FadeInUp.duration(600)} 
-            style={s.tipCard}
-        >
-            <Ionicons name="bulb-outline" size={20} color={colors.gold} />
-            <Text style={s.tipText}>{currentTip}</Text>
-        </Animated.View>
       </View>
 
       <View style={staticStyles.footer}>
-        <Text style={s.footerText}>APP de Entrenamiento Activa</Text>
+        <Animated.View 
+            key={currentTip}
+            entering={FadeIn.duration(800)} 
+            style={s.tipBox}
+        >
+            <Text style={s.tipText}>{currentTip}</Text>
+        </Animated.View>
       </View>
     </View>
   );
 }
 
 const staticStyles = StyleSheet.create({
-  stepContainer: { flexDirection: 'row', marginTop: 150, marginBottom: 40, justifyContent: 'flex-start' },
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  footer: { marginBottom: 50, alignItems: 'center' },
+  content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 60 },
+  footer: { marginBottom: 100, alignItems: 'center', paddingHorizontal: 40 },
 });
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 32 },
-  stepDot: { width: 12, height: 6, borderRadius: 3, backgroundColor: c.surfaceBorder, marginRight: 8 },
-  stepDotDone: { backgroundColor: c.gold },
-  iconCircle: { width: 150, height: 150, backgroundColor: c.surface, borderRadius: 75, justifyContent: 'center', alignItems: 'center', marginBottom: 40, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 30, elevation: 5, borderWidth: 1, borderColor: c.surfaceBorder },
-  title: { fontSize: 36, fontWeight: '800', color: c.text, textAlign: 'center', letterSpacing: -1 },
-  subtitle: { fontSize: 17, color: c.textSecondary, textAlign: 'center', lineHeight: 26, marginTop: 16, paddingHorizontal: 10, fontWeight: '500' },
+  container: { flex: 1, backgroundColor: c.background },
 
-  progressContainer: { marginTop: 60, width: '100%', alignItems: 'center' },
-  progressBackground: { width: '100%', height: 12, backgroundColor: c.surface, borderRadius: 6, overflow: 'hidden', borderWidth: 1, borderColor: c.surfaceBorder },
-  progressFill: { height: '100%', backgroundColor: c.accent, borderRadius: 6 },
+  iconBox: { width: 100, height: 100, backgroundColor: c.surface, borderRadius: 32, justifyContent: 'center', alignItems: 'center', marginBottom: 32, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 24, elevation: 4, borderWidth: 1, borderColor: c.surfaceBorder },
+  
+  title: { fontSize: 28, fontWeight: '800', color: c.text, textAlign: 'center', letterSpacing: -0.5 },
+  subtitle: { fontSize: 16, color: c.textSecondary, textAlign: 'center', lineHeight: 24, marginTop: 12, paddingHorizontal: 30, fontWeight: '500', opacity: 0.8 },
 
-  loaderBox: { marginTop: 24, alignItems: 'center', flexDirection: 'row' },
-  loadingMessage: { marginLeft: 16, fontSize: 15, fontWeight: '700', color: c.textSecondary },
+  progressRow: { marginTop: 48, alignItems: 'center', width: '100%' },
+  progressBarTrack: { width: SCREEN_WIDTH * 0.7, height: 12, backgroundColor: c.surface, borderRadius: 6, overflow: 'hidden', borderWidth: 1, borderColor: c.surfaceBorder, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.02, shadowRadius: 10, elevation: 1 },
+  progressBarFill: { height: '100%', backgroundColor: c.accent, borderRadius: 6 },
   
-  tipCard: { marginTop: 48, backgroundColor: c.surface, padding: 20, borderRadius: 24, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: c.surfaceBorder, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
-  tipText: { marginLeft: 12, fontSize: 14, color: c.text, fontWeight: '600', flex: 1 },
+  loadingMessage: { marginTop: 24, fontSize: 14, fontWeight: '800', color: c.accent, textTransform: 'uppercase', letterSpacing: 1.5, opacity: 0.9 },
   
-  footerText: { fontSize: 12, color: c.gold, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 2, opacity: 0.8 },
+  tipBox: { alignItems: 'center' },
+  tipText: { fontSize: 15, color: c.textSecondary, fontWeight: '600', textAlign: 'center', fontStyle: 'italic' },
 });

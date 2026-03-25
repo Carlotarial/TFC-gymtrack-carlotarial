@@ -10,7 +10,7 @@ import Animated, { Easing, FadeInDown, FadeInRight } from 'react-native-reanimat
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user, updateWater } = useUser();
+  const { user, updateWater, logout } = useUser();
   const { colors } = useTheme();
 
   const userName = user.name || 'Usuario GymTrack';
@@ -42,9 +42,17 @@ export default function HomeScreen() {
           <Text style={s.greeting}>Hola, {userName} 👋</Text>
           <Text style={s.subtitle}>Preparados para brillar hoy.</Text>
         </View>
-        <Pressable style={s.notificationBtn}>
-          <Ionicons name="notifications-outline" size={24} color={colors.accentDark} />
-        </Pressable>
+        <View style={{ flexDirection: 'row' }}>
+          <Pressable style={[s.notificationBtn, { marginRight: 12 }]} onPress={async () => {
+            await logout();
+            router.replace('/onboarding' as any);
+          }}>
+            <Ionicons name="people-outline" size={24} color={colors.accentDark} />
+          </Pressable>
+          <Pressable style={s.notificationBtn}>
+            <Ionicons name="notifications-outline" size={24} color={colors.accentDark} />
+          </Pressable>
+        </View>
       </Animated.View>
 
       {/* Métricas Rápidas (Estilo Burbujas) */}

@@ -9,7 +9,7 @@ import Animated, { FadeInDown, FadeInUp, ZoomIn } from 'react-native-reanimated'
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { user, updateUser, resetUser } = useUser();
+  const { user, updateUser, logout, deleteProfile } = useUser();
   const { colors, mode, setMode } = useTheme();
   const { isEnabled: notificationsEnabled, toggleNotifications } = useNotifications();
 
@@ -23,6 +23,7 @@ export default function SettingsScreen() {
   const [rating, setRating] = useState(0);
   const [ratingDone, setRatingDone] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   const userName = user.name || 'Usuario GymTrack';
@@ -34,7 +35,13 @@ export default function SettingsScreen() {
   }, [userName]);
 
   const handleLogout = async () => {
-    await resetUser();
+    await logout();
+    router.replace('/onboarding' as any);
+  };
+
+  const handleDeleteProfile = async () => {
+    await deleteProfile(user.name);
+    setShowDeleteConfirm(false);
     router.replace('/onboarding' as any);
   };
 
@@ -227,11 +234,22 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* BOTÓN DE LOGOUT */}
-        <TouchableOpacity style={s.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
-          <Text style={{ fontSize: 20, marginRight: 8 }}>🚪</Text>
-          <Text style={s.logoutText}>Cerrar Sesión</Text>
-        </TouchableOpacity>
+        {/* BOTONES DE SESIÓN */}
+        <View style={{ marginTop: 24, gap: 12 }}>
+          <TouchableOpacity style={s.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
+            <Ionicons name="log-out-outline" size={22} color={colors.gold} style={{ marginRight: 10 }} />
+            <Text style={s.logoutText}>Cerrar Sesión</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[s.logoutButton, { backgroundColor: '#FFEEED', shadowColor: '#FF6B6B' }]} 
+            onPress={() => setShowDeleteConfirm(true)} 
+            activeOpacity={0.8}
+          >
+            <Ionicons name="trash-outline" size={22} color="#FF6B6B" style={{ marginRight: 10 }} />
+            <Text style={[s.logoutText, { color: '#FF6B6B' }]}>Eliminar Perfil</Text>
+          </TouchableOpacity>
+        </View>
 
       </ScrollView>
 
@@ -295,6 +313,37 @@ export default function SettingsScreen() {
             <TouchableOpacity style={[s.modalButton, { marginTop: 20 }]} onPress={() => setShowSupport(false)}>
               <Text style={s.modalButtonText}>Entendido</Text>
             </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </Modal>
+
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <Modal visible={showDeleteConfirm} transparent animationType="fade">
+        <View style={staticStyles.modalOverlay}>
+          <Animated.View entering={ZoomIn.duration(400)} style={s.modalContent}>
+            <View style={[s.iconBox, { backgroundColor: '#FFEEED', marginBottom: 20 }]}>
+              <Ionicons name="warning" size={32} color="#FF6B6B" />
+            </View>
+            <Text style={s.modalTitle}>¿Eliminar perfil?</Text>
+            <Text style={s.modalSubtitle}>
+              Esta acción borrará permanentemente todo tu progreso, rachas e historial. No podrás recuperarlo.
+            </Text>
+            
+            <View style={{ width: '100%', gap: 12 }}>
+              <TouchableOpacity
+                style={[s.modalButton, { backgroundColor: '#FF6B6B' }]}
+                onPress={handleDeleteProfile}
+              >
+                <Text style={s.modalButtonText}>Sí, eliminar para siempre</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[s.modalButton, { backgroundColor: colors.surfaceBorder }]}
+                onPress={() => setShowDeleteConfirm(false)}
+              >
+                <Text style={[s.modalButtonText, { color: colors.text }]}>No, mantener perfil</Text>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         </View>
       </Modal>
