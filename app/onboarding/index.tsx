@@ -1,10 +1,10 @@
 import { AppColors, useTheme } from '@/context/ThemeContext';
-import { useUser, UserData } from '@/context/UserContext';
+import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View, Modal, ScrollView } from 'react-native';
+import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -137,8 +137,18 @@ export default function NameScreen() {
                   style={s.profileCard}
                   onPress={() => handleSelectProfile(profile.name)}
                 >
+                  {/* AQUÍ ESTÁ EL CAMBIO DE LA IMAGEN 👇 */}
                   <View style={s.profileAvatar}>
-                    <Text style={{fontSize: 24}}>💪</Text>
+                    {profile.avatar ? (
+                      <Image
+                        source={{ uri: profile.avatar }}
+                        style={{ width: '100%', height: '100%' }}
+                        contentFit="cover"
+                        transition={200}
+                      />
+                    ) : (
+                      <Text style={{fontSize: 24}}>💪</Text>
+                    )}
                   </View>
                   <View style={{flex: 1}}>
                     <Text style={s.profileName}>{profile.name}</Text>
@@ -202,7 +212,10 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   
   profileList: { flex: 1 },
   profileCard: { flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: c.surface, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: c.surfaceBorder },
-  profileAvatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
+  
+  // AQUÍ AÑADÍ overflow: 'hidden' PARA QUE LA IMAGEN RESPETE LA FORMA REDONDA 👇
+  profileAvatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 16, overflow: 'hidden' },
+  
   profileName: { fontSize: 18, fontWeight: '700', color: c.text },
   profileMeta: { fontSize: 14, color: c.textSecondary, marginTop: 2 },
 });
