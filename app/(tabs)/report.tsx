@@ -1,4 +1,4 @@
-import { useTheme, AppColors } from '@/context/ThemeContext';
+import { AppColors, useTheme } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { formatRelativeDate, useWeeklyStats } from '@/hooks/useWeeklyStats';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -108,7 +108,7 @@ export default function ReportScreen() {
               <View key={session.id}>
                 {index > 0 && <View style={s.historyDivider} />}
                 <View style={staticStyles.historyItem}>
-                   <Text style={{fontSize: 24, marginRight: 16}}>✨</Text>
+                   <Text style={{fontSize: 24, marginRight: 16}}>✔️</Text>
                   <View style={staticStyles.historyInfo}>
                     <Text style={s.historyTitle}>{session.title}</Text>
                     <Text style={s.historyMeta}>

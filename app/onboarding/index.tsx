@@ -8,6 +8,7 @@ import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollVie
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isWeb = Platform.OS === 'web'; // 👈 Añadido aquí para detectar si estamos en navegador
 
 export default function NameScreen() {
   const router = useRouter();
@@ -122,7 +123,8 @@ export default function NameScreen() {
       >
         <View style={s.modalOverlay}>
           <Pressable style={s.modalDismiss} onPress={() => setShowProfiles(false)} />
-          <Animated.View entering={SlideInDown} style={s.modalContent}>
+          {/* 👈 Parche aplicado en esta línea de abajo */}
+          <Animated.View entering={isWeb ? undefined : SlideInDown} style={s.modalContent}>
             <View style={s.modalHeader}>
               <Text style={s.modalTitle}>Seleccionar Perfil</Text>
               <Pressable style={s.closeIcon} onPress={() => setShowProfiles(false)}>
@@ -137,7 +139,6 @@ export default function NameScreen() {
                   style={s.profileCard}
                   onPress={() => handleSelectProfile(profile.name)}
                 >
-                  {/* AQUÍ ESTÁ EL CAMBIO DE LA IMAGEN 👇 */}
                   <View style={s.profileAvatar}>
                     {profile.avatar ? (
                       <Image
@@ -212,10 +213,7 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   
   profileList: { flex: 1 },
   profileCard: { flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: c.surface, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: c.surfaceBorder },
-  
-  // AQUÍ AÑADÍ overflow: 'hidden' PARA QUE LA IMAGEN RESPETE LA FORMA REDONDA 👇
   profileAvatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 16, overflow: 'hidden' },
-  
   profileName: { fontSize: 18, fontWeight: '700', color: c.text },
   profileMeta: { fontSize: 14, color: c.textSecondary, marginTop: 2 },
 });

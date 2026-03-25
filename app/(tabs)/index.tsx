@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
 import { AppColors, useTheme } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { getDailyTip } from '@/data/tips';
 import { getRecommendedWorkouts } from '@/data/workouts';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, FadeInDown, FadeInRight } from 'react-native-reanimated';
 
@@ -39,7 +39,7 @@ export default function HomeScreen() {
       {/* Cabecera */}
       <Animated.View entering={FadeInDown.duration(600).easing(Easing.out(Easing.exp))} style={s.header}>
         <View>
-          <Text style={s.greeting}>Hola, {userName} 👋</Text>
+          <Text style={s.greeting}>Hola, {userName}</Text>
           <Text style={s.subtitle}>Preparados para brillar hoy.</Text>
         </View>
         <View style={{ flexDirection: 'row' }}>
