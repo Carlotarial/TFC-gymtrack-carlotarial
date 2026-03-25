@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { AppColors, useTheme } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { getDailyTip } from '@/data/tips';
@@ -17,7 +18,14 @@ export default function HomeScreen() {
   const totalSessions = 4;
   const progressPercent = Math.min((sessionsCompleted / totalSessions) * 100, 100);
 
-  const recommendations = getRecommendedWorkouts(user.goal);
+  const recommendations = getRecommendedWorkouts(user.goal, user.activityLevel);
+  const goalLabel = useMemo(() => {
+    if (user.goal === 'perder_peso') return 'para quemar';
+    if (user.goal === 'ganar_musculo') return 'de potencia';
+    if (user.goal === 'tonificar') return 'de definición';
+    return 'para brillar';
+  }, [user.goal]);
+
   const tip = getDailyTip();
 
   const handleAddWater = () => {
@@ -84,7 +92,12 @@ export default function HomeScreen() {
 
       {/* Recomendaciones inteligentes (Cards suaves) */}
       <Animated.View entering={FadeInDown.delay(300).duration(600).easing(Easing.out(Easing.exp))} style={staticStyles.section}>
-        <Text style={s.sectionTitle}>Siguiente sesión</Text>
+        <View style={staticStyles.sectionHeaderRow}>
+          <Text style={s.sectionTitle}>Siguiente sesión</Text>
+          <View style={s.goalBadge}>
+            <Text style={s.goalBadgeText}>{goalLabel}</Text>
+          </View>
+        </View>
         <View style={staticStyles.grid}>
           {recommendations.map((rec, index) => (
             <Pressable
@@ -92,6 +105,9 @@ export default function HomeScreen() {
               style={s.gridCard}
               onPress={() => router.push({ pathname: '/routine', params: { id: rec.id, title: rec.title } } as any)}
             >
+              <View style={s.recommendedBadge}>
+                <Text style={s.recommendedBadgeText}>✨ Para ti</Text>
+              </View>
               <View style={[s.cardIconBox]}>
                 <Ionicons name={rec.icon as any} size={28} color={colors.accentDark} />
               </View>
@@ -122,6 +138,7 @@ export default function HomeScreen() {
 const staticStyles = StyleSheet.create({
   metricItem: { alignItems: 'center', flex: 1 },
   section: { marginBottom: 35 },
+  sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
   progressInfo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   grid: { flexDirection: 'row', justifyContent: 'space-between' },
   tipContent: { marginLeft: 16, flex: 1 },
@@ -142,8 +159,11 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   metricLabel: { fontSize: 13, color: c.textSecondary, fontWeight: '600', marginTop: 2 },
   metricDivider: { width: 1, height: 40, backgroundColor: c.divider },
   
-  sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, marginBottom: 20, letterSpacing: -0.5 },
+  sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
   
+  goalBadge: { backgroundColor: c.accentLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+  goalBadgeText: { fontSize: 12, fontWeight: '800', color: c.accent, textTransform: 'uppercase' },
+
   card: { backgroundColor: c.surface, borderRadius: 32, padding: 28, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
   progressValue: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
   progressLabel: { fontSize: 14, color: c.textSecondary, fontWeight: '600', marginTop: 4 },
@@ -152,7 +172,10 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   barBackground: { height: 12, backgroundColor: c.barInactive, borderRadius: 6, overflow: 'hidden' as const },
   barFill: { height: 12, backgroundColor: c.barActive, borderRadius: 6 },
   
-  gridCard: { width: '47%' as any, backgroundColor: c.surface, borderRadius: 32, padding: 24, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
+  gridCard: { width: '47%' as any, backgroundColor: c.surface, borderRadius: 32, padding: 24, paddingTop: 32, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4, position: 'relative' },
+  recommendedBadge: { position: 'absolute', top: 12, left: 12, backgroundColor: c.goldLight, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  recommendedBadgeText: { fontSize: 10, fontWeight: '800', color: c.gold },
+
   cardIconBox: { width: 54, height: 54, borderRadius: 20, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
   cardTitle: { fontSize: 16, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
   cardTag: { fontSize: 13, color: c.textSecondary, marginTop: 6, fontWeight: '600' },

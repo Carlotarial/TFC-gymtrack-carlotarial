@@ -27,17 +27,38 @@ export const ALL_WORKOUTS: Workout[] = [
   { id: 'w8', title: 'Hipertrofia Total', duration: '50 min', durationMinutes: 50, intensity: 'Alta', kcalEstimate: 450, tag: 'Fuerza', icon: 'barbell-outline', exercises: ['e1', 'e5', 'e6', 'e2', 'e3'] },
 ];
 
-export function getRecommendedWorkouts(goal: string): Workout[] {
-  switch (goal) {
-    case 'perder_peso':
-      return ALL_WORKOUTS.filter(w => ['HIIT', 'Cardio'].includes(w.tag)).slice(0, 2);
-    case 'ganar_musculo':
-      return ALL_WORKOUTS.filter(w => w.tag === 'Fuerza').slice(0, 2);
-    case 'tonificar':
-      return ALL_WORKOUTS.filter(w => ['Core', 'Fuerza'].includes(w.tag)).slice(0, 2);
-    default:
-      return ALL_WORKOUTS.slice(5, 7); 
+export function getRecommendedWorkouts(goal: string, activityLevel?: string): Workout[] {
+  let baseWorkouts = [...ALL_WORKOUTS];
+  
+  // 1. Filtrar por objetivo primario
+  if (goal === 'perder_peso') {
+    baseWorkouts = ALL_WORKOUTS.filter(w => ['HIIT', 'Cardio'].includes(w.tag));
+  } else if (goal === 'ganar_musculo') {
+    baseWorkouts = ALL_WORKOUTS.filter(w => w.tag === 'Fuerza');
+  } else if (goal === 'tonificar') {
+    baseWorkouts = ALL_WORKOUTS.filter(w => ['Core', 'Fuerza', 'Yoga'].includes(w.tag));
   }
+
+  // 2. Ajustar por nivel de actividad (Intensidad)
+  if (activityLevel) {
+    const level = activityLevel.toLowerCase();
+    if (level === 'sedentario') {
+      // Principiante: Evitar intensidad Alta si es posible
+      const easy = baseWorkouts.filter(w => w.intensity !== 'Alta');
+      if (easy.length >= 2) baseWorkouts = easy;
+    } else if (level === 'activo') {
+      // Avanzado: Priorizar intensidad Alta
+      const hard = baseWorkouts.filter(w => w.intensity === 'Alta');
+      if (hard.length >= 2) baseWorkouts = hard;
+    }
+  }
+
+  // Retornar al menos 2, mezclando si es necesario
+  if (baseWorkouts.length < 2) {
+    return [...baseWorkouts, ...ALL_WORKOUTS].slice(0, 2);
+  }
+  
+  return baseWorkouts.slice(0, 2);
 }
 
 export function filterWorkouts(search: string, tag: string): Workout[] {
