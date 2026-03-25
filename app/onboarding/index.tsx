@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -12,27 +12,40 @@ const isWeb = Platform.OS === 'web';
 
 export default function NameScreen() {
   const router = useRouter();
-  const { updateUser, profiles, selectProfile } = useUser();
+  // 🌟 CORRECCIÓN: Usamos los nombres correctos del contexto (allUsers y switchUser)
+  const { updateUser, allUsers, switchUser, isLoading } = useUser();
   const { colors } = useTheme();
   const [name, setName] = useState('');
   const [showProfiles, setShowProfiles] = useState(false);
 
+  // 🛡️ PROTECCIÓN: Si el contexto está cargando, mostramos un loader para evitar que .length falle
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.accent} />
+      </View>
+    );
+  }
+
   const handleContinue = async () => {
-    await updateUser({ name });
+    if (name.trim().length < 2) return;
+    await updateUser({ name: name.trim() });
     router.push({
       pathname: '/onboarding/objective',
-      params: { userName: name }
+      params: { userName: name.trim() }
     } as any);
   };
 
   const handleSelectProfile = async (profileName: string) => {
-    await selectProfile(profileName);
+    await switchUser(profileName);
     setShowProfiles(false);
-    // Como ya está onboarded, redirigimos a tabs
     router.replace('/(tabs)' as any);
   };
 
   const s = dynamicStyles(colors);
+
+  // 🛡️ PROTECCIÓN EXTRA: Usamos ?. para allUsers
+  const hasProfiles = (allUsers?.length ?? 0) > 0;
 
   return (
     <View style={s.container}>
@@ -45,6 +58,7 @@ export default function NameScreen() {
       >
         <View style={s.stepContainer}>
           <View style={[s.stepDot, s.stepDotActive]} />
+          <View style={s.stepDot} />
           <View style={s.stepDot} />
           <View style={s.stepDot} />
           <View style={s.stepDot} />
@@ -71,7 +85,6 @@ export default function NameScreen() {
               <Text style={s.badgeText}>Tu viaje comienza aquí</Text>
             </View>
             
-            {/* Título Premium a dos tonos */}
             <Text style={s.title}>
               <Text style={s.titleLight}>Perfil de{"\n"}</Text>
               <Text style={s.titleBold}>Atleta</Text>
@@ -95,12 +108,11 @@ export default function NameScreen() {
                 autoCapitalize="words"
                 autoCorrect={false}
                 selectionColor={colors.accentDark}
-                cursorColor={colors.accentDark}
-                underlineColorAndroid="transparent"
               />
             </View>
 
-            {profiles.length > 0 && (
+            {/* 🛡️ CORRECCIÓN: allUsers en lugar de profiles */}
+            {hasProfiles && (
               <Pressable style={s.loginButton} onPress={() => setShowProfiles(true)}>
                 <Text style={s.loginButtonText}>Ingresar con perfil existente</Text>
                 <Ionicons name="people-outline" size={18} color={colors.accentDark} />
@@ -139,7 +151,7 @@ export default function NameScreen() {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={s.profileList}>
-              {profiles.map((profile) => (
+              {allUsers?.map((profile) => (
                 <Pressable 
                   key={profile.name} 
                   style={s.profileCard}
@@ -154,13 +166,12 @@ export default function NameScreen() {
                         transition={200}
                       />
                     ) : (
-                      // 👈 Adiós emoji, hola Ionicon elegante
                       <Ionicons name="person" size={28} color={colors.accentDark} />
                     )}
                   </View>
                   <View style={{flex: 1}}>
                     <Text style={s.profileName}>{profile.name}</Text>
-                    <Text style={s.profileMeta}>{profile.goal || 'Perfil nuevo'}</Text>
+                    <Text style={s.profileMeta}>{profile.goal?.replace('_', ' ') || 'Perfil nuevo'}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
                 </Pressable>
@@ -181,48 +192,35 @@ const staticStyles = StyleSheet.create({
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 32, overflow: 'hidden' },
-  
   blob1: { position: 'absolute', width: SCREEN_WIDTH * 0.8, height: SCREEN_WIDTH * 0.8, borderRadius: SCREEN_WIDTH * 0.4, backgroundColor: c.accentLight, top: -100, right: -100, opacity: 0.6 },
   blob2: { position: 'absolute', width: SCREEN_WIDTH * 0.6, height: SCREEN_WIDTH * 0.6, borderRadius: SCREEN_WIDTH * 0.3, backgroundColor: c.goldLight, bottom: 20, left: -100, opacity: 0.4 },
-
   stepContainer: { flexDirection: 'row', marginTop: 70, marginBottom: 40, justifyContent: 'flex-start' },
   stepDot: { width: 12, height: 6, borderRadius: 3, backgroundColor: c.surfaceBorder, marginRight: 8 },
   stepDotActive: { width: 32, backgroundColor: c.accent },
-
   logoWrapper: { width: 100, height: 100, marginBottom: 40, position: 'relative' },
   logoInner: { width: '100%', height: '100%', backgroundColor: c.surface, borderRadius: 32, justifyContent: 'center', alignItems: 'center', zIndex: 2, borderWidth: 1, borderColor: c.surfaceBorder, overflow: 'hidden' },
   logoImage: { width: '80%', height: '80%' },
   logoShadow: { position: 'absolute', width: '90%', height: '90%', backgroundColor: c.accent, bottom: -8, right: -8, borderRadius: 32, opacity: 0.15, zIndex: 1 },
-
   welcomeBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accentLight, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, alignSelf: 'flex-start', marginBottom: 24, borderWidth: 1, borderColor: c.accent },
   badgeText: { fontSize: 13, fontWeight: '800', color: c.accentDark, textTransform: 'uppercase', letterSpacing: 1 },
-
-  // Estilos del nuevo título a dos tonos
   title: { fontSize: 46, letterSpacing: -1.5, lineHeight: 52 },
   titleLight: { fontWeight: '300', color: c.textSecondary }, 
   titleBold: { fontWeight: '900', color: c.text }, 
   titleDot: { fontWeight: '900', color: c.accent }, 
-
   subtitle: { fontSize: 18, color: c.textSecondary, marginTop: 18, lineHeight: 28, fontWeight: '500', opacity: 0.9 },
-
   inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, borderRadius: 28, height: 84, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.06, shadowRadius: 24, elevation: 3, borderWidth: 1, borderColor: c.surfaceBorder },
   input: { flex: 1, height: '100%', paddingHorizontal: 16, fontSize: 18, fontWeight: '700', color: c.text, outlineStyle: 'none' } as any,
-
   loginButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 24, paddingVertical: 12 },
   loginButtonText: { fontSize: 15, fontWeight: '700', color: c.accentDark, marginRight: 8, textDecorationLine: 'underline' },
-
   nextButton: { flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 24, borderRadius: 32, alignItems: 'center', justifyContent: 'center', shadowColor: c.accent, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.25, shadowRadius: 24, elevation: 5 },
   nextButtonDisabled: { backgroundColor: c.buttonDisabled, shadowOpacity: 0 },
   nextButtonText: { fontSize: 18, fontWeight: '800', color: c.buttonPrimaryText, marginRight: 10 },
-
-  // Modal Styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalDismiss: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   modalContent: { backgroundColor: c.background, borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 32, minHeight: 400, maxHeight: '80%' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 24, fontWeight: '800', color: c.text },
   closeIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center' },
-  
   profileList: { flex: 1 },
   profileCard: { flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: c.surface, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: c.surfaceBorder },
   profileAvatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 16, overflow: 'hidden' },

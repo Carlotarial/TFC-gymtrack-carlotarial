@@ -5,12 +5,11 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 export interface WorkoutSession {
   id: string;
   title: string;
-  date: string;       // ISO string
+  date: string;
   durationSecs: number;
   kcal: number;
 }
 
-// Definimos qué datos vamos a guardar
 export interface UserData {
   name: string;
   weight: string;
@@ -25,21 +24,20 @@ export interface UserData {
   avatar?: string;
 }
 
-// Discriminated union para el estado de inicialización
 export type AppState =
   | { status: 'loading' }
-  | { status: 'ready'; user: UserData; profiles: UserData[] }
+  | { status: 'ready'; user: UserData; allUsers: UserData[] }
   | { status: 'error'; error: Error };
 
 interface UserContextType {
   user: UserData;
-  profiles: UserData[];
+  allUsers: UserData[];
   status: AppState['status'];
   error?: Error;
   updateUser: (newData: Partial<UserData>) => Promise<void>;
   completeWorkout: (title: string, durationSecs: number, kcal: number) => Promise<void>;
   updateWater: (liters: number) => Promise<void>;
-  selectProfile: (name: string) => Promise<void>;
+  switchUser: (name: string) => Promise<void>;
   logout: () => Promise<void>;
   deleteProfile: (name: string) => Promise<void>;
   clearAllData: () => Promise<void>;
@@ -66,7 +64,6 @@ const UserContext = createContext<UserContextType | null>(null);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [appState, setAppState] = useState<AppState>({ status: 'loading' });
 
-  // Cargar datos guardados al arrancar la app
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -74,57 +71,49 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         const savedProfiles = await AsyncStorage.getItem('@all_profiles');
         
         let activeUser = DEFAULT_USER;
-        let profiles: UserData[] = [];
+        let allUsers: UserData[] = [];
 
         if (savedProfiles) {
-          profiles = JSON.parse(savedProfiles);
+          allUsers = JSON.parse(savedProfiles);
         }
 
         if (savedActive) {
           activeUser = { ...DEFAULT_USER, ...JSON.parse(savedActive) };
-          // Asegurarnos de que el activo esté en la lista (migración/sincronización)
-          if (activeUser.name && !profiles.find(p => p.name === activeUser.name)) {
-            profiles.push(activeUser);
-            await AsyncStorage.setItem('@all_profiles', JSON.stringify(profiles));
+          if (activeUser.name && !allUsers.find(p => p.name === activeUser.name)) {
+            allUsers.push(activeUser);
+            await AsyncStorage.setItem('@all_profiles', JSON.stringify(allUsers));
           }
         }
 
-        setAppState({ status: 'ready', user: activeUser, profiles });
+        setAppState({ status: 'ready', user: activeUser, allUsers });
       } catch (e) {
-        console.error('Error cargando datos del usuario:', e);
         setAppState({ status: 'error', error: e instanceof Error ? e : new Error('Error de almacenamiento') });
       }
     };
     loadData();
   }, []);
 
-  // Helpers para no romper la API actual
+  // 🛡️ HELPERS BLINDADOS: Nunca devuelven undefined
   const user = appState.status === 'ready' ? appState.user : DEFAULT_USER;
-  const profiles = appState.status === 'ready' ? appState.profiles : [];
+  const allUsers = appState.status === 'ready' ? appState.allUsers : [];
   const isLoading = appState.status === 'loading';
   const error = appState.status === 'error' ? appState.error : undefined;
 
-  const saveAll = async (activeUser: UserData, allProfiles: UserData[]) => {
+  const saveAll = async (activeUser: UserData, profiles: UserData[]) => {
     await AsyncStorage.setItem('@user_data', JSON.stringify(activeUser));
-    await AsyncStorage.setItem('@all_profiles', JSON.stringify(allProfiles));
+    await AsyncStorage.setItem('@all_profiles', JSON.stringify(profiles));
   };
 
   const updateUser = async (newData: Partial<UserData>) => {
     if (appState.status !== 'ready') return;
-    
     const updatedUser = { ...appState.user, ...newData };
-    
-    // Actualizar también en la lista de perfiles
-    const updatedProfiles = appState.profiles.map(p => 
+    let updatedProfiles = appState.allUsers.map(p => 
       p.name === appState.user.name ? updatedUser : p
     );
-    
-    // Si es un perfil nuevo (se acaba de poner nombre en onboarding)
-    if (newData.name && !appState.profiles.find(p => p.name === newData.name)) {
-      updatedProfiles.push(updatedUser);
+    if (newData.name && !appState.allUsers.find(p => p.name === newData.name)) {
+        updatedProfiles = [...updatedProfiles, updatedUser];
     }
-
-    setAppState({ status: 'ready', user: updatedUser, profiles: updatedProfiles });
+    setAppState({ status: 'ready', user: updatedUser, allUsers: updatedProfiles });
     await saveAll(updatedUser, updatedProfiles);
   };
 
@@ -137,7 +126,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       durationSecs,
       kcal,
     };
-
     const updatedUser: UserData = {
       ...appState.user,
       sessionsCompleted: appState.user.sessionsCompleted + 1,
@@ -145,28 +133,26 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       streak: appState.user.streak + 1,
       workoutHistory: [session, ...appState.user.workoutHistory],
     };
-
-    const updatedProfiles = appState.profiles.map(p => 
+    const updatedProfiles = appState.allUsers.map(p => 
       p.name === appState.user.name ? updatedUser : p
     );
-
-    setAppState({ status: 'ready', user: updatedUser, profiles: updatedProfiles });
+    setAppState({ status: 'ready', user: updatedUser, allUsers: updatedProfiles });
     await saveAll(updatedUser, updatedProfiles);
   };
 
   const updateWater = async (liters: number) => {
     if (appState.status !== 'ready') return;
     const updatedUser = { ...appState.user, waterIntake: liters };
-    const updatedProfiles = appState.profiles.map(p => 
+    const updatedProfiles = appState.allUsers.map(p => 
       p.name === appState.user.name ? updatedUser : p
     );
-    setAppState({ status: 'ready', user: updatedUser, profiles: updatedProfiles });
+    setAppState({ status: 'ready', user: updatedUser, allUsers: updatedProfiles });
     await saveAll(updatedUser, updatedProfiles);
   };
 
-  const selectProfile = async (name: string) => {
+  const switchUser = async (name: string) => {
     if (appState.status !== 'ready') return;
-    const selected = appState.profiles.find(p => p.name === name);
+    const selected = appState.allUsers.find(p => p.name === name);
     if (selected) {
       setAppState({ ...appState, user: selected });
       await AsyncStorage.setItem('@user_data', JSON.stringify(selected));
@@ -181,37 +167,35 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   const deleteProfile = async (name: string) => {
     if (appState.status !== 'ready') return;
-    const updatedProfiles = appState.profiles.filter(p => p.name !== name);
-    
-    // Si borramos el activo, deslogueamos
+    const updatedProfiles = appState.allUsers.filter(p => p.name !== name);
     if (appState.user.name === name) {
-        setAppState({ status: 'ready', user: DEFAULT_USER, profiles: updatedProfiles });
+        setAppState({ status: 'ready', user: DEFAULT_USER, allUsers: updatedProfiles });
         await AsyncStorage.removeItem('@user_data');
     } else {
-        setAppState({ ...appState, profiles: updatedProfiles });
+        setAppState({ ...appState, allUsers: updatedProfiles });
     }
     await AsyncStorage.setItem('@all_profiles', JSON.stringify(updatedProfiles));
   };
 
   const clearAllData = async () => {
-    // Borra TODO (todos los perfiles)
-    setAppState({ status: 'ready', user: DEFAULT_USER, profiles: [] });
+    setAppState({ status: 'ready', user: DEFAULT_USER, allUsers: [] });
     await AsyncStorage.clear();
   };
 
-  const isOnboarded = user.name.length > 0;
+  // 🛡️ CORRECCIÓN CRÍTICA: Añadido optional chaining para evitar el error de length
+  const isOnboarded = !!user?.name && user.name.length > 0;
 
   return (
     <UserContext.Provider 
       value={{ 
         user, 
-        profiles,
+        allUsers,
         status: appState.status, 
         error, 
         updateUser, 
         completeWorkout, 
         updateWater, 
-        selectProfile,
+        switchUser,
         logout,
         deleteProfile,
         clearAllData, 
