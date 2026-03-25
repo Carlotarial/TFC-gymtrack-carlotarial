@@ -5,22 +5,36 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Modal, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeInDown, FadeInUp, SlideInDown, ZoomIn } from 'react-native-reanimated';
+import { Modal, Platform, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInDown, SlideInDown, ZoomIn } from 'react-native-reanimated';
 
 const AVATARS = [
   { id: 'golden', url: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'husky', url: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'pug', url: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=250&h=250&fit=crop&fm=jpg&q=80' },
-  { id: 'corgi', url: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=250&h=250&fit=crop&fm=jpg&q=80' },
-  { id: 'beagle', url: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=250&h=250&fit=crop&fm=jpg&q=80' },
-  { id: 'frenchie', url: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=250&h=250&fit=crop&fm=jpg&q=80' },
-  { id: 'dalmatian', url: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'shiba', url: 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'labrador', url: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=250&h=250&fit=crop&fm=jpg&q=80' },
-  { id: 'border', url: 'https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'schnauzer', url: 'https://i.pinimg.com/564x/67/1c/85/671c85f3129e46c6deffb6cc6b6abe99.jpg' },
-  { id: 'poodle', url: 'https://i.pinimg.com/736x/ed/f1/20/edf120eade64c26bf371356174463cfd.jpg' },
+];
+
+const GOALS = [
+  { id: 'perder_peso', label: 'Perder peso' },
+  { id: 'ganar_musculo', label: 'Ganar músculo' },
+  { id: 'tonificar', label: 'Tonificar' },
+];
+
+const ACTIVITY_LEVELS = [
+  { id: 'sedentario', label: 'Sedentario' },
+  { id: 'moderado', label: 'Moderado' },
+  { id: 'activo', label: 'Muy Activo' },
+];
+
+const FAQ_DATA = [
+  { q: '¿Cómo cambio mi peso o altura?', a: 'Dentro de tu perfil, despliega "Ajustes de Entrenamiento" y pulsa el botón de "Editar" en la esquina superior derecha.', icon: 'body-outline' },
+  { q: '¿Cómo funcionan las rachas?', a: 'Tu racha aumenta cada día que completas al menos un entrenamiento. ¡No pierdas el ritmo!', icon: 'flash-outline' },
+  { q: '¿Puedo usar la app sin conexión?', a: 'GymTrack requiere conexión para sincronizar tu perfil, pero las rutinas cargadas pueden visualizarse temporalmente.', icon: 'wifi-outline' },
+  { q: '¿Cómo restablezco mi progreso?', a: 'Actualmente no hay un botón de reset, pero puedes eliminar tu perfil y crear uno nuevo desde cero.', icon: 'refresh-outline' },
+  { q: '¿Quién ha desarrollado la app?', a: 'Esta aplicación es un proyecto exclusivo desarrollado para el TFC como muestra de diseño y desarrollo en React Native.', icon: 'code-slash-outline' },
 ];
 
 const isWeb = Platform.OS === 'web';
@@ -36,7 +50,6 @@ export default function SettingsScreen() {
   const [tempWeight, setTempWeight] = useState(user.weight || '');
   const [tempHeight, setTempHeight] = useState(user.height || '');
 
-  // Modales interactivos
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
   const [ratingDone, setRatingDone] = useState(false);
@@ -46,49 +59,24 @@ export default function SettingsScreen() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   const userName = user.name || 'Usuario';
-
   const { userInitial, userEmail } = useMemo(() => {
     const initial = userName.charAt(0).toUpperCase();
     const email = `${userName.toLowerCase().replace(/\s+/g, '')}@gymtrack.com`;
     return { userInitial: initial, userEmail: email };
   }, [userName]);
 
-  const handleLogout = async () => {
-    await logout();
-    router.replace('/onboarding' as any);
-  };
-
-  const handleDeleteProfile = async () => {
-    await deleteProfile(user.name);
-    setShowDeleteConfirm(false);
-    router.replace('/onboarding' as any);
-  };
-
+  const handleLogout = async () => { await logout(); router.replace('/onboarding' as any); };
+  const handleDeleteProfile = async () => { await deleteProfile(user.name); setShowDeleteConfirm(false); router.replace('/onboarding' as any); };
+  
   const handleThemeToggle = () => {
     const modes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system'];
-    const currentIndex = modes.indexOf(mode);
-    const nextMode = modes[(currentIndex + 1) % modes.length];
+    const nextMode = modes[(modes.indexOf(mode) + 1) % modes.length];
     setMode(nextMode);
   };
 
   const handleSaveStats = async () => {
-    await updateUser({
-      weight: tempWeight,
-      height: tempHeight,
-    });
+    await updateUser({ weight: tempWeight, height: tempHeight });
     setIsEditing(false);
-  };
-
-  const getThemeLabel = () => {
-    if (mode === 'system') return 'Sistema';
-    if (mode === 'dark') return 'Oscuro';
-    return 'Claro';
-  };
-
-  const getThemeIcon = () => {
-    if (mode === 'system') return 'settings-outline';
-    if (mode === 'dark') return 'moon-outline';
-    return 'sunny-outline';
   };
 
   const s = dynamicStyles(colors);
@@ -97,63 +85,46 @@ export default function SettingsScreen() {
     <SafeAreaView style={s.safeArea}>
       <ScrollView style={s.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         
-        {/* NUEVO HEADER EDITORIAL CON MARGEN UNIFICADO */}
         <View style={s.header}>
           <View style={s.overlineContainer}>
             <View style={s.overlineDot} />
             <Text style={s.overlineText}>GYMTRACK SETTINGS</Text>
           </View>
-          
           <Text style={s.title}>
             <Text style={s.titleLight}>Tu </Text>
             <Text style={s.titleBold}>Perfil</Text>
             <Text style={s.titleDot}>.</Text>
           </Text>
-          
           <Text style={s.subtitle}>Gestiona tus preferencias y datos físicos</Text>
         </View>
 
-        {/* Tarjeta de Perfil Pastoral */}
+        {/* Tarjeta de Perfil */}
         <View style={s.profileCard}>
-          <TouchableOpacity
-            style={s.avatar}
-            activeOpacity={0.8}
-            onPress={() => setShowAvatarModal(true)}
-          >
-            {user.avatar ? (
-              <Image
-                source={{ uri: user.avatar }}
-                style={s.avatarImage}
-                contentFit="cover"
-                transition={200}
-              />
-            ) : (
-              <Text style={s.avatarText}>{userInitial}</Text>
-            )}
-            <View style={s.avatarEditBadge}>
-              <Ionicons name="images" size={12} color={colors.accent} />
-            </View>
+          <TouchableOpacity style={s.avatar} activeOpacity={0.8} onPress={() => setShowAvatarModal(true)}>
+            {user.avatar ? <Image source={{ uri: user.avatar }} style={s.avatarImage} contentFit="cover" /> : <Text style={s.avatarText}>{userInitial}</Text>}
+            <View style={s.avatarEditBadge}><Ionicons name="images" size={12} color={colors.accent} /></View>
           </TouchableOpacity>
           <View style={staticStyles.profileInfo}>
             <Text style={s.profileName}>{userName}</Text>
             <Text style={s.profileEmail}>{userEmail}</Text>
+            <View style={s.streakMiniBadge}>
+               <Ionicons name="flash" size={12} color="#FFF" />
+               <Text style={s.streakMiniText}>{user.streak} días de racha</Text>
+            </View>
           </View>
         </View>
 
         {/* SECCIÓN: PREFERENCIAS */}
         <View style={staticStyles.section}>
           <Text style={s.sectionTitle}>Preferencias</Text>
-
-          <TouchableOpacity style={s.settingItem} onPress={handleThemeToggle} activeOpacity={0.7}>
+          <TouchableOpacity style={s.settingItem} onPress={handleThemeToggle}>
             <View style={staticStyles.settingLabelGroup}>
               <View style={[s.iconBox, { backgroundColor: colors.accentLight }]}>
-                <Ionicons name={getThemeIcon()} size={22} color={colors.accentDark} />
+                <Ionicons name={mode === 'dark' ? 'moon-outline' : 'sunny-outline'} size={22} color={colors.accentDark} />
               </View>
               <Text style={s.settingText}>Modo Visual</Text>
             </View>
-            <View style={s.themeBadge}>
-              <Text style={s.themeBadgeText}>{getThemeLabel()}</Text>
-            </View>
+            <View style={s.themeBadge}><Text style={s.themeBadgeText}>{mode === 'dark' ? 'Oscuro' : 'Claro'}</Text></View>
           </TouchableOpacity>
 
           <View style={s.settingItem}>
@@ -161,95 +132,55 @@ export default function SettingsScreen() {
               <View style={[s.iconBox, { backgroundColor: colors.goldLight }]}>
                 <Ionicons name="notifications-outline" size={22} color={colors.gold} />
               </View>
-              <Text style={s.settingText}>Recordatorios</Text>
+              <Text style={s.settingText}>Notificaciones</Text>
             </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={(val) => { toggleNotifications(val); }}
-              trackColor={{ false: colors.barInactive, true: colors.accent }}
-              thumbColor={colors.buttonPrimaryText}
-            />
+            <Switch value={notificationsEnabled} onValueChange={(val) => { toggleNotifications(val); }} trackColor={{ false: colors.barInactive, true: colors.accent }} thumbColor="#FFF" />
           </View>
 
-          <TouchableOpacity
-            style={s.settingItem}
-            activeOpacity={0.7}
-            onPress={() => setShowStats(!showStats)}
-          >
+          <TouchableOpacity style={s.settingItem} onPress={() => setShowStats(!showStats)}>
             <View style={staticStyles.settingLabelGroup}>
               <View style={[s.iconBox, { backgroundColor: colors.surfaceBorder }]}>
                  <Ionicons name="body-outline" size={22} color={colors.textSecondary} />
               </View>
-              <Text style={s.settingText}>Mis Datos Físicos</Text>
+              <Text style={s.settingText}>Ajustes de Entrenamiento</Text>
             </View>
             <Ionicons name={showStats ? "chevron-down" : "chevron-forward"} size={20} color={colors.textMuted} />
           </TouchableOpacity>
 
           {showStats && (
-            <Animated.View entering={isWeb ? undefined : FadeInDown.duration(400)} style={s.statsContainer}>
+            <Animated.View entering={FadeInDown} style={s.statsContainer}>
               <View style={staticStyles.statsHeader}>
-                <Text style={s.statsTitle}>Detalles físicos</Text>
-                <TouchableOpacity
-                  onPress={() => isEditing ? handleSaveStats() : setIsEditing(true)}
-                  style={[s.editBadge, isEditing && { backgroundColor: colors.accent }]}
-                >
-                  <Ionicons
-                    name={isEditing ? "checkmark" : "pencil"}
-                    size={14}
-                    color={isEditing ? colors.buttonPrimaryText : colors.accent}
-                  />
-                  <Text style={[s.editBadgeText, isEditing && { color: colors.buttonPrimaryText }]}>
-                    {isEditing ? 'Guardar' : 'Editar'}
-                  </Text>
+                <Text style={s.statsTitle}>Métricas e IA</Text>
+                <TouchableOpacity onPress={() => isEditing ? handleSaveStats() : setIsEditing(true)} style={s.editBadge}>
+                  <Text style={s.editBadgeText}>{isEditing ? 'Guardar' : 'Editar'}</Text>
                 </TouchableOpacity>
               </View>
-
               <View style={staticStyles.statsRow}>
                 <View style={s.statBox}>
                   <Text style={s.statLabel}>Peso</Text>
-                  {isEditing ? (
-                    <View style={s.inputWrapper}>
-                      <TextInput
-                        style={s.statInput}
-                        value={tempWeight}
-                        onChangeText={setTempWeight}
-                        keyboardType="numeric"
-                        placeholder="00"
-                        placeholderTextColor={colors.textMuted}
-                      />
-                      <Text style={s.statUnit}>kg</Text>
-                    </View>
-                  ) : (
-                    <Text style={s.statValue}>{user.weight || '--'} <Text style={s.statUnit}>kg</Text></Text>
-                  )}
+                  {isEditing ? <TextInput style={s.statInput} value={tempWeight} onChangeText={setTempWeight} keyboardType="numeric" /> : <Text style={s.statValue}>{user.weight}kg</Text>}
                 </View>
                 <View style={s.statBox}>
                   <Text style={s.statLabel}>Altura</Text>
-                  {isEditing ? (
-                    <View style={s.inputWrapper}>
-                      <TextInput
-                        style={s.statInput}
-                        value={tempHeight}
-                        onChangeText={setTempHeight}
-                        keyboardType="numeric"
-                        placeholder="000"
-                        placeholderTextColor={colors.textMuted}
-                      />
-                      <Text style={s.statUnit}>cm</Text>
-                    </View>
-                  ) : (
-                    <Text style={s.statValue}>{user.height || '--'} <Text style={s.statUnit}>cm</Text></Text>
-                  )}
+                  {isEditing ? <TextInput style={s.statInput} value={tempHeight} onChangeText={setTempHeight} keyboardType="numeric" /> : <Text style={s.statValue}>{user.height}cm</Text>}
                 </View>
               </View>
-              <View style={staticStyles.statsRow}>
-                <View style={s.statBox}>
-                  <Text style={s.statLabel}>Objetivo</Text>
-                  <Text style={s.statValueSmall}>{user.goal || 'General'}</Text>
+              <View style={{ marginTop: 20 }}>
+                <Text style={s.statLabel}>Cambiar Objetivo</Text>
+                <View style={s.selectorRow}>
+                  {GOALS.map((g) => (
+                    <TouchableOpacity key={g.id} onPress={() => updateUser({ goal: g.id })} style={[s.selectorItem, user.goal === g.id && s.selectorItemActive]}>
+                      <Text style={[s.selectorText, user.goal === g.id && s.selectorTextActive]}>{g.label}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-                <View style={s.statBox}>
-                  <Text style={s.statLabel}>Actividad</Text>
-                  <Text style={s.statValueSmall}>{user.activityLevel || 'Sedentario'}</Text>
+                <Text style={[s.statLabel, { marginTop: 20 }]}>Nivel de actividad</Text>
+                <View style={s.selectorRow}>
+                  {ACTIVITY_LEVELS.map((a) => (
+                    <TouchableOpacity key={a.id} onPress={() => updateUser({ activityLevel: a.id })} style={[s.selectorItem, user.activityLevel === a.id && s.selectorItemActive]}>
+                      <Text style={[s.selectorText, user.activityLevel === a.id && s.selectorTextActive]}>{a.label}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
             </Animated.View>
@@ -259,42 +190,32 @@ export default function SettingsScreen() {
         {/* SECCIÓN: GENERAL */}
         <View style={staticStyles.section}>
           <Text style={s.sectionTitle}>General</Text>
-
-          <TouchableOpacity style={s.settingItem} onPress={() => setShowRating(true)} activeOpacity={0.7}>
+          <TouchableOpacity style={s.settingItem} onPress={() => setShowRating(true)}>
             <View style={staticStyles.settingLabelGroup}>
-              <View style={[s.iconBox, { backgroundColor: colors.surfaceBorder }]}>
-                <Ionicons name="star-outline" size={22} color={colors.textSecondary} />
-              </View>
+              <View style={[s.iconBox, { backgroundColor: colors.surfaceBorder }]}><Ionicons name="star-outline" size={22} color={colors.textSecondary} /></View>
               <Text style={s.settingText}>Valorar la App</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={s.settingItem} onPress={() => setShowSupport(true)} activeOpacity={0.7}>
+          <TouchableOpacity style={s.settingItem} onPress={() => setShowSupport(true)}>
             <View style={staticStyles.settingLabelGroup}>
-              <View style={[s.iconBox, { backgroundColor: colors.surfaceBorder }]}>
-                 <Ionicons name="help-circle-outline" size={24} color={colors.textSecondary} />
-              </View>
+              <View style={[s.iconBox, { backgroundColor: colors.surfaceBorder }]}><Ionicons name="help-circle-outline" size={24} color={colors.textSecondary} /></View>
               <Text style={s.settingText}>Ayuda y Soporte</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
-        {/* BOTONES DE SESIÓN */}
-        <View style={{ marginTop: 24, gap: 12 }}>
-          <TouchableOpacity style={s.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
-            <Ionicons name="log-out-outline" size={22} color={colors.gold} style={{ marginRight: 10 }} />
-            <Text style={s.logoutText}>Cerrar Sesión</Text>
+        {/* BOTONES DE ACCIÓN CRÍTICA */}
+        <View style={s.footerActions}>
+          <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={22} color={colors.gold} />
+            <Text style={s.logoutBtnText}>Cerrar Sesión</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[s.logoutButton, { backgroundColor: '#FFEEED', shadowColor: '#FF6B6B' }]}
-            onPress={() => setShowDeleteConfirm(true)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="trash-outline" size={22} color="#FF6B6B" style={{ marginRight: 10 }} />
-            <Text style={[s.logoutText, { color: '#FF6B6B' }]}>Eliminar Perfil</Text>
+          <TouchableOpacity style={s.deleteBtn} onPress={() => setShowDeleteConfirm(true)}>
+            <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
+            <Text style={s.deleteBtnText}>Eliminar Cuenta Permanente</Text>
           </TouchableOpacity>
         </View>
 
@@ -303,135 +224,82 @@ export default function SettingsScreen() {
       {/* MODAL DE VALORACIÓN */}
       <Modal visible={showRating} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
-          <Animated.View entering={isWeb ? undefined : ZoomIn.duration(400)} style={s.modalContent}>
-            <View style={[s.iconBox, { backgroundColor: colors.accentLight, width: 64, height: 64, borderRadius: 32, marginBottom: 20 }]}>
-               <Ionicons name="heart" size={32} color={colors.accent} />
-            </View>
+          <Animated.View entering={ZoomIn} style={s.modalContent}>
+            <View style={[s.iconBox, { backgroundColor: colors.accentLight, width: 64, height: 64, borderRadius: 32, marginBottom: 20 }]}><Ionicons name="heart" size={32} color={colors.accent} /></View>
             <Text style={s.modalTitle}>{ratingDone ? '¡Gracias!' : 'Valorar GymTrack'}</Text>
-            <Text style={s.modalSubtitle}>
-              {ratingDone ? 'Tu opinión nos ayuda a mejorar cada día.' : '¿Qué te ha parecido nuestra APP?'}
-            </Text>
-            {!ratingDone ? (
+            <Text style={s.modalSubtitle}>{ratingDone ? 'Tu opinión nos ayuda a mejorar cada día.' : '¿Qué te ha parecido nuestra APP?'}</Text>
+            {!ratingDone && (
               <View style={staticStyles.starsRow}>
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <TouchableOpacity key={s} onPress={() => setRating(s)}>
-                    <Ionicons name={rating >= s ? "star" : "star-outline"} size={40} color={colors.accent} style={{ marginHorizontal: 4 }} />
-                  </TouchableOpacity>
+                  <TouchableOpacity key={s} onPress={() => setRating(s)}><Ionicons name={rating >= s ? "star" : "star-outline"} size={40} color={colors.accent} style={{ marginHorizontal: 4 }} /></TouchableOpacity>
                 ))}
               </View>
-            ) : null}
-            <TouchableOpacity
-              style={[s.modalButton, (rating === 0 && !ratingDone) && { opacity: 0.5 }]}
-              onPress={() => {
-                if (ratingDone) { setShowRating(false); setRatingDone(false); setRating(0); }
-                else if (rating > 0) setRatingDone(true);
-              }}
-              disabled={rating === 0 && !ratingDone}
-            >
-              <Text style={s.modalButtonText}>{ratingDone ? 'Cerrar' : 'Enviar valoración'}</Text>
+            )}
+            <TouchableOpacity style={s.modalButton} onPress={() => { if (ratingDone) { setShowRating(false); setRatingDone(false); } else if (rating > 0) setRatingDone(true); }}>
+              <Text style={s.modalButtonText}>{ratingDone ? 'Cerrar' : 'Enviar'}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
 
-      {/* MODAL DE SOPORTE / FAQ */}
+      {/* MODAL DE SOPORTE RECUPERADO Y MEJORADO */}
       <Modal visible={showSupport} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
-          <Animated.View entering={isWeb ? undefined : FadeInUp.duration(400)} style={s.modalContentWide}>
+          <Animated.View entering={ZoomIn} style={s.modalContentWide}>
             <View style={staticStyles.modalHeader}>
-              <Text style={s.modalTitle}>Ayuda y Soporte</Text>
-              <TouchableOpacity onPress={() => setShowSupport(false)}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
-              </TouchableOpacity>
+                <View>
+                    <Text style={s.modalTitleSmall}>Centro de Ayuda</Text>
+                    <Text style={s.modalSubtitleSmall}>Preguntas frecuentes</Text>
+                </View>
+                <TouchableOpacity onPress={() => setShowSupport(false)} style={s.closeIcon}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
             </View>
             <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
-              {[
-                { q: '¿Cómo cambio mi peso?', a: 'En la sección "Mis Datos Físicos" pulsa en "Editar" para actualizar tus métricas.' },
-                { q: '¿Es gratuita la app?', a: '¡Por supuesto! GymTrack es un proyecto realizado para el TFC.' },
-                { q: '¿Hay más rutinas?', a: 'Estamos añadiendo nuevos entrenamientos dinámicos constantemente en la sección Descubrir.' }
-              ].map((item, i) => (
-                <TouchableOpacity key={i} style={s.faqItem} onPress={() => setExpandedFaq(expandedFaq === i ? null : i)}>
-                  <View style={staticStyles.faqHeader}>
+              {FAQ_DATA.map((item, i) => (
+                <TouchableOpacity key={i} style={s.faqItem} onPress={() => setExpandedFaq(expandedFaq === i ? null : i)} activeOpacity={0.7}>
+                  <View style={staticStyles.faqHeaderRow}>
+                    <View style={s.faqIconContainer}>
+                        <Ionicons name={item.icon as any} size={18} color={colors.accent} />
+                    </View>
                     <Text style={s.faqQuestion}>{item.q}</Text>
-                    <Ionicons name={expandedFaq === i ? "chevron-up" : "chevron-down"} size={18} color={colors.accent} />
+                    <Ionicons name={expandedFaq === i ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} />
                   </View>
-                  {expandedFaq === i && <Text style={s.faqAnswer}>{item.a}</Text>}
+                  {expandedFaq === i && <Animated.Text entering={FadeInDown} style={s.faqAnswer}>{item.a}</Animated.Text>}
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity style={[s.modalButton, { marginTop: 20 }]} onPress={() => setShowSupport(false)}>
+            <TouchableOpacity style={[s.modalButton, { marginTop: 24 }]} onPress={() => setShowSupport(false)}>
               <Text style={s.modalButtonText}>Entendido</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
 
-      {/* MODAL DE SELECCIÓN DE AVATAR */}
-      <Modal
-        visible={showAvatarModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowAvatarModal(false)}
-      >
+      {/* MODAL ELIMINAR CUENTA */}
+      <Modal visible={showDeleteConfirm} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
-          <Pressable style={staticStyles.modalDismiss} onPress={() => setShowAvatarModal(false)} />
-          <Animated.View entering={isWeb ? undefined : SlideInDown} style={s.avatarModalContent}>
-            <View style={staticStyles.modalHeader}>
-              <Text style={s.modalTitle}>Foto de Perfil</Text>
-              <TouchableOpacity onPress={() => setShowAvatarModal(false)} style={s.closeIcon}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={s.avatarGrid}>
-              {AVATARS.map((av) => (
-                <TouchableOpacity
-                  key={av.id}
-                  style={[s.avatarItem, user.avatar === av.url && s.avatarItemActive]}
-                  onPress={async () => {
-                    await updateUser({ avatar: av.url });
-                    setShowAvatarModal(false);
-                  }}
-                >
-                  <Image
-                    source={{ uri: av.url }}
-                    style={s.gridAvatarImage}
-                    contentFit="cover"
-                    transition={200}
-                  />
-                </TouchableOpacity>
-              ))}
-            </View>
+          <Animated.View entering={ZoomIn} style={s.modalContent}>
+            <View style={s.warningIcon}><Ionicons name="warning" size={32} color="#FF6B6B" /></View>
+            <Text style={s.modalTitle}>¿Estás seguro?</Text>
+            <Text style={s.modalSubtitle}>Esta acción borrará todas tus rachas e historial de forma permanente.</Text>
+            <TouchableOpacity style={s.confirmDeleteBtn} onPress={handleDeleteProfile}><Text style={s.confirmDeleteText}>Borrar definitivamente</Text></TouchableOpacity>
+            <TouchableOpacity style={s.cancelBtn} onPress={() => setShowDeleteConfirm(false)}><Text style={s.cancelBtnText}>Cancelar</Text></TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
 
-      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
-      <Modal visible={showDeleteConfirm} transparent animationType="fade">
+      {/* MODAL AVATAR */}
+      <Modal visible={showAvatarModal} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
-          <Animated.View entering={isWeb ? undefined : ZoomIn.duration(400)} style={s.modalContent}>
-            <View style={[s.iconBox, { backgroundColor: '#FFEEED', marginBottom: 20 }]}>
-              <Ionicons name="warning" size={32} color="#FF6B6B" />
-            </View>
-            <Text style={s.modalTitle}>¿Eliminar perfil?</Text>
-            <Text style={s.modalSubtitle}>
-              Esta acción borrará permanentemente todo tu progreso, rachas e historial. No podrás recuperarlo.
-            </Text>
-
-            <View style={{ width: '100%', gap: 12 }}>
-              <TouchableOpacity
-                style={[s.modalButton, { backgroundColor: '#FF6B6B' }]}
-                onPress={handleDeleteProfile}
-              >
-                <Text style={s.modalButtonText}>Sí, eliminar para siempre</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[s.modalButton, { backgroundColor: colors.surfaceBorder }]}
-                onPress={() => setShowDeleteConfirm(false)}
-              >
-                <Text style={[s.modalButtonText, { color: colors.text }]}>No, mantener perfil</Text>
-              </TouchableOpacity>
+          <Animated.View entering={SlideInDown} style={s.avatarModalContent}>
+            <View style={staticStyles.modalHeader}><Text style={s.modalTitle}>Elige tu Avatar</Text><TouchableOpacity onPress={() => setShowAvatarModal(false)}><Ionicons name="close" size={24} color={colors.text} /></TouchableOpacity></View>
+            <View style={s.avatarGrid}>
+              {AVATARS.map((av) => (
+                <TouchableOpacity key={av.id} style={s.avatarItem} onPress={async () => { await updateUser({ avatar: av.url }); setShowAvatarModal(false); }}>
+                  <Image source={{ uri: av.url }} style={s.gridAvatarImage} contentFit="cover" />
+                </TouchableOpacity>
+              ))}
             </View>
           </Animated.View>
         </View>
@@ -445,19 +313,16 @@ const staticStyles = StyleSheet.create({
   section: { marginBottom: 32 },
   settingLabelGroup: { flexDirection: 'row', alignItems: 'center' },
   statsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
-  modalDismiss: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
-  starsRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 32, marginTop: 10 },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  faqHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  starsRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20 },
+  faqHeaderRow: { flexDirection: 'row', alignItems: 'center' },
 });
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: c.background },
   container: { flex: 1, paddingHorizontal: 24 },
-  
-  // 👈 AQUÍ EL CAMBIO: marginTop a 50
   header: { marginTop: 50, marginBottom: 35 },
   overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
@@ -466,55 +331,68 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   titleLight: { fontWeight: '300', color: c.textSecondary }, 
   titleBold: { fontWeight: '900', color: c.text }, 
   titleDot: { fontWeight: '900', color: c.accent }, 
-  subtitle: { fontSize: 15, color: c.textSecondary, marginTop: 8, fontWeight: '500', lineHeight: 22 },
+  subtitle: { fontSize: 15, color: c.textSecondary, marginTop: 8, fontWeight: '500' },
 
-  profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accent, padding: 24, borderRadius: 36, marginBottom: 40, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 30, elevation: 6 },
-  avatar: { width: 78, height: 78, borderRadius: 39, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 20, position: 'relative', overflow: 'hidden' },
+  profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accent, padding: 24, borderRadius: 36, marginBottom: 40, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.15, shadowRadius: 30 },
+  avatar: { width: 74, height: 74, borderRadius: 37, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 20, overflow: 'hidden' },
   avatarImage: { width: '100%', height: '100%' },
   avatarText: { fontSize: 32, fontWeight: '800', color: c.accentDark },
-  avatarEditBadge: { position: 'absolute', bottom: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: c.background, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: c.accent, zIndex: 10 },
-  profileName: { fontSize: 22, fontWeight: '800', color: c.background },
-  profileEmail: { fontSize: 14, color: c.background, marginTop: 4, opacity: 0.9 },
+  avatarEditBadge: { position: 'absolute', bottom: 2, right: 2, width: 22, height: 22, borderRadius: 11, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center' },
+  profileName: { fontSize: 22, fontWeight: '800', color: '#FFF' },
+  profileEmail: { fontSize: 14, color: '#FFF', opacity: 0.8 },
+  streakMiniBadge: { flexDirection: 'row', alignItems: 'center', marginTop: 6, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  streakMiniText: { color: '#FFF', fontSize: 11, fontWeight: '700', marginLeft: 4 },
 
   sectionTitle: { fontSize: 13, fontWeight: '800', color: c.textSecondary, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1.5 },
-  settingItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: c.surface, padding: 20, borderRadius: 28, marginBottom: 12, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.03, shadowRadius: 20, elevation: 2 },
+  settingItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: c.surface, padding: 20, borderRadius: 28, marginBottom: 12 },
   iconBox: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
   settingText: { fontSize: 17, color: c.text, fontWeight: '600' },
-  themeBadge: { backgroundColor: c.background, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 16 },
-  themeBadgeText: { fontSize: 14, fontWeight: '700', color: c.accentDark },
+  themeBadge: { backgroundColor: c.background, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
+  themeBadgeText: { fontSize: 12, fontWeight: '700', color: c.accentDark },
 
-  logoutButton: { marginTop: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', padding: 24, borderRadius: 32, backgroundColor: c.goldLight, shadowColor: c.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.05, shadowRadius: 20 },
-  logoutText: { fontSize: 18, fontWeight: '700', color: c.gold },
+  statsContainer: { backgroundColor: c.surface, padding: 24, borderRadius: 32, marginTop: -8, marginBottom: 20 },
+  statsTitle: { fontSize: 16, fontWeight: '800', color: c.text },
+  editBadge: { backgroundColor: c.accentLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
+  editBadgeText: { fontSize: 12, fontWeight: '800', color: c.accent },
+  statBox: { backgroundColor: c.background, flex: 0.48, padding: 16, borderRadius: 20, alignItems: 'center' },
+  statLabel: { fontSize: 10, color: c.textSecondary, fontWeight: '800', textTransform: 'uppercase', marginBottom: 8, letterSpacing: 0.5 },
+  statValue: { fontSize: 20, fontWeight: '800', color: c.text },
+  statInput: { fontSize: 20, fontWeight: '800', color: c.accent, minWidth: 60, textAlign: 'center' },
 
-  statsContainer: { backgroundColor: c.surface, padding: 24, borderRadius: 36, marginTop: -12, marginBottom: 16, borderWidth: 1, borderColor: c.surfaceBorder, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 4 },
-  statsTitle: { fontSize: 16, fontWeight: '800', color: c.text, letterSpacing: -0.5 },
-  editBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accentLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
-  editBadgeText: { fontSize: 12, fontWeight: '800', color: c.accent, marginLeft: 4 },
+  selectorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  selectorItem: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 14, backgroundColor: c.background, borderWidth: 1, borderColor: c.surfaceBorder },
+  selectorItemActive: { backgroundColor: c.accent, borderColor: c.accent },
+  selectorText: { fontSize: 12, fontWeight: '700', color: c.textSecondary },
+  selectorTextActive: { color: '#FFF' },
 
-  statBox: { backgroundColor: c.background, flex: 0.48, padding: 16, borderRadius: 24, alignItems: 'center', justifyContent: 'center', minHeight: 90 },
-  statLabel: { fontSize: 11, color: c.textSecondary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 },
-  statValue: { fontSize: 22, fontWeight: '800', color: c.text },
-  statValueSmall: { fontSize: 14, fontWeight: '700', color: c.accent, textAlign: 'center' },
-  statUnit: { fontSize: 14, color: c.textMuted, fontWeight: '500' },
+  footerActions: { gap: 4, marginTop: 10 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 22, borderRadius: 28, backgroundColor: c.goldLight },
+  logoutBtnText: { marginLeft: 10, fontSize: 17, fontWeight: '800', color: c.gold },
+  deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16 },
+  deleteBtnText: { marginLeft: 8, fontSize: 14, fontWeight: '700', color: '#FF6B6B', opacity: 0.8 },
 
-  inputWrapper: { flexDirection: 'row', alignItems: 'baseline', borderBottomWidth: 2, borderBottomColor: c.accent, paddingBottom: 2 },
-  statInput: { fontSize: 24, fontWeight: '800', color: c.text, textAlign: 'center', width: 60, padding: 0 },
-
-  modalContent: { backgroundColor: c.surface, width: '100%', borderRadius: 40, padding: 32, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20 },
-  modalContentWide: { backgroundColor: c.surface, width: '100%', borderRadius: 40, padding: 32, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20 },
-  avatarModalContent: { backgroundColor: c.background, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 32, position: 'absolute', bottom: 0, minHeight: 450 },
-  modalTitle: { fontSize: 24, fontWeight: '800', color: c.text, textAlign: 'center' },
-  modalSubtitle: { fontSize: 16, color: c.textSecondary, textAlign: 'center', marginBottom: 24, lineHeight: 22 },
+  modalContent: { backgroundColor: c.surface, width: '100%', borderRadius: 40, padding: 32, alignItems: 'center' },
+  modalContentWide: { backgroundColor: c.surface, width: '92%', borderRadius: 40, padding: 28 },
+  modalTitle: { fontSize: 24, fontWeight: '800', color: c.text, marginBottom: 12, textAlign: 'center' },
+  modalTitleSmall: { fontSize: 20, fontWeight: '900', color: c.text },
+  modalSubtitle: { fontSize: 16, color: c.textSecondary, textAlign: 'center', marginBottom: 28, lineHeight: 22 },
+  modalSubtitleSmall: { fontSize: 14, color: c.textSecondary, fontWeight: '500' },
   modalButton: { backgroundColor: c.accent, width: '100%', padding: 20, borderRadius: 24, alignItems: 'center' },
   modalButtonText: { color: '#FFFFFF', fontWeight: '800', fontSize: 16 },
-  closeIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center' },
-
-  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 20 },
-  avatarItem: { width: '31%', aspectRatio: 1, backgroundColor: c.accentLight, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 12, borderWidth: 1, borderColor: c.surfaceBorder, overflow: 'hidden' },
-  avatarItemActive: { borderColor: c.accent, borderWidth: 2, backgroundColor: c.accentLight },
+  warningIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#FFEEED', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  confirmDeleteBtn: { backgroundColor: '#FF6B6B', padding: 18, borderRadius: 22, width: '100%', alignItems: 'center' },
+  confirmDeleteText: { color: '#FFF', fontWeight: '800', fontSize: 16 },
+  cancelBtn: { padding: 16, width: '100%', alignItems: 'center' },
+  cancelBtnText: { color: c.textSecondary, fontWeight: '700' },
+  
+  avatarModalContent: { backgroundColor: c.background, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 32, position: 'absolute', bottom: 0, minHeight: 450 },
+  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 10 },
+  avatarItem: { width: '31%', aspectRatio: 1, borderRadius: 20, marginBottom: 12, overflow: 'hidden' },
   gridAvatarImage: { width: '100%', height: '100%' },
-
-  faqItem: { backgroundColor: c.background, padding: 20, borderRadius: 24, marginBottom: 12 },
+  
+  faqItem: { backgroundColor: c.background, padding: 18, borderRadius: 20, marginBottom: 12, borderWidth: 1, borderColor: c.surfaceBorder },
+  faqIconContainer: { width: 32, height: 32, borderRadius: 10, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   faqQuestion: { fontSize: 15, fontWeight: '700', color: c.text, flex: 1 },
-  faqAnswer: { fontSize: 14, color: c.textSecondary, marginTop: 10, lineHeight: 20 },
+  faqAnswer: { fontSize: 14, color: c.textSecondary, marginTop: 12, lineHeight: 20, borderTopWidth: 1, borderTopColor: c.surfaceBorder, paddingTop: 12 },
+  closeIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center' },
 });
