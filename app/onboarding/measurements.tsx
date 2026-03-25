@@ -119,7 +119,7 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   
   label: { fontSize: 14, fontWeight: '800', color: c.accentDark, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1.5 },
   inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, borderRadius: 28, paddingHorizontal: 28, height: 80, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.04, shadowRadius: 20, elevation: 2 },
-  input: { flex: 1, fontSize: 32, fontWeight: '800', color: c.text },
+  input: { flex: 1, fontSize: 32, fontWeight: '800', color: c.text, padding: 0, height: '100%', outlineStyle: 'none' } as any,
   unitText: { fontSize: 20, fontWeight: '800', color: c.accent },
   
   nextButton: { flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 24, borderRadius: 32, alignItems: 'center', justifyContent: 'center', shadowColor: c.accent, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 24 },

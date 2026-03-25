@@ -1,9 +1,24 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { useUser } from '../context/UserContext';
 import { useTheme, AppColors } from '@/context/ThemeContext';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, ZoomIn, Keyframe } from 'react-native-reanimated';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Animación de caída realista
+const fallingAnimation = (delay: number) => new Keyframe({
+  0: { 
+    transform: [{ translateY: -100 }, { rotate: '0deg' }, { translateX: 0 }],
+    opacity: 0,
+  },
+  10: { opacity: 1 },
+  100: { 
+    transform: [{ translateY: SCREEN_HEIGHT + 100 }, { rotate: '720deg' }, { translateX: Math.random() * 100 - 50 }],
+    opacity: 0,
+  },
+}).delay(delay).duration(4000 + Math.random() * 2000);
 
 export default function SuccessScreen() {
   const router = useRouter();
@@ -28,27 +43,26 @@ export default function SuccessScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      {/* Sistema de Confeti Pastel */}
+      {/* Sistema de Confeti Pastel Realista */}
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        {[...Array(30)].map((_, i) => {
-          const randomX = Math.random() * 400;
-          const delay = Math.random() * 2000;
-          const duration = 3000 + Math.random() * 2000;
-          const size = 10 + Math.random() * 10;
-          const colors = ['#FFD1DC', '#B2E2F2', '#C1E1C1', '#FDFD96', '#E6E6FA'];
+        {[...Array(40)].map((_, i) => {
+          const randomX = Math.random() * SCREEN_WIDTH;
+          const size = 8 + Math.random() * 10;
+          const isCircle = i % 2 === 0;
+          const palette = ['#FFD1DC', '#B2E2F2', '#C1E1C1', '#FDFD96', '#E6E6FA', '#FFB7B2', '#B2FFD6'];
+          
           return (
             <Animated.View
               key={i}
-              entering={FadeInDown.delay(delay).duration(duration)}
+              entering={fallingAnimation(Math.random() * 1500)}
               style={{
                 position: 'absolute',
                 top: -50,
                 left: randomX,
                 width: size,
                 height: size,
-                borderRadius: size / 2,
-                backgroundColor: colors[i % colors.length],
-                opacity: 0.6,
+                borderRadius: isCircle ? size / 2 : 2,
+                backgroundColor: palette[i % palette.length],
               }}
             />
           );
