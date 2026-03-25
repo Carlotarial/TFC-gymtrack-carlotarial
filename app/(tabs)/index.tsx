@@ -6,12 +6,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { Easing, FadeInDown, FadeInRight } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeInDown,
+  FadeInRight,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming
+} from 'react-native-reanimated';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { user, updateWater, logout } = useUser();
   const { colors } = useTheme();
+
+  // 🌟 Valor para la animación táctil delicada
+  const waterScale = useSharedValue(1);
 
   const userName = user.name || 'Usuario';
   const sessionsCompleted = user.sessionsCompleted;
@@ -28,9 +40,29 @@ export default function HomeScreen() {
 
   const tip = getDailyTip();
 
+  // 🌟 AÑADIR AGUA (Clic normal) - Animación de presión hacia adentro
   const handleAddWater = () => {
+    waterScale.value = withSequence(
+      withTiming(0.95, { duration: 100, easing: Easing.out(Easing.quad) }),
+      withSpring(1, { damping: 20, stiffness: 150 })
+    );
     updateWater(Math.round((user.waterIntake + 0.25) * 100) / 100);
   };
+
+  // 🌟 RESTAR AGUA (Pulsación larga) - Animación de "pop" hacia afuera
+  const handleRemoveWater = () => {
+    if (user.waterIntake <= 0) return;
+    
+    waterScale.value = withSequence(
+      withTiming(1.08, { duration: 100, easing: Easing.out(Easing.quad) }),
+      withSpring(1, { damping: 20, stiffness: 150 })
+    );
+    updateWater(Math.round(Math.max(0, user.waterIntake - 0.25) * 100) / 100);
+  };
+
+  const animatedWaterStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: waterScale.value }]
+  }));
 
   const s = dynamicStyles(colors);
 
@@ -66,7 +98,7 @@ export default function HomeScreen() {
         </View>
       </Animated.View>
 
-      {/* Métricas Rápidas (Estilo Burbujas) - AHORA CON COLOR 🎨 */}
+      {/* Métricas Rápidas */}
       <Animated.View entering={FadeInDown.delay(100).duration(600).easing(Easing.out(Easing.exp))} style={s.metricsRow}>
         <View style={staticStyles.metricItem}>
           <Ionicons name="flame-outline" size={28} color="#FF4B4B" style={{ marginBottom: 6 }} />
@@ -80,14 +112,28 @@ export default function HomeScreen() {
           <Text style={s.metricLabel}>Energía</Text>
         </View>
         <View style={s.metricDivider} />
-        <Pressable style={staticStyles.metricItem} onPress={handleAddWater}>
-          <Ionicons name="water-outline" size={28} color="#4A90E2" style={{ marginBottom: 6 }} />
-          <Text style={s.metricValue}>{user.waterIntake.toFixed(1)}L</Text>
-          <Text style={s.metricLabel}>Beber</Text>
+        
+        {/* BOTÓN DE AGUA INTERACTIVO */}
+        <Pressable 
+          style={staticStyles.metricItem} 
+          onPress={handleAddWater}
+          onLongPress={handleRemoveWater}
+          delayLongPress={450}
+        >
+          <Animated.View style={[staticStyles.metricItem, animatedWaterStyle]}>
+            <View style={{ position: 'relative' }}>
+              <Ionicons name="water-outline" size={28} color="#4A90E2" style={{ marginBottom: 6 }} />
+              <View style={s.waterPlusBadge}>
+                <Ionicons name="add" size={10} color="#FFFFFF" />
+              </View>
+            </View>
+            <Text style={s.metricValue}>{user.waterIntake.toFixed(2)}L</Text>
+            <Text style={s.metricLabel}>Beber</Text>
+          </Animated.View>
         </Pressable>
       </Animated.View>
 
-      {/* Progreso Semanal Pastel */}
+      {/* Progreso Semanal */}
       <Animated.View entering={FadeInDown.delay(200).duration(600).easing(Easing.out(Easing.exp))} style={staticStyles.section}>
         <Text style={s.sectionTitle}>Progreso semanal</Text>
         <View style={s.card}>
@@ -109,7 +155,7 @@ export default function HomeScreen() {
         </View>
       </Animated.View>
 
-      {/* Recomendaciones inteligentes (Cards suaves) */}
+      {/* Recomendaciones inteligentes */}
       <Animated.View entering={FadeInDown.delay(300).duration(600).easing(Easing.out(Easing.exp))} style={staticStyles.section}>
         <View style={staticStyles.sectionHeaderRow}>
           <Text style={s.sectionTitle}>Siguiente sesión</Text>
@@ -118,7 +164,7 @@ export default function HomeScreen() {
           </View>
         </View>
         <View style={staticStyles.grid}>
-          {recommendations.map((rec, index) => (
+          {recommendations.map((rec) => (
             <Pressable
               key={rec.id}
               style={s.gridCard}
@@ -137,7 +183,7 @@ export default function HomeScreen() {
         </View>
       </Animated.View>
 
-      {/* Tip del día rotativo */}
+      {/* Tip del día */}
       <Animated.View entering={FadeInDown.delay(400).duration(600).easing(Easing.out(Easing.exp))} style={s.tipCard}>
         <View style={s.tipIconBox}>
            <Ionicons name="bulb-outline" size={24} color={colors.gold} />
@@ -153,7 +199,6 @@ export default function HomeScreen() {
   );
 }
 
-// Estilos estáticos
 const staticStyles = StyleSheet.create({
   metricItem: { alignItems: 'center', flex: 1 },
   section: { marginBottom: 35 },
@@ -163,7 +208,6 @@ const staticStyles = StyleSheet.create({
   tipContent: { marginLeft: 16, flex: 1 },
 });
 
-// Estilos dinámicos
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
   
@@ -184,6 +228,20 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   metricValue: { fontSize: 20, fontWeight: '800', color: c.text },
   metricLabel: { fontSize: 13, color: c.textSecondary, fontWeight: '600', marginTop: 2 },
   metricDivider: { width: 1, height: 40, backgroundColor: c.divider },
+
+  waterPlusBadge: { 
+    position: 'absolute', 
+    top: -2, 
+    right: -2, 
+    backgroundColor: '#4A90E2', 
+    width: 12, 
+    height: 12, 
+    borderRadius: 6, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    borderWidth: 1.5, 
+    borderColor: c.surface 
+  },
   
   sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
   
