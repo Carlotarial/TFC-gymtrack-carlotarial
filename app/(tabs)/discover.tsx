@@ -99,25 +99,25 @@ export default function DiscoverScreen() {
       <Animated.View entering={FadeInDown.delay(400)} style={staticStyles.section}>
         <Text style={s.sectionTitle}>Aprende la técnica</Text>
         <View style={staticStyles.grid}>
-          <Pressable 
-            style={staticStyles.gridItem} 
-            onPress={() => router.push({ pathname: '/movement', params: { id: 'e1' } } as any)}
-          >
-            <View style={s.imageBox}>
-               <Text style={{fontSize: 44}}>🏋🏻‍♂️</Text>
-            </View>
-            <Text style={s.gridTitle}>Sentadilla</Text>
-          </Pressable>
-
-          <Pressable 
-            style={staticStyles.gridItem} 
-            onPress={() => router.push({ pathname: '/movement', params: { id: 'e7' } } as any)}
-          >
-            <View style={s.imageBox}>
-               <Text style={{fontSize: 44}}>🧍🏻</Text>
-            </View>
-            <Text style={s.gridTitle}>Plancha</Text>
-          </Pressable>
+          {[
+            { id: 'e1', name: 'Sentadilla', emoji: '🏋🏻‍♂️' },
+            { id: 'e7', name: 'Plancha', emoji: '🧍🏻' },
+            { id: 'e2', name: 'Flexiones', emoji: '💪' },
+            { id: 'e3', name: 'Zancadas', emoji: '🦵' },
+            { id: 'e8', name: 'Burpee', emoji: '💥' },
+            { id: 'e5', name: 'Diamante', emoji: '💎' },
+          ].map((item) => (
+            <Pressable 
+              key={item.id}
+              style={staticStyles.gridItem} 
+              onPress={() => router.push({ pathname: '/movement', params: { id: item.id } } as any)}
+            >
+              <View style={s.imageBox}>
+                 <Text style={{fontSize: 44}}>{item.emoji}</Text>
+              </View>
+              <Text style={s.gridTitle}>{item.name}</Text>
+            </Pressable>
+          ))}
         </View>
       </Animated.View>
 
@@ -129,8 +129,8 @@ export default function DiscoverScreen() {
 const staticStyles = StyleSheet.create({
   section: { marginBottom: 40 },
   workoutInfo: { flex: 1 },
-  grid: { flexDirection: 'row', justifyContent: 'space-between' },
-  gridItem: { width: '47%', alignItems: 'center' },
+  grid: { flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap' },
+  gridItem: { width: '47%', alignItems: 'center', marginBottom: 24 },
   noResults: { alignItems: 'center', marginTop: 40, opacity: 0.7 },
 });
 
