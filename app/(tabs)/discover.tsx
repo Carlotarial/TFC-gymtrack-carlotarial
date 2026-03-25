@@ -17,11 +17,14 @@ export default function DiscoverScreen() {
   const [activeTag, setActiveTag] = useState('Todos');
   const [mode, setMode] = useState<'workouts' | 'library'>('workouts');
   const [selectedExercise, setSelectedExercise] = useState<any>(null);
+  const [selectedMuscle, setSelectedMuscle] = useState('Todos');
 
   const filteredWorkouts = filterWorkouts(search, activeTag);
-  const filteredExercises = ALL_EXERCISES.filter(e => 
-    e.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredExercises = ALL_EXERCISES.filter(e => {
+    const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
+    const matchesMuscle = selectedMuscle === 'Todos' || e.muscleGroup.toLowerCase() === selectedMuscle.toLowerCase();
+    return matchesSearch && matchesMuscle;
+  });
 
   const s = dynamicStyles(colors);
 
@@ -164,24 +167,53 @@ export default function DiscoverScreen() {
         </>
       ) : (
         /* BIBLIOTECA DE EJERCICIOS */
-        <Animated.View entering={FadeInDown.delay(150)} style={staticStyles.section}>
-          <Text style={s.sectionTitle}>Biblioteca Técnica</Text>
-          <View style={staticStyles.grid}>
-            {filteredExercises.map((exercise) => (
-              <Pressable 
-                key={exercise.id}
-                style={staticStyles.gridItem} 
-                onPress={() => setSelectedExercise(exercise)}
-              >
-                <View style={s.imageBox}>
-                   <Ionicons name={exercise.icon as any} size={40} color={colors.accent} />
+        <>
+          <Animated.View entering={FadeInDown.delay(150)} style={{ marginBottom: 32 }}>
+            <Text style={s.sectionTitle}>Filtrar por músculo</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {['Todos', 'Piernas', 'Pecho', 'Core', 'Full-body'].map((muscle) => {
+                const isActive = selectedMuscle === muscle;
+                return (
+                  <Pressable 
+                    key={muscle} 
+                    style={[s.tag, isActive && s.tagActive]}
+                    onPress={() => setSelectedMuscle(muscle)}
+                  >
+                    <Text style={[s.tagText, isActive && s.tagTextActive]}>
+                      {muscle}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.delay(200)} style={staticStyles.section}>
+            <Text style={s.sectionTitle}>Biblioteca Técnica</Text>
+            <View style={staticStyles.grid}>
+              {filteredExercises.length > 0 ? (
+                filteredExercises.map((exercise) => (
+                  <Pressable 
+                    key={exercise.id}
+                    style={staticStyles.gridItem} 
+                    onPress={() => setSelectedExercise(exercise)}
+                  >
+                    <View style={s.imageBox}>
+                       <Ionicons name={exercise.icon as any} size={40} color={colors.accent} />
+                    </View>
+                    <Text style={s.gridTitle}>{exercise.name}</Text>
+                    <Text style={s.gridSubtitle}>{exercise.muscleGroup.toUpperCase()}</Text>
+                  </Pressable>
+                ))
+              ) : (
+                <View style={[staticStyles.noResults, {width: '100%'}]}>
+                   <Text style={{fontSize: 48, marginBottom: 10}}>🔍</Text>
+                   <Text style={s.noResultsText}>No hay ejercicios de {selectedMuscle}</Text>
                 </View>
-                <Text style={s.gridTitle}>{exercise.name}</Text>
-                <Text style={s.gridSubtitle}>{exercise.muscleGroup.toUpperCase()}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </Animated.View>
+              )}
+            </View>
+          </Animated.View>
+        </>
       )}
 
       {/* Modal de Detalle de Ejercicio */}
