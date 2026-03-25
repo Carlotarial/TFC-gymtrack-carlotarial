@@ -361,7 +361,7 @@ export default function SettingsScreen() {
           <Pressable style={staticStyles.modalDismiss} onPress={() => setShowAvatarModal(false)} />
           <Animated.View entering={SlideInDown} style={s.avatarModalContent}>
             <View style={staticStyles.modalHeader}>
-              <Text style={s.modalTitle}>Símbolo de Atleta</Text>
+              <Text style={s.modalTitle}>Foto de Perfil</Text>
               <TouchableOpacity onPress={() => setShowAvatarModal(false)} style={s.closeIcon}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
