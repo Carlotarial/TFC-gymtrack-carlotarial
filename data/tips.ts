@@ -41,13 +41,9 @@ export const ALL_TIPS: Tip[] = [
 ];
 
 /**
- * Devuelve un tip diferente cada día basado en la fecha.
+ * Devuelve un tip aleatorio cada vez que se llama (recarga).
  */
 export function getDailyTip(): Tip {
-  const today = new Date();
-  const dayOfYear = Math.floor(
-    (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
-  );
-  const index = dayOfYear % ALL_TIPS.length;
-  return ALL_TIPS[index];
+  const randomIndex = Math.floor(Math.random() * ALL_TIPS.length);
+  return ALL_TIPS[randomIndex];
 }
