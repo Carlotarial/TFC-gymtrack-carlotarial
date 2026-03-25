@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp, SlideInDown, ZoomIn } from 'react-native-reanimated';
 
 const AVATARS = [
@@ -22,6 +22,8 @@ const AVATARS = [
   { id: 'schnauzer', url: 'https://i.pinimg.com/564x/67/1c/85/671c85f3129e46c6deffb6cc6b6abe99.jpg' },
   { id: 'poodle', url: 'https://i.pinimg.com/736x/ed/f1/20/edf120eade64c26bf371356174463cfd.jpg' },
 ];
+
+const isWeb = Platform.OS === 'web';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -172,7 +174,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
 
           {showStats && (
-            <Animated.View entering={FadeInDown.duration(400)} style={s.statsContainer}>
+            <Animated.View entering={isWeb ? undefined : FadeInDown.duration(400)} style={s.statsContainer}>
               <View style={staticStyles.statsHeader}>
                 <Text style={s.statsTitle}>Detalles físicos</Text>
                 <TouchableOpacity
@@ -289,7 +291,7 @@ export default function SettingsScreen() {
       {/* MODAL DE VALORACIÓN */}
       <Modal visible={showRating} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
-          <Animated.View entering={ZoomIn.duration(400)} style={s.modalContent}>
+          <Animated.View entering={isWeb ? undefined : ZoomIn.duration(400)} style={s.modalContent}>
             <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>👏</Text>
             <Text style={s.modalTitle}>{ratingDone ? '¡Gracias!' : 'Valorar GymTrack'}</Text>
             <Text style={s.modalSubtitle}>
@@ -321,7 +323,7 @@ export default function SettingsScreen() {
       {/* MODAL DE SOPORTE / FAQ */}
       <Modal visible={showSupport} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
-          <Animated.View entering={FadeInUp.duration(400)} style={s.modalContentWide}>
+          <Animated.View entering={isWeb ? undefined : FadeInUp.duration(400)} style={s.modalContentWide}>
             <View style={staticStyles.modalHeader}>
               <Text style={s.modalTitle}>Ayuda y Soporte</Text>
               <TouchableOpacity onPress={() => setShowSupport(false)}>
@@ -359,7 +361,7 @@ export default function SettingsScreen() {
       >
         <View style={staticStyles.modalOverlay}>
           <Pressable style={staticStyles.modalDismiss} onPress={() => setShowAvatarModal(false)} />
-          <Animated.View entering={SlideInDown} style={s.avatarModalContent}>
+          <Animated.View entering={isWeb ? undefined : SlideInDown} style={s.avatarModalContent}>
             <View style={staticStyles.modalHeader}>
               <Text style={s.modalTitle}>Foto de Perfil</Text>
               <TouchableOpacity onPress={() => setShowAvatarModal(false)} style={s.closeIcon}>
@@ -393,7 +395,7 @@ export default function SettingsScreen() {
       {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       <Modal visible={showDeleteConfirm} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
-          <Animated.View entering={ZoomIn.duration(400)} style={s.modalContent}>
+          <Animated.View entering={isWeb ? undefined : ZoomIn.duration(400)} style={s.modalContent}>
             <View style={[s.iconBox, { backgroundColor: '#FFEEED', marginBottom: 20 }]}>
               <Ionicons name="warning" size={32} color="#FF6B6B" />
             </View>
