@@ -22,6 +22,7 @@ export interface UserData {
   streak: number;
   waterIntake: number;
   workoutHistory: WorkoutSession[];
+  avatar?: string;
 }
 
 // Discriminated union para el estado de inicialización
@@ -57,6 +58,7 @@ const DEFAULT_USER: UserData = {
   streak: 0,
   waterIntake: 0,
   workoutHistory: [],
+  avatar: '',
 };
 
 const UserContext = createContext<UserContextType | null>(null);

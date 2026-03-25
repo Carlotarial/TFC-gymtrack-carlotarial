@@ -2,10 +2,26 @@ import { AppColors, useTheme } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Modal, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeInDown, FadeInUp, ZoomIn } from 'react-native-reanimated';
+import { Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInDown, FadeInUp, SlideInDown, ZoomIn } from 'react-native-reanimated';
+
+const AVATARS = [
+  { id: 'golden', url: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'husky', url: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'pug', url: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'corgi', url: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'beagle', url: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'frenchie', url: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'dalmatian', url: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'shiba', url: 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'labrador', url: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'border', url: 'https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'schnauzer', url: 'https://i.pinimg.com/564x/67/1c/85/671c85f3129e46c6deffb6cc6b6abe99.jpg' },
+  { id: 'poodle', url: 'https://i.pinimg.com/736x/ed/f1/20/edf120eade64c26bf371356174463cfd.jpg' },
+];
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -24,6 +40,7 @@ export default function SettingsScreen() {
   const [ratingDone, setRatingDone] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   const userName = user.name || 'Usuario GymTrack';
@@ -84,9 +101,25 @@ export default function SettingsScreen() {
 
         {/* Tarjeta de Perfil Pastoral */}
         <View style={s.profileCard}>
-          <View style={s.avatar}>
-            <Text style={s.avatarText}>{userInitial}</Text>
-          </View>
+          <TouchableOpacity
+            style={s.avatar}
+            activeOpacity={0.8}
+            onPress={() => setShowAvatarModal(true)}
+          >
+            {user.avatar ? (
+              <Image
+                source={{ uri: user.avatar }}
+                style={s.avatarImage}
+                contentFit="cover"
+                transition={200}
+              />
+            ) : (
+              <Text style={s.avatarText}>{userInitial}</Text>
+            )}
+            <View style={s.avatarEditBadge}>
+              <Ionicons name="images" size={12} color={colors.accent} />
+            </View>
+          </TouchableOpacity>
           <View style={staticStyles.profileInfo}>
             <Text style={s.profileName}>{userName}</Text>
             <Text style={s.profileEmail}>{userEmail}</Text>
@@ -241,9 +274,9 @@ export default function SettingsScreen() {
             <Text style={s.logoutText}>Cerrar Sesión</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[s.logoutButton, { backgroundColor: '#FFEEED', shadowColor: '#FF6B6B' }]} 
-            onPress={() => setShowDeleteConfirm(true)} 
+          <TouchableOpacity
+            style={[s.logoutButton, { backgroundColor: '#FFEEED', shadowColor: '#FF6B6B' }]}
+            onPress={() => setShowDeleteConfirm(true)}
             activeOpacity={0.8}
           >
             <Ionicons name="trash-outline" size={22} color="#FF6B6B" style={{ marginRight: 10 }} />
@@ -317,6 +350,46 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
+      {/* MODAL DE SELECCIÓN DE AVATAR */}
+      <Modal
+        visible={showAvatarModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAvatarModal(false)}
+      >
+        <View style={staticStyles.modalOverlay}>
+          <Pressable style={staticStyles.modalDismiss} onPress={() => setShowAvatarModal(false)} />
+          <Animated.View entering={SlideInDown} style={s.avatarModalContent}>
+            <View style={staticStyles.modalHeader}>
+              <Text style={s.modalTitle}>Símbolo de Atleta</Text>
+              <TouchableOpacity onPress={() => setShowAvatarModal(false)} style={s.closeIcon}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={s.avatarGrid}>
+              {AVATARS.map((av) => (
+                <TouchableOpacity
+                  key={av.id}
+                  style={[s.avatarItem, user.avatar === av.url && s.avatarItemActive]}
+                  onPress={async () => {
+                    await updateUser({ avatar: av.url });
+                    setShowAvatarModal(false);
+                  }}
+                >
+                  <Image
+                    source={{ uri: av.url }}
+                    style={s.gridAvatarImage}
+                    contentFit="cover"
+                    transition={200}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
+
       {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       <Modal visible={showDeleteConfirm} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
@@ -328,7 +401,7 @@ export default function SettingsScreen() {
             <Text style={s.modalSubtitle}>
               Esta acción borrará permanentemente todo tu progreso, rachas e historial. No podrás recuperarlo.
             </Text>
-            
+
             <View style={{ width: '100%', gap: 12 }}>
               <TouchableOpacity
                 style={[s.modalButton, { backgroundColor: '#FF6B6B' }]}
@@ -336,7 +409,7 @@ export default function SettingsScreen() {
               >
                 <Text style={s.modalButtonText}>Sí, eliminar para siempre</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[s.modalButton, { backgroundColor: colors.surfaceBorder }]}
                 onPress={() => setShowDeleteConfirm(false)}
@@ -359,6 +432,7 @@ const staticStyles = StyleSheet.create({
   statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalDismiss: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   starsRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 32, marginTop: 10 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   faqHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -372,8 +446,10 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
 
   profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accent, padding: 24, borderRadius: 36, marginBottom: 40, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 30, elevation: 6 },
-  avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: c.background, justifyContent: 'center', alignItems: 'center', marginRight: 20 },
-  avatarText: { fontSize: 24, fontWeight: '800', color: c.accentDark },
+  avatar: { width: 78, height: 78, borderRadius: 39, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 20, position: 'relative', overflow: 'hidden' },
+  avatarImage: { width: '100%', height: '100%' },
+  avatarText: { fontSize: 32, fontWeight: '800', color: c.accentDark },
+  avatarEditBadge: { position: 'absolute', bottom: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: c.background, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: c.accent, zIndex: 10 },
   profileName: { fontSize: 22, fontWeight: '800', color: c.background },
   profileEmail: { fontSize: 14, color: c.background, marginTop: 4, opacity: 0.9 },
 
@@ -404,10 +480,17 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   // Estilos de Modales
   modalContent: { backgroundColor: c.surface, width: '100%', borderRadius: 40, padding: 32, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20 },
   modalContentWide: { backgroundColor: c.surface, width: '100%', borderRadius: 40, padding: 32, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20 },
-  modalTitle: { fontSize: 24, fontWeight: '800', color: c.text, textAlign: 'center', marginBottom: 8 },
+  avatarModalContent: { backgroundColor: c.background, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 32, position: 'absolute', bottom: 0, minHeight: 450 },
+  modalTitle: { fontSize: 24, fontWeight: '800', color: c.text, textAlign: 'center' },
   modalSubtitle: { fontSize: 16, color: c.textSecondary, textAlign: 'center', marginBottom: 24, lineHeight: 22 },
   modalButton: { backgroundColor: c.accent, width: '100%', padding: 20, borderRadius: 24, alignItems: 'center' },
   modalButtonText: { color: '#FFFFFF', fontWeight: '800', fontSize: 16 },
+  closeIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center' },
+
+  avatarGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 20 },
+  avatarItem: { width: '31%', aspectRatio: 1, backgroundColor: c.accentLight, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 12, borderWidth: 1, borderColor: c.surfaceBorder, overflow: 'hidden' },
+  avatarItemActive: { borderColor: c.accent, borderWidth: 2, backgroundColor: c.accentLight },
+  gridAvatarImage: { width: '100%', height: '100%' },
 
   faqItem: { backgroundColor: c.background, padding: 20, borderRadius: 24, marginBottom: 12 },
   faqQuestion: { fontSize: 15, fontWeight: '700', color: c.text, flex: 1 },
