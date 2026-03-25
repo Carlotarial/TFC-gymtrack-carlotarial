@@ -31,12 +31,24 @@ export default function DiscoverScreen() {
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
       <Animated.View entering={FadeInDown.duration(400)} style={s.header}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-          <View>
-            <Text style={s.title}>Explorar 🚀</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+          <View style={{ flex: 1, paddingRight: 16 }}>
+            {/* NUEVO HEADER EDITORIAL */}
+            <View style={s.overlineContainer}>
+              <View style={s.overlineDot} />
+              <Text style={s.overlineText}>GYMTRACK DISCOVER</Text>
+            </View>
+            
+            <Text style={s.title}>
+              <Text style={s.titleLight}>Modo </Text>
+              <Text style={s.titleBold}>Explorar</Text>
+              <Text style={s.titleDot}>.</Text>
+            </Text>
+            
             <Text style={s.subtitle}>Encuentra tu próximo {mode === 'workouts' ? 'nivel' : 'movimiento'}</Text>
           </View>
-          <View style={s.modeToggle}>
+          
+          <View style={[s.modeToggle, { marginTop: 16 }]}>
              <Pressable 
                 onPress={() => setMode('workouts')}
                 style={[s.modeBtn, mode === 'workouts' && s.modeBtnActive]}
@@ -271,9 +283,17 @@ const staticStyles = StyleSheet.create({
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
-  header: { marginTop: 50, marginBottom: 32 },
-  title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
-  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
+  
+  // Nuevos estilos de la cabecera editorial
+  header: { marginTop: 50, marginBottom: 35 },
+  overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
+  overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },
+  title: { fontSize: 38, letterSpacing: -1 }, // Un poquito más pequeño para que encaje con los botones
+  titleLight: { fontWeight: '300', color: c.textSecondary }, 
+  titleBold: { fontWeight: '900', color: c.text }, 
+  titleDot: { fontWeight: '900', color: c.accent }, 
+  subtitle: { fontSize: 15, color: c.textSecondary, marginTop: 8, fontWeight: '500', lineHeight: 22 },
   
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, borderRadius: 32, paddingHorizontal: 24, height: 64, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
   searchInput: { flex: 1, fontSize: 17, color: c.text, marginLeft: 16, fontWeight: '600' },

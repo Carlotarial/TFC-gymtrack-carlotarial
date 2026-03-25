@@ -17,8 +17,19 @@ export default function ReportScreen() {
 
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
+      {/* NUEVO HEADER EDITORIAL */}
       <Animated.View entering={FadeInDown.duration(600).easing(Easing.out(Easing.exp))} style={s.header}>
-        <Text style={s.title}>Tu Progreso 📈</Text>
+        <View style={s.overlineContainer}>
+          <View style={s.overlineDot} />
+          <Text style={s.overlineText}>GYMTRACK REPORT</Text>
+        </View>
+        
+        <Text style={s.title}>
+          <Text style={s.titleLight}>Tu </Text>
+          <Text style={s.titleBold}>Progreso</Text>
+          <Text style={s.titleDot}>.</Text>
+        </Text>
+        
         <Text style={s.subtitle}>Todo esfuerzo tiene su recompensa</Text>
       </Animated.View>
 
@@ -148,9 +159,17 @@ const staticStyles = StyleSheet.create({
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
-  header: { marginTop: 50, marginBottom: 32 },
-  title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
-  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
+  
+  // Nuevos estilos de la cabecera editorial
+  header: { marginTop: 50, marginBottom: 35 },
+  overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
+  overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },
+  title: { fontSize: 40, letterSpacing: -1 },
+  titleLight: { fontWeight: '300', color: c.textSecondary }, 
+  titleBold: { fontWeight: '900', color: c.text }, 
+  titleDot: { fontWeight: '900', color: c.accent }, 
+  subtitle: { fontSize: 15, color: c.textSecondary, marginTop: 8, fontWeight: '500', lineHeight: 22 },
   
   statCard: { backgroundColor: c.surface, width: '31%', borderRadius: 28, padding: 20, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 4, alignItems: 'flex-start', minHeight: 120 },
   statLabel: { fontSize: 12, color: c.textSecondary, fontWeight: '700', marginBottom: 8, letterSpacing: 0.5 },

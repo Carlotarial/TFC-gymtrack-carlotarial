@@ -13,7 +13,7 @@ export default function HomeScreen() {
   const { user, updateWater, logout } = useUser();
   const { colors } = useTheme();
 
-  const userName = user.name || 'Usuario GymTrack';
+  const userName = user.name || 'Usuario';
   const sessionsCompleted = user.sessionsCompleted;
   const totalSessions = 4;
   const progressPercent = Math.min((sessionsCompleted / totalSessions) * 100, 100);
@@ -36,13 +36,24 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
-      {/* Cabecera */}
+      {/* Cabecera Editorial */}
       <Animated.View entering={FadeInDown.duration(600).easing(Easing.out(Easing.exp))} style={s.header}>
-        <View>
-          <Text style={s.greeting}>Hola, {userName}</Text>
+        <View style={{ flex: 1, paddingRight: 16 }}>
+          <View style={s.overlineContainer}>
+            <View style={s.overlineDot} />
+            <Text style={s.overlineText}>GYMTRACK HOME</Text>
+          </View>
+          
+          <Text style={s.title}>
+            <Text style={s.titleLight}>Hola, </Text>
+            <Text style={s.titleBold}>{userName}</Text>
+            <Text style={s.titleDot}>.</Text>
+          </Text>
+          
           <Text style={s.subtitle}>Preparados para brillar hoy.</Text>
         </View>
-        <View style={{ flexDirection: 'row' }}>
+
+        <View style={s.headerButtons}>
           <Pressable style={[s.notificationBtn, { marginRight: 12 }]} onPress={async () => {
             await logout();
             router.replace('/onboarding' as any);
@@ -155,9 +166,18 @@ const staticStyles = StyleSheet.create({
 // Estilos dinámicos
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
-  header: { marginTop: 50, marginBottom: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  greeting: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
-  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
+  
+  // Nuevos estilos de la cabecera editorial
+  header: { marginTop: 50, marginBottom: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  headerButtons: { flexDirection: 'row', marginTop: 12 }, // Baja un poco los botones para alinearlos con el texto
+  overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
+  overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },
+  title: { fontSize: 38, letterSpacing: -1 },
+  titleLight: { fontWeight: '300', color: c.textSecondary }, 
+  titleBold: { fontWeight: '900', color: c.text }, 
+  titleDot: { fontWeight: '900', color: c.accent }, 
+  subtitle: { fontSize: 15, color: c.textSecondary, marginTop: 8, fontWeight: '500', lineHeight: 22 },
   
   notificationBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center', shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 24, elevation: 4 },
   
