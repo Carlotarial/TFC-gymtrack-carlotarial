@@ -1,26 +1,53 @@
-import { useTheme } from '@/context/ThemeContext';
-import { AppColors } from '@/context/ThemeContext';
+import { AppColors, useTheme } from '@/context/ThemeContext';
+import { ALL_EXERCISES } from '@/data/exercises';
 import { CATEGORIES, filterWorkouts } from '@/data/workouts';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Dimensions, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function DiscoverScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const [search, setSearch] = useState('');
   const [activeTag, setActiveTag] = useState('Todos');
+  const [mode, setMode] = useState<'workouts' | 'library'>('workouts');
+  const [selectedExercise, setSelectedExercise] = useState<any>(null);
 
   const filteredWorkouts = filterWorkouts(search, activeTag);
+  const filteredExercises = ALL_EXERCISES.filter(e => 
+    e.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   const s = dynamicStyles(colors);
 
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
       <Animated.View entering={FadeInDown.duration(400)} style={s.header}>
-        <Text style={s.title}>Explorar 🚀</Text>
-        <Text style={s.subtitle}>Encuentra tu próximo entrenamiento</Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+          <View>
+            <Text style={s.title}>Explorar 🚀</Text>
+            <Text style={s.subtitle}>Encuentra tu próximo {mode === 'workouts' ? 'nivel' : 'movimiento'}</Text>
+          </View>
+          <View style={s.modeToggle}>
+             <Pressable 
+                onPress={() => setMode('workouts')}
+                style={[s.modeBtn, mode === 'workouts' && s.modeBtnActive]}
+             >
+                <Ionicons name="flash" size={18} color={mode === 'workouts' ? colors.buttonPrimaryText : colors.textSecondary} />
+             </Pressable>
+             <Pressable 
+                onPress={() => setMode('library')}
+                style={[s.modeBtn, mode === 'library' && s.modeBtnActive]}
+             >
+                <Ionicons name="book" size={18} color={mode === 'library' ? colors.buttonPrimaryText : colors.textSecondary} />
+             </Pressable>
+          </View>
+        </View>
       </Animated.View>
 
       {/* Buscador de píldora redonda */}
@@ -29,7 +56,7 @@ export default function DiscoverScreen() {
           <Text style={{fontSize: 20}}>🔍</Text>
           <TextInput
             style={s.searchInput}
-            placeholder="Buscar rutinas..."
+            placeholder={mode === 'workouts' ? "Buscar rutinas..." : "Buscar ejercicios..."}
             placeholderTextColor={colors.textSecondary}
             value={search}
             onChangeText={setSearch}
@@ -45,126 +72,157 @@ export default function DiscoverScreen() {
         </View>
       </Animated.View>
 
-      {/* Filtro Unificado */}
-      <Animated.View entering={FadeInDown.delay(150)} style={{ marginBottom: 32 }}>
-        <Text style={s.sectionTitle}>Explorar por</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {[
-            ...CATEGORIES.map(c => ({ id: c, type: 'tag', label: c })),
-            ...['Abdomen', 'Inferior', 'Express'].map(s => ({ id: s, type: 'search', label: s }))
-          ].map((item) => {
-            // Filtrar solo si hay resultados disponibles
-            const hasResults = filterWorkouts(item.type === 'search' ? item.id : '', item.type === 'tag' ? item.id : 'Todos').length > 0;
-            if (!hasResults && item.id !== 'Todos') return null;
+      {/* Contenido Condicional: Rutinas o Biblioteca */}
+      {mode === 'workouts' ? (
+        <>
+          {/* Filtro Unificado */}
+          <Animated.View entering={FadeInDown.delay(150)} style={{ marginBottom: 32 }}>
+            <Text style={s.sectionTitle}>Explorar por</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {[
+                ...CATEGORIES.map(c => ({ id: c, type: 'tag', label: c })),
+                ...['Abdomen', 'Inferior', 'Express'].map(s => ({ id: s, type: 'search', label: s }))
+              ].map((item) => {
+                const hasResults = filterWorkouts(item.type === 'search' ? item.id : '', item.type === 'tag' ? item.id : 'Todos').length > 0;
+                if (!hasResults && item.id !== 'Todos') return null;
 
-            const isActive = (item.type === 'tag' && activeTag === item.id) || (item.type === 'search' && search === item.id);
-            return (
+                const isActive = (item.type === 'tag' && activeTag === item.id) || (item.type === 'search' && search === item.id);
+                return (
+                  <Pressable 
+                    key={item.id} 
+                    style={[s.tag, isActive && s.tagActive]}
+                    onPress={() => {
+                      if (item.type === 'tag') {
+                        setActiveTag(item.id);
+                        setSearch('');
+                      } else {
+                        setSearch(item.id);
+                        setActiveTag('Todos');
+                      }
+                    }}
+                  >
+                    <Text style={[s.tagText, isActive && s.tagTextActive]}>
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </Animated.View>
+
+          {/* Destacado del Día (Hero) */}
+          {search.length === 0 && activeTag === 'Todos' && (
+            <Animated.View entering={FadeInDown.delay(250)} style={staticStyles.section}>
+              <Text style={s.sectionTitle}>Destacado del Día</Text>
               <Pressable 
-                key={item.id} 
-                style={[s.tag, isActive && s.tagActive]}
-                onPress={() => {
-                  if (item.type === 'tag') {
-                    setActiveTag(item.id);
-                    setSearch('');
-                  } else {
-                    setSearch(item.id);
-                    setActiveTag('Todos');
-                  }
-                }}
+                style={s.heroCard}
+                onPress={() => router.push({ pathname: '/routine', params: { id: 'w1', title: 'Abdomen de Acero' } } as any)}
               >
-                <Text style={[s.tagText, isActive && s.tagTextActive]}>
-                  {item.label}
-                </Text>
+                <View style={s.heroContent}>
+                   <View style={s.heroBadge}>
+                      <Text style={s.heroBadgeText}>🔥 RETO DE HOY</Text>
+                   </View>
+                   <Text style={s.heroTitle}>Abdomen de{"\n"}Acero</Text>
+                   <Text style={s.heroSubtitle}>15 min • Alta Intensidad</Text>
+                </View>
+                <View style={s.heroEmojiBox}>
+                   <Text style={{fontSize: 60}}>🏆</Text>
+                </View>
               </Pressable>
-            );
-          })}
-        </ScrollView>
-      </Animated.View>
+            </Animated.View>
+          )}
 
-      {/* Destacado del Día (Hero) - Solo si no hay búsqueda activa */}
-      {search.length === 0 && activeTag === 'Todos' && (
-        <Animated.View entering={FadeInDown.delay(250)} style={staticStyles.section}>
-          <Text style={s.sectionTitle}>Destacado del Día</Text>
-          <Pressable 
-            style={s.heroCard}
-            onPress={() => router.push({ pathname: '/routine', params: { id: 'w1', title: 'Abdomen de Acero' } } as any)}
-          >
-            <View style={s.heroContent}>
-               <View style={s.heroBadge}>
-                  <Text style={s.heroBadgeText}>🔥 RETO DE HOY</Text>
-               </View>
-               <Text style={s.heroTitle}>Abdomen de{"\n"}Acero</Text>
-               <Text style={s.heroSubtitle}>15 min • Alta Intensidad</Text>
-            </View>
-            <View style={s.heroEmojiBox}>
-               <Text style={{fontSize: 60}}>🏆</Text>
-            </View>
-          </Pressable>
+          {/* Lista de Resultados de Rutinas */}
+          <Animated.View entering={FadeInDown.delay(300)} style={staticStyles.section}>
+            <Text style={s.sectionTitle}>Entrenamientos para ti</Text>
+            {filteredWorkouts.length > 0 ? (
+              filteredWorkouts.map((workout, idx) => (
+                <Pressable 
+                  key={workout.id} 
+                  style={s.workoutCard}
+                  onPress={() => router.push({ pathname: '/routine', params: { id: workout.id, title: workout.title } } as any)}
+                >
+                  <View style={staticStyles.workoutInfo}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <Text style={s.workoutTitle}>{workout.title}</Text>
+                      {idx === 0 && <View style={s.trendingBadge}><Text style={s.trendingText}>🔥</Text></View>}
+                    </View>
+                    <Text style={s.workoutDetails}>{workout.duration} • {workout.intensity}</Text>
+                  </View>
+                  <View style={s.actionIcon}>
+                    <Ionicons name="chevron-forward" size={24} color={colors.accentDark} />
+                  </View>
+                </Pressable>
+              ))
+            ) : (
+              <View style={staticStyles.noResults}>
+                <Text style={{fontSize: 48, marginBottom: 10}}>👀</Text>
+                <Text style={s.noResultsText}>Sin resultados para "{search}"</Text>
+              </View>
+            )}
+          </Animated.View>
+        </>
+      ) : (
+        /* BIBLIOTECA DE EJERCICIOS */
+        <Animated.View entering={FadeInDown.delay(150)} style={staticStyles.section}>
+          <Text style={s.sectionTitle}>Biblioteca Técnica</Text>
+          <View style={staticStyles.grid}>
+            {filteredExercises.map((exercise) => (
+              <Pressable 
+                key={exercise.id}
+                style={staticStyles.gridItem} 
+                onPress={() => setSelectedExercise(exercise)}
+              >
+                <View style={s.imageBox}>
+                   <Ionicons name={exercise.icon as any} size={40} color={colors.accent} />
+                </View>
+                <Text style={s.gridTitle}>{exercise.name}</Text>
+                <Text style={s.gridSubtitle}>{exercise.muscleGroup.toUpperCase()}</Text>
+              </Pressable>
+            ))}
+          </View>
         </Animated.View>
       )}
 
-      {/* Lista de Resultados */}
-      <Animated.View entering={FadeInDown.delay(300)} style={staticStyles.section}>
-        <Text style={s.sectionTitle}>Entrenamientos para ti</Text>
-        
-        {filteredWorkouts.length > 0 ? (
-          filteredWorkouts.map((workout, idx) => (
-            <Pressable 
-              key={workout.id} 
-              style={s.workoutCard}
-              onPress={() => router.push({ 
-                pathname: '/routine', 
-                params: { id: workout.id, title: workout.title } 
-              } as any)}
-            >
-              <View style={staticStyles.workoutInfo}>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <Text style={s.workoutTitle}>{workout.title}</Text>
-                  {idx === 0 && <View style={s.trendingBadge}><Text style={s.trendingText}>🔥</Text></View>}
-                  {idx === 2 && <View style={[s.trendingBadge, {backgroundColor: colors.goldLight}]}><Text style={[s.trendingText, {color: colors.gold}]}>✨</Text></View>}
+      {/* Modal de Detalle de Ejercicio */}
+      <Modal 
+        visible={!!selectedExercise} 
+        transparent 
+        animationType="fade"
+        onRequestClose={() => setSelectedExercise(null)}
+      >
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            {selectedExercise && (
+              <>
+                <View style={s.modalHeader}>
+                  <Text style={s.modalTitle}>{selectedExercise.name}</Text>
+                  <Pressable onPress={() => setSelectedExercise(null)} style={s.modalClose}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                  </Pressable>
                 </View>
-                <Text style={s.workoutDetails}>
-                  {workout.duration} • {workout.intensity}
-                </Text>
-              </View>
-              <View style={s.actionIcon}>
-                <Ionicons name="chevron-forward" size={24} color={colors.accentDark} />
-              </View>
-            </Pressable>
-          ))
-        ) : (
-          <View style={staticStyles.noResults}>
-            <Text style={{fontSize: 48, marginBottom: 10}}>👀</Text>
-            <Text style={s.noResultsText}>Sin resultados para "{search}"</Text>
-          </View>
-        )}
-      </Animated.View>
+                
+                <View style={s.modalGifSource}>
+                   <Image 
+                      source={selectedExercise.gifSource} 
+                      style={{width: '100%', height: '100%'}} 
+                      contentFit="contain"
+                   />
+                </View>
 
-      {/* Grid de Ejercicios y Movimientos sueltos */}
-      <Animated.View entering={FadeInDown.delay(400)} style={staticStyles.section}>
-        <Text style={s.sectionTitle}>Aprende la técnica</Text>
-        <View style={staticStyles.grid}>
-          {[
-            { id: 'e1', name: 'Sentadilla', emoji: '🏋🏻‍♂️' },
-            { id: 'e7', name: 'Plancha', emoji: '🧍🏻' },
-            { id: 'e2', name: 'Flexiones', emoji: '💪' },
-            { id: 'e3', name: 'Zancadas', emoji: '🦵' },
-            { id: 'e8', name: 'Burpee', emoji: '💥' },
-            { id: 'e5', name: 'Diamante', emoji: '💎' },
-          ].map((item) => (
-            <Pressable 
-              key={item.id}
-              style={staticStyles.gridItem} 
-              onPress={() => router.push({ pathname: '/movement', params: { id: item.id } } as any)}
-            >
-              <View style={s.imageBox}>
-                 <Text style={{fontSize: 44}}>{item.emoji}</Text>
-              </View>
-              <Text style={s.gridTitle}>{item.name}</Text>
-            </Pressable>
-          ))}
+                <View style={s.modalInfo}>
+                   <View style={s.infoBadge}>
+                      <Text style={s.infoBadgeText}>{selectedExercise.muscleGroup.toUpperCase()}</Text>
+                   </View>
+                   <Text style={s.infoDescription}>
+                      {selectedExercise.description}
+                   </Text>
+                </View>
+              </>
+            )}
+          </View>
         </View>
-      </Animated.View>
+      </Modal>
 
       <View style={{ height: 40 }} />
     </ScrollView>
@@ -210,7 +268,23 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   workoutDetails: { fontSize: 14, color: c.textSecondary, fontWeight: '600', marginTop: 2 },
   actionIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center' },
   
-  imageBox: { width: '100%', height: 150, backgroundColor: c.surface, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 16, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
-  gridTitle: { fontSize: 17, fontWeight: '700', color: c.text },
+  imageBox: { width: '100%', height: 150, backgroundColor: c.surface, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 12, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4, borderWidth: 1, borderColor: c.surfaceBorder },
+  gridTitle: { fontSize: 16, fontWeight: '700', color: c.text, textAlign: 'center' },
+  gridSubtitle: { fontSize: 10, fontWeight: '800', color: c.accent, marginTop: 4, letterSpacing: 1 },
   noResultsText: { marginTop: 8, color: c.textSecondary, fontSize: 16, fontWeight: '600' },
+
+  modeToggle: { flexDirection: 'row', backgroundColor: c.surface, padding: 4, borderRadius: 20, borderWidth: 1, borderColor: c.surfaceBorder },
+  modeBtn: { width: 44, height: 44, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+  modeBtnActive: { backgroundColor: c.buttonPrimary },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalContent: { backgroundColor: c.background, borderRadius: 40, width: '100%', padding: 32, shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.2, shadowRadius: 40, elevation: 10 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+  modalTitle: { fontSize: 24, fontWeight: '800', color: c.text, letterSpacing: -1 },
+  modalClose: { width: 40, height: 40, borderRadius: 20, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center' },
+  modalGifSource: { width: '100%', height: 240, backgroundColor: c.surface, borderRadius: 32, marginBottom: 24, overflow: 'hidden' },
+  modalInfo: { backgroundColor: c.surface, padding: 24, borderRadius: 32 },
+  infoBadge: { backgroundColor: c.accentLight, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, alignSelf: 'flex-start', marginBottom: 12 },
+  infoBadgeText: { fontSize: 10, fontWeight: '800', color: c.accentDark, letterSpacing: 1 },
+  infoDescription: { fontSize: 15, color: c.textSecondary, lineHeight: 22, fontWeight: '500' },
 });
