@@ -4,12 +4,13 @@ import { getDailyTip } from '@/data/tips';
 import { getRecommendedWorkouts } from '@/data/workouts';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeInDown,
   FadeInRight,
+  FadeOut,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -22,8 +23,9 @@ export default function HomeScreen() {
   const { user, updateWater, logout } = useUser();
   const { colors } = useTheme();
 
-  // 🌟 Valor para la animación táctil delicada
+  // 🌟 Estados para animaciones y ayuda visual
   const waterScale = useSharedValue(1);
+  const [showWaterTooltip, setShowWaterTooltip] = useState(false);
 
   const userName = user.name || 'Usuario';
   const sessionsCompleted = user.sessionsCompleted;
@@ -40,19 +42,27 @@ export default function HomeScreen() {
 
   const tip = getDailyTip();
 
-  // 🌟 AÑADIR AGUA (Clic normal) - Animación de presión hacia adentro
+  // 🌟 AÑADIR AGUA (Clic) + Mostrar ayuda la primera vez
   const handleAddWater = () => {
     waterScale.value = withSequence(
       withTiming(0.95, { duration: 100, easing: Easing.out(Easing.quad) }),
       withSpring(1, { damping: 20, stiffness: 150 })
     );
+
+    // Si es su primera interacción con el agua, le enseñamos el truco
+    if (user.waterIntake === 0) {
+      setShowWaterTooltip(true);
+      setTimeout(() => setShowWaterTooltip(false), 3000);
+    }
+
     updateWater(Math.round((user.waterIntake + 0.25) * 100) / 100);
   };
 
-  // 🌟 RESTAR AGUA (Pulsación larga) - Animación de "pop" hacia afuera
+  // 🌟 RESTAR AGUA (Long Press)
   const handleRemoveWater = () => {
     if (user.waterIntake <= 0) return;
     
+    setShowWaterTooltip(false); // Si restan, ya saben cómo funciona, ocultamos ayuda
     waterScale.value = withSequence(
       withTiming(1.08, { duration: 100, easing: Easing.out(Easing.quad) }),
       withSpring(1, { damping: 20, stiffness: 150 })
@@ -113,24 +123,37 @@ export default function HomeScreen() {
         </View>
         <View style={s.metricDivider} />
         
-        {/* BOTÓN DE AGUA INTERACTIVO */}
-        <Pressable 
-          style={staticStyles.metricItem} 
-          onPress={handleAddWater}
-          onLongPress={handleRemoveWater}
-          delayLongPress={450}
-        >
-          <Animated.View style={[staticStyles.metricItem, animatedWaterStyle]}>
-            <View style={{ position: 'relative' }}>
-              <Ionicons name="water-outline" size={28} color="#4A90E2" style={{ marginBottom: 6 }} />
-              <View style={s.waterPlusBadge}>
-                <Ionicons name="add" size={10} color="#FFFFFF" />
+        {/* BOTÓN DE AGUA INTERACTIVO CON TOOLTIP */}
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          {showWaterTooltip && (
+            <Animated.View 
+              entering={FadeInDown} 
+              exiting={FadeOut}
+              style={s.waterTooltip}
+            >
+              <Text style={s.waterTooltipText}>Mantén para restar</Text>
+              <View style={s.tooltipArrow} />
+            </Animated.View>
+          )}
+
+          <Pressable 
+            style={staticStyles.metricItem} 
+            onPress={handleAddWater}
+            onLongPress={handleRemoveWater}
+            delayLongPress={450}
+          >
+            <Animated.View style={[staticStyles.metricItem, animatedWaterStyle]}>
+              <View style={{ position: 'relative' }}>
+                <Ionicons name="water-outline" size={28} color="#4A90E2" style={{ marginBottom: 6 }} />
+                <View style={s.waterPlusBadge}>
+                  <Ionicons name="add" size={10} color="#FFFFFF" />
+                </View>
               </View>
-            </View>
-            <Text style={s.metricValue}>{user.waterIntake.toFixed(2)}L</Text>
-            <Text style={s.metricLabel}>Beber</Text>
-          </Animated.View>
-        </Pressable>
+              <Text style={s.metricValue}>{user.waterIntake.toFixed(2)}L</Text>
+              <Text style={s.metricLabel}>Beber</Text>
+            </Animated.View>
+          </Pressable>
+        </View>
       </Animated.View>
 
       {/* Progreso Semanal */}
@@ -229,19 +252,12 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   metricLabel: { fontSize: 13, color: c.textSecondary, fontWeight: '600', marginTop: 2 },
   metricDivider: { width: 1, height: 40, backgroundColor: c.divider },
 
-  waterPlusBadge: { 
-    position: 'absolute', 
-    top: -2, 
-    right: -2, 
-    backgroundColor: '#4A90E2', 
-    width: 12, 
-    height: 12, 
-    borderRadius: 6, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    borderWidth: 1.5, 
-    borderColor: c.surface 
-  },
+  waterPlusBadge: { position: 'absolute', top: -2, right: -2, backgroundColor: '#4A90E2', width: 12, height: 12, borderRadius: 6, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: c.surface },
+
+  // 🌟 ESTILOS DEL TOOLTIP INTELIGENTE
+  waterTooltip: { position: 'absolute', top: -45, backgroundColor: c.accentDark, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, zIndex: 100, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
+  waterTooltipText: { color: '#FFFFFF', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.5 },
+  tooltipArrow: { position: 'absolute', bottom: -4, left: '50%', marginLeft: -4, width: 0, height: 0, borderLeftWidth: 5, borderRightWidth: 5, borderTopWidth: 5, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: c.accentDark },
   
   sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, letterSpacing: -0.5 },
   
