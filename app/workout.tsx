@@ -18,7 +18,7 @@ export default function WorkoutScreen() {
     if (!player.isLastExercise) {
       player.goToNext();
     } else {
-      router.push({ pathname: '/success', params: { seconds: timer.seconds.toString() } } as any);
+      router.push({ pathname: '/success', params: { seconds: timer.seconds.toString(), title: player.workoutTitle } } as any);
     }
   };
 

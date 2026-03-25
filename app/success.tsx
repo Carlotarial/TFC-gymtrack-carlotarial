@@ -7,23 +7,20 @@ import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 export default function SuccessScreen() {
   const router = useRouter();
-  const { seconds } = useLocalSearchParams();
-  const { user, updateUser } = useUser();
+  const { seconds, title } = useLocalSearchParams();
+  const { user, completeWorkout } = useUser();
   const { colors } = useTheme();
   const hasRecorded = useRef(false);
 
   const elapsedSeconds = parseInt(seconds as string, 10) || 0;
+  const workoutTitle = (title as string) || 'Entrenamiento';
   const minutes = Math.floor(elapsedSeconds / 60);
   const kcal = Math.round((elapsedSeconds / 60) * 7) || 320; 
 
   useEffect(() => {
     if (!hasRecorded.current) {
       hasRecorded.current = true;
-      updateUser({
-        sessionsCompleted: (user.sessionsCompleted || 0) + 1,
-        kcalBurned: (user.kcalBurned || 0) + kcal,
-        streak: (user.streak || 0) + 1
-      });
+      completeWorkout(workoutTitle, elapsedSeconds, kcal);
     }
   }, []);
 

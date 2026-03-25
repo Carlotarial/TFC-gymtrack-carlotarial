@@ -39,5 +39,6 @@ export function useWorkoutPlayer(workoutId: string) {
     goToNext,
     onLoadStart,
     onLoadEnd,
+    workoutTitle: workout.title,
   };
 }

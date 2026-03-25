@@ -1,8 +1,7 @@
 import { useTheme, AppColors } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { formatRelativeDate, useWeeklyStats } from '@/hooks/useWeeklyStats';
-import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, FadeInDown } from 'react-native-reanimated';
 
 export default function ReportScreen() {
@@ -14,7 +13,6 @@ export default function ReportScreen() {
     user.workoutHistory.reduce((acc, s) => acc + s.durationSecs, 0) / 60
   );
 
-  const screenWidth = Dimensions.get('window').width;
   const s = dynamicStyles(colors);
 
   return (
@@ -49,39 +47,49 @@ export default function ReportScreen() {
         </View>
       </Animated.View>
 
-      {/* Gráfica Real Semanal */}
+      {/* Gráfica Premium Semanal */}
       <Animated.View entering={FadeInDown.delay(200)} style={staticStyles.section}>
         <Text style={s.sectionTitle}>Semana Dinámica</Text>
         <View style={s.chartCard}>
           {weekly.totalKcal > 0 ? (
-            <BarChart
-              data={{
-                labels: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
-                datasets: [{ data: weekly.dailyKcal }],
-              }}
-              width={screenWidth - 80}
-              height={220}
-              yAxisLabel=""
-              yAxisSuffix=""
-              chartConfig={{
-                backgroundColor: colors.surface,
-                backgroundGradientFrom: colors.surface,
-                backgroundGradientTo: colors.surface,
-                decimalPlaces: 0,
-                color: (opacity = 1) => isDark ? `rgba(196, 181, 253, ${opacity})` : `rgba(167, 139, 250, ${opacity})`,
-                labelColor: (opacity = 1) => colors.textSecondary,
-                style: { borderRadius: 24 },
-                barPercentage: 0.6,
-                propsForBackgroundLines: { strokeDasharray: '', stroke: colors.surfaceBorder, strokeWidth: 1 }
-              }}
-              style={{
-                marginVertical: 8,
-                borderRadius: 24,
-                marginLeft: -10,
-              }}
-              showValuesOnTopOfBars
-              fromZero
-            />
+            <View style={staticStyles.chartContainer}>
+              <View style={staticStyles.barsRow}>
+                {weekly.dailyKcal.map((kcal, index) => {
+                  const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+                  const isToday = (new Date().getDay() || 7) - 1 === index;
+                  const maxHeight = 160;
+                  const barHeight = Math.max((kcal / Math.max(...weekly.dailyKcal, 1)) * maxHeight, 6);
+                  
+                  return (
+                    <View key={index} style={staticStyles.barColumn}>
+                      {kcal > 0 && (
+                        <Text style={s.barValue}>{kcal}</Text>
+                      )}
+                      <View style={staticStyles.barTrack}>
+                        <Animated.View 
+                          entering={FadeInDown.delay(index * 100).duration(800)}
+                          style={[
+                            s.barFill, 
+                            { 
+                              height: barHeight, 
+                              backgroundColor: isToday ? colors.accent : colors.accentLight,
+                              borderTopLeftRadius: 12,
+                              borderTopRightRadius: 12,
+                              borderBottomLeftRadius: 4,
+                              borderBottomRightRadius: 4,
+                            }
+                          ]} 
+                        />
+                      </View>
+                      <Text style={[s.chartLabel, isToday && s.chartLabelToday]}>{days[index]}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+              <View style={s.chartFooter}>
+                <Text style={s.chartTotalText}>Total semanal: <Text style={{fontWeight: '800', color: colors.accent}}>{weekly.totalKcal} kcal</Text></Text>
+              </View>
+            </View>
           ) : (
             <View style={staticStyles.emptyChart}>
               <Text style={{fontSize: 40}}>📊</Text>
@@ -131,6 +139,11 @@ const staticStyles = StyleSheet.create({
   emptyChart: { alignItems: 'center', paddingVertical: 32 },
   historyItem: { flexDirection: 'row', paddingVertical: 20, alignItems: 'center' },
   historyInfo: { flex: 1 },
+  // Estilos del chart
+  chartContainer: { paddingTop: 10 },
+  barsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 180, paddingHorizontal: 4 },
+  barColumn: { alignItems: 'center', flex: 1 },
+  barTrack: { backgroundColor: 'rgba(0,0,0,0.03)', width: 24, height: 160, borderRadius: 12, justifyContent: 'flex-end', overflow: 'hidden' },
 });
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
@@ -146,8 +159,15 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   
   sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, marginBottom: 16, letterSpacing: -0.5 },
   
-  chartCard: { backgroundColor: c.surface, borderRadius: 36, paddingVertical: 24, paddingHorizontal: 16, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
+  chartCard: { backgroundColor: c.surface, borderRadius: 36, padding: 24, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
   emptyText: { fontSize: 15, color: c.textSecondary, textAlign: 'center', marginTop: 16, lineHeight: 22, fontWeight: '500' },
+  
+  barFill: { width: '100%', minHeight: 4 },
+  barValue: { fontSize: 10, fontWeight: '800', color: c.textSecondary, marginBottom: 4 },
+  chartLabel: { fontSize: 13, color: c.textMuted, fontWeight: '700', marginTop: 12 },
+  chartLabelToday: { color: c.accent, fontWeight: '900' },
+  chartFooter: { marginTop: 24, borderTopWidth: 1, borderTopColor: c.surfaceBorder, paddingTop: 16, alignItems: 'center' },
+  chartTotalText: { fontSize: 15, color: c.textSecondary, fontWeight: '600' },
   
   historyCard: { backgroundColor: c.surface, borderRadius: 36, paddingHorizontal: 24, paddingVertical: 8, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
   historyTitle: { fontSize: 16, fontWeight: '700', color: c.text },
