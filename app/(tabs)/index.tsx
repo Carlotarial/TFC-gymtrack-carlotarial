@@ -267,7 +267,7 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   waterTooltipText: { color: '#FFFFFF', fontSize: 9, fontWeight: '900', textTransform: 'uppercase' },
   tooltipArrow: { position: 'absolute', bottom: -4, left: '50%', marginLeft: -4, width: 0, height: 0, borderTopWidth: 5, borderLeftWidth: 5, borderRightWidth: 5, borderTopColor: c.accentDark, borderLeftColor: 'transparent', borderRightColor: 'transparent' },
 
-  sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, letterSpacing: -0.5, marginBottom: 20 },
+  sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, letterSpacing: -0.5, marginBottom: 10 },
   goalBadge: { backgroundColor: c.accentLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   goalBadgeText: { fontSize: 12, fontWeight: '800', color: c.accent, textTransform: 'uppercase' },
   card: { backgroundColor: c.surface, borderRadius: 32, padding: 28, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
