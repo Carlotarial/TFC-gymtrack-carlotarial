@@ -16,7 +16,7 @@ export type MuscleGroup = 'piernas' | 'pecho' | 'core' | 'espalda' | 'full-body'
 const getGifUrl = (id: string) => `https://raw.githubusercontent.com/omercotkd/exercises-gifs/main/assets/${id}.gif`;
 
 export const ALL_EXERCISES: Exercise[] = [
-  { id: 'e1', name: 'Sentadilla Goblet', reps: '12 Repeticiones', sets: '4 x 12', icon: 'fitness-outline', gifSource: getGifUrl('0450'), muscleGroup: 'piernas' },
+  { id: 'e1', name: 'Sentadilla Goblet', reps: '12 Repeticiones', sets: '4 x 12', icon: 'fitness-outline', gifSource: require('../assets/images/exercises/sentadillagoblet.gif'), muscleGroup: 'piernas' },
   { id: 'e2', name: 'Flexiones Clásicas', reps: '10 Repeticiones', sets: '3 x 15', icon: 'body-outline', gifSource: getGifUrl('0662'), muscleGroup: 'pecho' },
   { id: 'e3', name: 'Zancadas Alternas', reps: '20 Repeticiones', sets: '3 x 20', icon: 'walk-outline', gifSource: require('../assets/images/exercises/zancadasalternas.gif'), muscleGroup: 'piernas' },
   { id: 'e4', name: 'Sentadilla Isométrica', reps: '1 min', sets: '3 x 1m', icon: 'timer-outline', gifSource: getGifUrl('2316'), muscleGroup: 'piernas' },
