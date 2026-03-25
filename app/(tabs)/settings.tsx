@@ -12,9 +12,15 @@ const AVATARS = [
   { id: 'golden', url: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'husky', url: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'pug', url: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'corgi', url: 'https://images.unsplash.com/photo-1583511655827-05700d52f4d9?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'beagle', url: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'frenchie', url: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'dalmatian', url: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'shiba', url: 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'labrador', url: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'border', url: 'https://images.unsplash.com/photo-1503256207526-0d5d80fa2f47?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'schnauzer', url: 'https://i.pinimg.com/564x/67/1c/85/671c85f3129e46c6deffb6cc6b6abe99.jpg' },
+  { id: 'poodle', url: 'https://i.pinimg.com/736x/ed/f1/20/edf120eade64c26bf371356174463cfd.jpg' },
 ];
 
 const GOALS = [
@@ -33,8 +39,7 @@ const FAQ_DATA = [
   { q: '¿Cómo cambio mi peso o altura?', a: 'Dentro de tu perfil, despliega "Ajustes de Entrenamiento" y pulsa el botón de "Editar" en la esquina superior derecha.', icon: 'body-outline' },
   { q: '¿Cómo funcionan las rachas?', a: 'Tu racha aumenta cada día que completas al menos un entrenamiento. ¡No pierdas el ritmo!', icon: 'flash-outline' },
   { q: '¿Puedo usar la app sin conexión?', a: 'GymTrack requiere conexión para sincronizar tu perfil, pero las rutinas cargadas pueden visualizarse temporalmente.', icon: 'wifi-outline' },
-  { q: '¿Cómo restablezco mi progreso?', a: 'Actualmente no hay un botón de reset, pero puedes eliminar tu perfil y crear uno nuevo desde cero.', icon: 'refresh-outline' },
-  { q: '¿Quién ha desarrollado la app?', a: 'Esta aplicación es un proyecto exclusivo desarrollado para el TFC como muestra de diseño y desarrollo en React Native.', icon: 'code-slash-outline' },
+  { q: '¿Quién ha desarrollado la app?', a: 'Esta aplicación es un proyecto exclusivo desarrollado para el TFC.', icon: 'code-slash-outline' },
 ];
 
 const isWeb = Platform.OS === 'web';
@@ -74,6 +79,16 @@ export default function SettingsScreen() {
     setMode(nextMode);
   };
 
+  const getThemeLabel = () => {
+    if (mode === 'system') return 'Sistema';
+    return mode === 'dark' ? 'Oscuro' : 'Claro';
+  };
+
+  const getThemeIcon = () => {
+    if (mode === 'system') return 'settings-outline';
+    return mode === 'dark' ? 'moon-outline' : 'sunny-outline';
+  };
+
   const handleSaveStats = async () => {
     await updateUser({ weight: tempWeight, height: tempHeight });
     setIsEditing(false);
@@ -98,12 +113,25 @@ export default function SettingsScreen() {
           <Text style={s.subtitle}>Gestiona tus preferencias y datos físicos</Text>
         </View>
 
-        {/* Tarjeta de Perfil */}
+        {/* Tarjeta de Perfil Corregida (Sin recorte en el badge) */}
         <View style={s.profileCard}>
-          <TouchableOpacity style={s.avatar} activeOpacity={0.8} onPress={() => setShowAvatarModal(true)}>
-            {user.avatar ? <Image source={{ uri: user.avatar }} style={s.avatarImage} contentFit="cover" /> : <Text style={s.avatarText}>{userInitial}</Text>}
-            <View style={s.avatarEditBadge}><Ionicons name="images" size={12} color={colors.accent} /></View>
+          <TouchableOpacity 
+            style={s.avatarContainer} 
+            activeOpacity={0.8} 
+            onPress={() => setShowAvatarModal(true)}
+          >
+            <View style={s.avatarImageWrapper}>
+              {user.avatar ? (
+                <Image source={{ uri: user.avatar }} style={s.avatarImage} contentFit="cover" transition={200} />
+              ) : (
+                <Text style={s.avatarText}>{userInitial}</Text>
+              )}
+            </View>
+            <View style={s.avatarEditBadge}>
+              <Ionicons name="camera" size={12} color={colors.accent} />
+            </View>
           </TouchableOpacity>
+
           <View style={staticStyles.profileInfo}>
             <Text style={s.profileName}>{userName}</Text>
             <Text style={s.profileEmail}>{userEmail}</Text>
@@ -120,11 +148,11 @@ export default function SettingsScreen() {
           <TouchableOpacity style={s.settingItem} onPress={handleThemeToggle}>
             <View style={staticStyles.settingLabelGroup}>
               <View style={[s.iconBox, { backgroundColor: colors.accentLight }]}>
-                <Ionicons name={mode === 'dark' ? 'moon-outline' : 'sunny-outline'} size={22} color={colors.accentDark} />
+                <Ionicons name={getThemeIcon()} size={22} color={colors.accentDark} />
               </View>
               <Text style={s.settingText}>Modo Visual</Text>
             </View>
-            <View style={s.themeBadge}><Text style={s.themeBadgeText}>{mode === 'dark' ? 'Oscuro' : 'Claro'}</Text></View>
+            <View style={s.themeBadge}><Text style={s.themeBadgeText}>{getThemeLabel()}</Text></View>
           </TouchableOpacity>
 
           <View style={s.settingItem}>
@@ -134,7 +162,12 @@ export default function SettingsScreen() {
               </View>
               <Text style={s.settingText}>Notificaciones</Text>
             </View>
-            <Switch value={notificationsEnabled} onValueChange={(val) => { toggleNotifications(val); }} trackColor={{ false: colors.barInactive, true: colors.accent }} thumbColor="#FFF" />
+            <Switch 
+              value={notificationsEnabled} 
+              onValueChange={(val) => { toggleNotifications(val); }} 
+              trackColor={{ false: colors.barInactive, true: colors.accent }} 
+              thumbColor="#FFF" 
+            />
           </View>
 
           <TouchableOpacity style={s.settingItem} onPress={() => setShowStats(!showStats)}>
@@ -158,11 +191,29 @@ export default function SettingsScreen() {
               <View style={staticStyles.statsRow}>
                 <View style={s.statBox}>
                   <Text style={s.statLabel}>Peso</Text>
-                  {isEditing ? <TextInput style={s.statInput} value={tempWeight} onChangeText={setTempWeight} keyboardType="numeric" /> : <Text style={s.statValue}>{user.weight}kg</Text>}
+                  {isEditing ? (
+                    <TextInput 
+                      style={s.statInput} 
+                      value={tempWeight} 
+                      onChangeText={setTempWeight} 
+                      keyboardType="numeric" 
+                      maxLength={3}
+                      placeholderTextColor={colors.textMuted}
+                    />
+                  ) : <Text style={s.statValue}>{user.weight}kg</Text>}
                 </View>
                 <View style={s.statBox}>
                   <Text style={s.statLabel}>Altura</Text>
-                  {isEditing ? <TextInput style={s.statInput} value={tempHeight} onChangeText={setTempHeight} keyboardType="numeric" /> : <Text style={s.statValue}>{user.height}cm</Text>}
+                  {isEditing ? (
+                    <TextInput 
+                      style={s.statInput} 
+                      value={tempHeight} 
+                      onChangeText={setTempHeight} 
+                      keyboardType="numeric" 
+                      maxLength={3}
+                      placeholderTextColor={colors.textMuted}
+                    />
+                  ) : <Text style={s.statValue}>{user.height}cm</Text>}
                 </View>
               </View>
               <View style={{ marginTop: 20 }}>
@@ -207,7 +258,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* BOTONES DE ACCIÓN CRÍTICA */}
+        {/* ACCIONES FINALES */}
         <View style={s.footerActions}>
           <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={22} color={colors.gold} />
@@ -218,10 +269,9 @@ export default function SettingsScreen() {
             <Text style={s.deleteBtnText}>Eliminar Cuenta Permanente</Text>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
 
-      {/* MODAL DE VALORACIÓN */}
+      {/* MODAL VALORACIÓN */}
       <Modal visible={showRating} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
           <Animated.View entering={ZoomIn} style={s.modalContent}>
@@ -230,8 +280,8 @@ export default function SettingsScreen() {
             <Text style={s.modalSubtitle}>{ratingDone ? 'Tu opinión nos ayuda a mejorar cada día.' : '¿Qué te ha parecido nuestra APP?'}</Text>
             {!ratingDone && (
               <View style={staticStyles.starsRow}>
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <TouchableOpacity key={s} onPress={() => setRating(s)}><Ionicons name={rating >= s ? "star" : "star-outline"} size={40} color={colors.accent} style={{ marginHorizontal: 4 }} /></TouchableOpacity>
+                {[1, 2, 3, 4, 5].map((st) => (
+                  <TouchableOpacity key={st} onPress={() => setRating(st)}><Ionicons name={rating >= st ? "star" : "star-outline"} size={40} color={colors.accent} style={{ marginHorizontal: 4 }} /></TouchableOpacity>
                 ))}
               </View>
             )}
@@ -242,7 +292,7 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
-      {/* MODAL DE SOPORTE RECUPERADO Y MEJORADO */}
+      {/* MODAL SOPORTE */}
       <Modal visible={showSupport} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
           <Animated.View entering={ZoomIn} style={s.modalContentWide}>
@@ -269,22 +319,23 @@ export default function SettingsScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity style={[s.modalButton, { marginTop: 24 }]} onPress={() => setShowSupport(false)}>
-              <Text style={s.modalButtonText}>Entendido</Text>
-            </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
 
-      {/* MODAL ELIMINAR CUENTA */}
+      {/* MODAL CONFIRMACIÓN ELIMINACIÓN */}
       <Modal visible={showDeleteConfirm} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
           <Animated.View entering={ZoomIn} style={s.modalContent}>
             <View style={s.warningIcon}><Ionicons name="warning" size={32} color="#FF6B6B" /></View>
-            <Text style={s.modalTitle}>¿Estás seguro?</Text>
+            <Text style={s.modalTitle}>¿Seguro?</Text>
             <Text style={s.modalSubtitle}>Esta acción borrará todas tus rachas e historial de forma permanente.</Text>
-            <TouchableOpacity style={s.confirmDeleteBtn} onPress={handleDeleteProfile}><Text style={s.confirmDeleteText}>Borrar definitivamente</Text></TouchableOpacity>
-            <TouchableOpacity style={s.cancelBtn} onPress={() => setShowDeleteConfirm(false)}><Text style={s.cancelBtnText}>Cancelar</Text></TouchableOpacity>
+            <TouchableOpacity style={s.confirmDeleteBtn} onPress={handleDeleteProfile}>
+                <Text style={s.confirmDeleteText}>Borrar definitivamente</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={s.cancelBtn} onPress={() => setShowDeleteConfirm(false)}>
+                <Text style={s.cancelBtnText}>Cancelar</Text>
+            </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
@@ -333,11 +384,29 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   titleDot: { fontWeight: '900', color: c.accent }, 
   subtitle: { fontSize: 15, color: c.textSecondary, marginTop: 8, fontWeight: '500' },
 
-  profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accent, padding: 24, borderRadius: 36, marginBottom: 40, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.15, shadowRadius: 30 },
-  avatar: { width: 74, height: 74, borderRadius: 37, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 20, overflow: 'hidden' },
+  profileCard: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: c.accent, 
+    padding: 24, 
+    borderRadius: 36, 
+    marginBottom: 40,
+    shadowColor: c.accentDark,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 30
+  },
+  
+  // 🌟 CONTENEDOR AVATAR FIX (Para que el badge no se corte)
+  avatarContainer: { position: 'relative', marginRight: 20, width: 74, height: 74 },
+  avatarImageWrapper: { width: 74, height: 74, borderRadius: 37, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
   avatarImage: { width: '100%', height: '100%' },
   avatarText: { fontSize: 32, fontWeight: '800', color: c.accentDark },
-  avatarEditBadge: { position: 'absolute', bottom: 2, right: 2, width: 22, height: 22, borderRadius: 11, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center' },
+  avatarEditBadge: { 
+    position: 'absolute', bottom: -2, right: -2, width: 26, height: 26, borderRadius: 13, backgroundColor: '#FFF', 
+    justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4, zIndex: 20 
+  },
+
   profileName: { fontSize: 22, fontWeight: '800', color: '#FFF' },
   profileEmail: { fontSize: 14, color: '#FFF', opacity: 0.8 },
   streakMiniBadge: { flexDirection: 'row', alignItems: 'center', marginTop: 6, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
@@ -357,7 +426,10 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   statBox: { backgroundColor: c.background, flex: 0.48, padding: 16, borderRadius: 20, alignItems: 'center' },
   statLabel: { fontSize: 10, color: c.textSecondary, fontWeight: '800', textTransform: 'uppercase', marginBottom: 8, letterSpacing: 0.5 },
   statValue: { fontSize: 20, fontWeight: '800', color: c.text },
-  statInput: { fontSize: 20, fontWeight: '800', color: c.accent, minWidth: 60, textAlign: 'center' },
+  statInput: { 
+    fontSize: 20, fontWeight: '800', color: c.accent, minWidth: 60, textAlign: 'center',
+    ...Platform.select({ web: { outlineStyle: 'none' } as any })
+  },
 
   selectorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
   selectorItem: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 14, backgroundColor: c.background, borderWidth: 1, borderColor: c.surfaceBorder },
