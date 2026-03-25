@@ -39,7 +39,7 @@ export default function HomeScreen() {
       {/* Cabecera */}
       <Animated.View entering={FadeInDown.duration(600).easing(Easing.out(Easing.exp))} style={s.header}>
         <View>
-          <Text style={s.greeting}>Hola, {userName} ✨</Text>
+          <Text style={s.greeting}>Hola, {userName} 👋</Text>
           <Text style={s.subtitle}>Preparados para brillar hoy.</Text>
         </View>
         <Pressable style={s.notificationBtn}>
@@ -106,7 +106,7 @@ export default function HomeScreen() {
               onPress={() => router.push({ pathname: '/routine', params: { id: rec.id, title: rec.title } } as any)}
             >
               <View style={s.recommendedBadge}>
-                <Text style={s.recommendedBadgeText}>✨ Para ti</Text>
+                <Text style={s.recommendedBadgeText}>🎯 Para ti</Text>
               </View>
               <View style={[s.cardIconBox]}>
                 <Ionicons name={rec.icon as any} size={28} color={colors.accentDark} />
@@ -147,7 +147,7 @@ const staticStyles = StyleSheet.create({
 // Estilos dinámicos
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
-  header: { marginTop: 80, marginBottom: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  header: { marginTop: 50, marginBottom: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   greeting: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
   subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
   

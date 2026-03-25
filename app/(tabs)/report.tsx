@@ -148,7 +148,7 @@ const staticStyles = StyleSheet.create({
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
-  header: { marginTop: 80, marginBottom: 32 },
+  header: { marginTop: 50, marginBottom: 32 },
   title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
   subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
   

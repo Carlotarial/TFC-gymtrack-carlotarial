@@ -239,7 +239,7 @@ export default function SettingsScreen() {
       <Modal visible={showRating} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
           <Animated.View entering={ZoomIn.duration(400)} style={s.modalContent}>
-            <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>✨</Text>
+            <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>👏</Text>
             <Text style={s.modalTitle}>{ratingDone ? '¡Gracias!' : 'Valorar GymTrack'}</Text>
             <Text style={s.modalSubtitle}>
               {ratingDone ? 'Tu opinión nos ayuda a mejorar cada día.' : '¿Qué te ha parecido nuestra APP?'}
@@ -318,7 +318,7 @@ const staticStyles = StyleSheet.create({
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: c.background },
   container: { flex: 1, paddingHorizontal: 24 },
-  header: { marginTop: 40, marginBottom: 32 },
+  header: { marginTop: 15, marginBottom: 32 },
   title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
   subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
 
