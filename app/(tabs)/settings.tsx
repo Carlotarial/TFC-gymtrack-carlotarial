@@ -45,7 +45,7 @@ export default function SettingsScreen() {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
-  const userName = user.name || 'Usuario GymTrack';
+  const userName = user.name || 'Usuario';
 
   const { userInitial, userEmail } = useMemo(() => {
     const initial = userName.charAt(0).toUpperCase();
@@ -85,10 +85,10 @@ export default function SettingsScreen() {
     return 'Claro';
   };
 
-  const getThemeEmoji = () => {
-    if (mode === 'system') return '⚙️';
-    if (mode === 'dark') return '🌙';
-    return '☀️';
+  const getThemeIcon = () => {
+    if (mode === 'system') return 'settings-outline';
+    if (mode === 'dark') return 'moon-outline';
+    return 'sunny-outline';
   };
 
   const s = dynamicStyles(colors);
@@ -96,9 +96,21 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={s.safeArea}>
       <ScrollView style={s.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        
+        {/* NUEVO HEADER EDITORIAL */}
         <View style={s.header}>
-          <Text style={s.title}>Tu Perfil 👩🏻‍💻</Text>
-          <Text style={s.subtitle}>Configura el entorno de GymTrack</Text>
+          <View style={s.overlineContainer}>
+            <View style={s.overlineDot} />
+            <Text style={s.overlineText}>GYMTRACK SETTINGS</Text>
+          </View>
+          
+          <Text style={s.title}>
+            <Text style={s.titleLight}>Tu </Text>
+            <Text style={s.titleBold}>Perfil</Text>
+            <Text style={s.titleDot}>.</Text>
+          </Text>
+          
+          <Text style={s.subtitle}>Gestiona tus preferencias y datos físicos</Text>
         </View>
 
         {/* Tarjeta de Perfil Pastoral */}
@@ -135,7 +147,7 @@ export default function SettingsScreen() {
           <TouchableOpacity style={s.settingItem} onPress={handleThemeToggle} activeOpacity={0.7}>
             <View style={staticStyles.settingLabelGroup}>
               <View style={[s.iconBox, { backgroundColor: colors.accentLight }]}>
-                <Text style={{ fontSize: 20 }}>{getThemeEmoji()}</Text>
+                <Ionicons name={getThemeIcon()} size={22} color={colors.accentDark} />
               </View>
               <Text style={s.settingText}>Modo Visual</Text>
             </View>
@@ -147,7 +159,7 @@ export default function SettingsScreen() {
           <View style={s.settingItem}>
             <View style={staticStyles.settingLabelGroup}>
               <View style={[s.iconBox, { backgroundColor: colors.goldLight }]}>
-                <Text style={{ fontSize: 20 }}>🔔</Text>
+                <Ionicons name="notifications-outline" size={22} color={colors.gold} />
               </View>
               <Text style={s.settingText}>Recordatorios</Text>
             </View>
@@ -166,11 +178,11 @@ export default function SettingsScreen() {
           >
             <View style={staticStyles.settingLabelGroup}>
               <View style={[s.iconBox, { backgroundColor: colors.surfaceBorder }]}>
-                <Text style={{ fontSize: 20 }}>📏</Text>
+                 <Ionicons name="body-outline" size={22} color={colors.textSecondary} />
               </View>
               <Text style={s.settingText}>Mis Datos Físicos</Text>
             </View>
-            <Text style={{ fontSize: 16, color: colors.textSecondary }}>{showStats ? '⌄' : '›'}</Text>
+            <Ionicons name={showStats ? "chevron-down" : "chevron-forward"} size={20} color={colors.textMuted} />
           </TouchableOpacity>
 
           {showStats && (
@@ -251,21 +263,21 @@ export default function SettingsScreen() {
           <TouchableOpacity style={s.settingItem} onPress={() => setShowRating(true)} activeOpacity={0.7}>
             <View style={staticStyles.settingLabelGroup}>
               <View style={[s.iconBox, { backgroundColor: colors.surfaceBorder }]}>
-                <Text style={{ fontSize: 20 }}>⭐</Text>
+                <Ionicons name="star-outline" size={22} color={colors.textSecondary} />
               </View>
               <Text style={s.settingText}>Valorar la App</Text>
             </View>
-            <Text style={{ fontSize: 16, color: colors.textSecondary }}>›</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
 
           <TouchableOpacity style={s.settingItem} onPress={() => setShowSupport(true)} activeOpacity={0.7}>
             <View style={staticStyles.settingLabelGroup}>
               <View style={[s.iconBox, { backgroundColor: colors.surfaceBorder }]}>
-                <Text style={{ fontSize: 20 }}>🎧</Text>
+                 <Ionicons name="help-circle-outline" size={24} color={colors.textSecondary} />
               </View>
               <Text style={s.settingText}>Ayuda y Soporte</Text>
             </View>
-            <Text style={{ fontSize: 16, color: colors.textSecondary }}>›</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -292,7 +304,9 @@ export default function SettingsScreen() {
       <Modal visible={showRating} transparent animationType="fade">
         <View style={staticStyles.modalOverlay}>
           <Animated.View entering={isWeb ? undefined : ZoomIn.duration(400)} style={s.modalContent}>
-            <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>👏</Text>
+            <View style={[s.iconBox, { backgroundColor: colors.accentLight, width: 64, height: 64, borderRadius: 32, marginBottom: 20 }]}>
+               <Ionicons name="heart" size={32} color={colors.accent} />
+            </View>
             <Text style={s.modalTitle}>{ratingDone ? '¡Gracias!' : 'Valorar GymTrack'}</Text>
             <Text style={s.modalSubtitle}>
               {ratingDone ? 'Tu opinión nos ayuda a mejorar cada día.' : '¿Qué te ha parecido nuestra APP?'}
@@ -432,7 +446,6 @@ const staticStyles = StyleSheet.create({
   settingLabelGroup: { flexDirection: 'row', alignItems: 'center' },
   statsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   modalDismiss: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   starsRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 32, marginTop: 10 },
@@ -443,9 +456,17 @@ const staticStyles = StyleSheet.create({
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: c.background },
   container: { flex: 1, paddingHorizontal: 24 },
-  header: { marginTop: 15, marginBottom: 32 },
-  title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
-  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
+  
+  // Nuevos estilos de la cabecera editorial
+  header: { marginTop: 20, marginBottom: 35 },
+  overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
+  overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },
+  title: { fontSize: 40, letterSpacing: -1 },
+  titleLight: { fontWeight: '300', color: c.textSecondary }, 
+  titleBold: { fontWeight: '900', color: c.text }, 
+  titleDot: { fontWeight: '900', color: c.accent }, 
+  subtitle: { fontSize: 15, color: c.textSecondary, marginTop: 8, fontWeight: '500', lineHeight: 22 },
 
   profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accent, padding: 24, borderRadius: 36, marginBottom: 40, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 30, elevation: 6 },
   avatar: { width: 78, height: 78, borderRadius: 39, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 20, position: 'relative', overflow: 'hidden' },
@@ -479,7 +500,6 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   inputWrapper: { flexDirection: 'row', alignItems: 'baseline', borderBottomWidth: 2, borderBottomColor: c.accent, paddingBottom: 2 },
   statInput: { fontSize: 24, fontWeight: '800', color: c.text, textAlign: 'center', width: 60, padding: 0 },
 
-  // Estilos de Modales
   modalContent: { backgroundColor: c.surface, width: '100%', borderRadius: 40, padding: 32, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20 },
   modalContentWide: { backgroundColor: c.surface, width: '100%', borderRadius: 40, padding: 32, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20 },
   avatarModalContent: { backgroundColor: c.background, width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 32, position: 'absolute', bottom: 0, minHeight: 450 },
