@@ -31,6 +31,7 @@ export function useWorkoutPlayer(workoutId: string) {
 
   return {
     currentExercise,
+    nextExercise: exercises[currentIndex + 1] || null,
     currentIndex,
     totalExercises,
     isLastExercise,

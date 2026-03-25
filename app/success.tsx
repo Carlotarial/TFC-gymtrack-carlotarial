@@ -28,6 +28,33 @@ export default function SuccessScreen() {
 
   return (
     <SafeAreaView style={s.container}>
+      {/* Sistema de Confeti Pastel */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        {[...Array(30)].map((_, i) => {
+          const randomX = Math.random() * 400;
+          const delay = Math.random() * 2000;
+          const duration = 3000 + Math.random() * 2000;
+          const size = 10 + Math.random() * 10;
+          const colors = ['#FFD1DC', '#B2E2F2', '#C1E1C1', '#FDFD96', '#E6E6FA'];
+          return (
+            <Animated.View
+              key={i}
+              entering={FadeInDown.delay(delay).duration(duration)}
+              style={{
+                position: 'absolute',
+                top: -50,
+                left: randomX,
+                width: size,
+                height: size,
+                borderRadius: size / 2,
+                backgroundColor: colors[i % colors.length],
+                opacity: 0.6,
+              }}
+            />
+          );
+        })}
+      </View>
+
       <View style={staticStyles.content}>
         
         {/* Cofre de Emoji Animado */}
