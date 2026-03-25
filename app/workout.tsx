@@ -94,8 +94,8 @@ const staticStyles = StyleSheet.create({
   gifWrapper: { paddingHorizontal: 24, marginBottom: 32 },
   gifImage: { width: '90%', height: '90%' },
   detailsContainer: { alignItems: 'center', marginBottom: 40 },
-  timerContainer: { alignItems: 'center' },
-  footer: { paddingHorizontal: 24, marginTop: 'auto', marginBottom: 40 },
+  timerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  footer: { paddingHorizontal: 24, marginBottom: 40 },
 });
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
