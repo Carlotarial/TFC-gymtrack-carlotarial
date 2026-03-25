@@ -12,7 +12,7 @@ const AVATARS = [
   { id: 'golden', url: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'husky', url: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'pug', url: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=250&h=250&fit=crop&fm=jpg&q=80' },
-  { id: 'corgi', url: 'https://images.unsplash.com/photo-1583511655827-05700d52f4d9?w=250&h=250&fit=crop&fm=jpg&q=80' },
+  { id: 'corgi', url: 'https://i.pinimg.com/736x/2a/66/50/2a66500160effee5281510632f44f0d4.jpg' },
   { id: 'beagle', url: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'frenchie', url: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=250&h=250&fit=crop&fm=jpg&q=80' },
   { id: 'dalmatian', url: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=250&h=250&fit=crop&fm=jpg&q=80' },
