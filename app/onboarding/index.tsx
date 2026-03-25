@@ -1,6 +1,7 @@
 import { AppColors, useTheme } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Dimensions, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -45,7 +46,12 @@ export default function NameScreen() {
           <Animated.View entering={FadeInUp.duration(800).delay(100)}>
             <View style={s.logoWrapper}>
               <View style={s.logoInner}>
-                <Text style={{ fontSize: 44 }}>🌱</Text>
+                <Image
+                  source={require('../../assets/images/logo.png')}
+                  style={s.logoImage}
+                  contentFit="contain"
+                  transition={1000}
+                />
               </View>
               <View style={s.logoShadow} />
             </View>
@@ -64,19 +70,19 @@ export default function NameScreen() {
 
           <Animated.View entering={FadeInUp.duration(800).delay(500)} style={staticStyles.inputContainer}>
             <View style={s.inputWrapper}>
-                <Ionicons name="person-outline" size={22} color={colors.accent} style={{ marginLeft: 20 }} />
-                <TextInput
-                    style={s.input}
-                    placeholder="Escribe tu nombre..."
-                    placeholderTextColor={colors.textMuted}
-                    value={name}
-                    onChangeText={setName}
-                    autoCapitalize="words"
-                    autoCorrect={false}
-                    selectionColor={colors.accentDark}
-                    cursorColor={colors.accentDark}
-                    underlineColorAndroid="transparent"
-                />
+              <Ionicons name="person-outline" size={22} color={colors.accent} style={{ marginLeft: 20 }} />
+              <TextInput
+                style={s.input}
+                placeholder="Escribe tu nombre..."
+                placeholderTextColor={colors.textMuted}
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                autoCorrect={false}
+                selectionColor={colors.accentDark}
+                cursorColor={colors.accentDark}
+                underlineColorAndroid="transparent"
+              />
             </View>
           </Animated.View>
         </View>
@@ -104,7 +110,7 @@ const staticStyles = StyleSheet.create({
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 32, overflow: 'hidden' },
-  
+
   // Background Accents
   blob1: { position: 'absolute', width: SCREEN_WIDTH * 0.8, height: SCREEN_WIDTH * 0.8, borderRadius: SCREEN_WIDTH * 0.4, backgroundColor: c.accentLight, top: -100, right: -100, opacity: 0.6 },
   blob2: { position: 'absolute', width: SCREEN_WIDTH * 0.6, height: SCREEN_WIDTH * 0.6, borderRadius: SCREEN_WIDTH * 0.3, backgroundColor: c.goldLight, bottom: 20, left: -100, opacity: 0.4 },
@@ -114,7 +120,8 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   stepDotActive: { width: 32, backgroundColor: c.accent },
 
   logoWrapper: { width: 100, height: 100, marginBottom: 40, position: 'relative' },
-  logoInner: { width: '100%', height: '100%', backgroundColor: c.surface, borderRadius: 32, justifyContent: 'center', alignItems: 'center', zIndex: 2, borderWidth: 1, borderColor: c.surfaceBorder },
+  logoInner: { width: '100%', height: '100%', backgroundColor: c.surface, borderRadius: 32, justifyContent: 'center', alignItems: 'center', zIndex: 2, borderWidth: 1, borderColor: c.surfaceBorder, overflow: 'hidden' },
+  logoImage: { width: '80%', height: '80%' },
   logoShadow: { position: 'absolute', width: '90%', height: '90%', backgroundColor: c.accent, bottom: -8, right: -8, borderRadius: 32, opacity: 0.15, zIndex: 1 },
 
   welcomeBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accentLight, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, alignSelf: 'flex-start', marginBottom: 24, borderWidth: 1, borderColor: c.accent },
