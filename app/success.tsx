@@ -3,23 +3,83 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Dimensions, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown, Keyframe, ZoomIn } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
+  ZoomIn
+} from 'react-native-reanimated';
 import { useUser } from '../context/UserContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Animación de caída de confeti refinada
-const fallingAnimation = (delay: number) => new Keyframe({
-  0: { 
-    transform: [{ translateY: -100 }, { rotate: '0deg' }, { translateX: 0 }],
-    opacity: 0,
-  },
-  10: { opacity: 1 },
-  100: { 
-    transform: [{ translateY: SCREEN_HEIGHT + 100 }, { rotate: '720deg' }, { translateX: Math.random() * 100 - 50 }],
-    opacity: 0,
-  },
-}).delay(delay).duration(4000 + Math.random() * 2000);
+// 🌟 Componente individual para cada trozo de confeti (Evita errores en Web)
+const ConfettiPiece = ({ index }: { index: number }) => {
+  const translateY = useSharedValue(-100);
+  const rotate = useSharedValue(0);
+  const horizontalOffset = useSharedValue(Math.random() * 40 - 20);
+
+  const size = 7 + Math.random() * 9; // Un pelín más grandes para que se vean mejor los pasteles
+
+  // 🌟 PALETA SUPER PASTEL SOFISTICADA
+  const palette = [
+    '#FFD1DC', // Rosa Pastel Suave
+    '#B2E2F2', // Azul Cielo Pastel
+    '#C1E1C1', // Verde Menta Deslavado
+    '#FDFD96', // Amarillo Vainilla
+    '#E6E6FA', // Lavanda Pálido
+    '#F4BBFF', // Orquídea Pastel
+    '#FFCC99'  // Melocotón Suave
+  ];
+  
+  const color = palette[index % palette.length];
+  const randomX = Math.random() * SCREEN_WIDTH;
+
+  useEffect(() => {
+    const delay = Math.random() * 2000;
+    const duration = 3000 + Math.random() * 2500; // Caída un poco más lenta y majestuosa
+
+    translateY.value = withDelay(
+      delay,
+      withRepeat(withTiming(SCREEN_HEIGHT + 100, { duration, easing: Easing.linear }), -1, false)
+    );
+
+    rotate.value = withDelay(
+      delay,
+      withRepeat(withTiming(720, { duration: duration * 1.5, easing: Easing.linear }), -1, false)
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: translateY.value },
+      { rotate: `${rotate.value}deg` },
+      { translateX: horizontalOffset.value }
+    ],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          top: -20,
+          left: randomX,
+          width: size,
+          height: index % 3 === 0 ? size * 1.6 : size, // Mezcla de formas
+          borderRadius: index % 2 === 0 ? size : 3, // Círculos y rectángulos suaves
+          backgroundColor: color,
+          opacity: 0.75, // Ligeramente transparentes para mayor suavidad
+        },
+        animatedStyle,
+      ]}
+    />
+  );
+};
 
 export default function SuccessScreen() {
   const router = useRouter();
@@ -44,30 +104,11 @@ export default function SuccessScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      {/* Sistema de Confeti Pastel */}
+      {/* Sistema de Confeti Seguro y PASTEL 🌸 */}
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        {[...Array(35)].map((_, i) => {
-          const randomX = Math.random() * SCREEN_WIDTH;
-          const size = 6 + Math.random() * 8;
-          const palette = ['#FF4B4B', '#4A90E2', '#FFB800', '#34C759', '#AF52DE'];
-          
-          return (
-            <Animated.View
-              key={i}
-              entering={fallingAnimation(Math.random() * 2000)}
-              style={{
-                position: 'absolute',
-                top: -50,
-                left: randomX,
-                width: size,
-                height: i % 3 === 0 ? size * 1.5 : size, // Mezcla de rectángulos y cuadrados
-                borderRadius: i % 2 === 0 ? size : 2,
-                backgroundColor: palette[i % palette.length],
-                opacity: 0.8,
-              }}
-            />
-          );
-        })}
+        {[...Array(35)].map((_, i) => (
+          <ConfettiPiece key={i} index={i} />
+        ))}
       </View>
 
       <View style={staticStyles.content}>
@@ -94,7 +135,7 @@ export default function SuccessScreen() {
           </Text>
         </Animated.View>
 
-        {/* Tarjeta de Estadísticas Refinada */}
+        {/* Tarjeta de Estadísticas */}
         <Animated.View entering={FadeInDown.delay(400)} style={s.statsCard}>
           <View style={staticStyles.statBox}>
             <Ionicons name="time-outline" size={20} color={colors.textMuted} style={{marginBottom: 8}} />
@@ -119,7 +160,10 @@ export default function SuccessScreen() {
       </View>
 
       <Animated.View entering={FadeInDown.delay(800)} style={staticStyles.footer}>
-        <Pressable style={s.homeButton} onPress={() => router.replace('/(tabs)')}>
+        <Pressable 
+          style={({ pressed }) => [s.homeButton, pressed && { opacity: 0.8 }]} 
+          onPress={() => router.replace('/(tabs)')}
+        >
           <Text style={s.homeButtonText}>Volver al inicio</Text>
           <Text style={[s.homeButtonText, {color: colors.accent}]}>.</Text>
         </Pressable>
@@ -136,28 +180,21 @@ const staticStyles = StyleSheet.create({
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background },
-  
   overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
   overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },
-
   iconCircle: { width: 140, height: 140, borderRadius: 70, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center', marginBottom: 32, shadowColor: c.gold, shadowOffset: { width: 0, height: 15 }, shadowOpacity: 0.2, shadowRadius: 30, elevation: 8, borderWidth: 1, borderColor: c.surfaceBorder },
-  
   title: { fontSize: 42, letterSpacing: -1.5, textAlign: 'center', lineHeight: 48 },
   titleLight: { fontWeight: '300', color: c.textSecondary },
   titleBold: { fontWeight: '900', color: c.text },
   titleDot: { fontWeight: '900', color: c.accent },
-
   subtitle: { fontSize: 16, color: c.textSecondary, textAlign: 'center', lineHeight: 24, marginTop: 16, marginBottom: 40, paddingHorizontal: 30, fontWeight: '500' },
-  
   statsCard: { flexDirection: 'row', backgroundColor: c.surface, borderRadius: 32, paddingVertical: 30, width: SCREEN_WIDTH - 48, justifyContent: 'space-around', alignItems: 'center', shadowColor: c.accentDark, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.05, shadowRadius: 25, elevation: 4, borderWidth: 1, borderColor: c.surfaceBorder },
   statNumber: { fontSize: 36, fontWeight: '900', color: c.text, letterSpacing: -1 },
   statLabel: { fontSize: 10, color: c.textSecondary, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: '800' },
   divider: { width: 1, height: 40, backgroundColor: c.surfaceBorder },
-  
   streakBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accentLight, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 20, marginTop: 32 },
   streakText: { fontSize: 15, fontWeight: '800', color: c.accentDark, marginLeft: 8 },
-  
   homeButton: { flexDirection: 'row', backgroundColor: c.text, padding: 22, borderRadius: 28, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 5 },
   homeButtonText: { fontSize: 18, fontWeight: '900', color: c.background },
 });
