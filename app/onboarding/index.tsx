@@ -8,7 +8,7 @@ import { Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollVie
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const isWeb = Platform.OS === 'web'; // 👈 Añadido aquí para detectar si estamos en navegador
+const isWeb = Platform.OS === 'web';
 
 export default function NameScreen() {
   const router = useRouter();
@@ -70,7 +70,14 @@ export default function NameScreen() {
               <Ionicons name="sparkles" size={14} color={colors.accentDark} style={{ marginRight: 6 }} />
               <Text style={s.badgeText}>Tu viaje comienza aquí</Text>
             </View>
-            <Text style={s.title}>Crea tu perfil {"\n"}de atleta</Text>
+            
+            {/* Título Premium a dos tonos */}
+            <Text style={s.title}>
+              <Text style={s.titleLight}>Perfil de{"\n"}</Text>
+              <Text style={s.titleBold}>Atleta</Text>
+              <Text style={s.titleDot}>.</Text>
+            </Text>
+
             <Text style={s.subtitle}>
               Personalizaremos cada gramo y cada repetición para que alcances tu mejor versión.
             </Text>
@@ -123,7 +130,6 @@ export default function NameScreen() {
       >
         <View style={s.modalOverlay}>
           <Pressable style={s.modalDismiss} onPress={() => setShowProfiles(false)} />
-          {/* 👈 Parche aplicado en esta línea de abajo */}
           <Animated.View entering={isWeb ? undefined : SlideInDown} style={s.modalContent}>
             <View style={s.modalHeader}>
               <Text style={s.modalTitle}>Seleccionar Perfil</Text>
@@ -148,7 +154,8 @@ export default function NameScreen() {
                         transition={200}
                       />
                     ) : (
-                      <Text style={{fontSize: 24}}>💪</Text>
+                      // 👈 Adiós emoji, hola Ionicon elegante
+                      <Ionicons name="person" size={28} color={colors.accentDark} />
                     )}
                   </View>
                   <View style={{flex: 1}}>
@@ -190,7 +197,12 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   welcomeBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.accentLight, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, alignSelf: 'flex-start', marginBottom: 24, borderWidth: 1, borderColor: c.accent },
   badgeText: { fontSize: 13, fontWeight: '800', color: c.accentDark, textTransform: 'uppercase', letterSpacing: 1 },
 
-  title: { fontSize: 42, fontWeight: '900', color: c.text, letterSpacing: -1.5, lineHeight: 48 },
+  // Estilos del nuevo título a dos tonos
+  title: { fontSize: 46, letterSpacing: -1.5, lineHeight: 52 },
+  titleLight: { fontWeight: '300', color: c.textSecondary }, 
+  titleBold: { fontWeight: '900', color: c.text }, 
+  titleDot: { fontWeight: '900', color: c.accent }, 
+
   subtitle: { fontSize: 18, color: c.textSecondary, marginTop: 18, lineHeight: 28, fontWeight: '500', opacity: 0.9 },
 
   inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, borderRadius: 28, height: 84, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.06, shadowRadius: 24, elevation: 3, borderWidth: 1, borderColor: c.surfaceBorder },

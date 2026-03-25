@@ -1,4 +1,4 @@
-import { useTheme, AppColors } from '@/context/ThemeContext';
+import { AppColors, useTheme } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -35,7 +35,19 @@ export default function MeasurementsScreen() {
           </View>
 
           <View style={staticStyles.header}>
-            <Text style={s.title}>Tus medidas 📏</Text>
+            {/* Etiqueta superior */}
+            <View style={s.overlineContainer}>
+              <View style={s.overlineDot} />
+              <Text style={s.overlineText}>GYMTRACK ONBOARDING</Text>
+            </View>
+
+            {/* Título Editorial Personalizado */}
+            <Text style={s.title}>
+              <Text style={s.titleLight}>Tus{"\n"}</Text>
+              <Text style={s.titleBold}>Medidas</Text>
+              <Text style={s.titleDot}>.</Text>
+            </Text>
+            
             <Text style={s.subtitle}>Esto nos permite calcular tu IMC y ajustar tus objetivos calóricos con la máxima precisión.</Text>
           </View>
 
@@ -100,7 +112,6 @@ export default function MeasurementsScreen() {
               }}
             >
               <Text style={s.nextButtonText}>Finalizar test</Text>
-              <Ionicons name="sparkles" size={20} color={colors.buttonPrimaryText} />
             </Pressable>
           </View>
         </Animated.View>
@@ -122,8 +133,16 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   stepDot: { width: 12, height: 6, borderRadius: 3, backgroundColor: c.surfaceBorder, marginRight: 8 },
   stepDotActive: { width: 32, backgroundColor: c.accent },
   stepDotDone: { backgroundColor: c.gold },
-  title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
-  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 12, lineHeight: 24, fontWeight: '500' },
+  
+  // Estilos del título editorial
+  overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
+  overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },
+  title: { fontSize: 46, letterSpacing: -1.5, lineHeight: 52 },
+  titleLight: { fontWeight: '300', color: c.textSecondary }, 
+  titleBold: { fontWeight: '900', color: c.text }, 
+  titleDot: { fontWeight: '900', color: c.accent }, 
+  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 18, lineHeight: 24, fontWeight: '500' },
   
   label: { fontSize: 14, fontWeight: '800', color: c.accentDark, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1.5 },
   inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, borderRadius: 28, paddingHorizontal: 28, height: 80, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.04, shadowRadius: 20, elevation: 2 },

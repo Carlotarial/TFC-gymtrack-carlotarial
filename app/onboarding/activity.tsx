@@ -1,4 +1,4 @@
-import { useTheme, AppColors } from '@/context/ThemeContext';
+import { AppColors, useTheme } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,9 +14,9 @@ export default function ActivityScreen() {
   const [selectedActivity, setSelectedActivity] = useState('');
 
   const activities = [
-    { id: 'sedentario', title: 'Sedentario', desc: 'Paso la mayor parte del día sentada', emoji: '🛋️' },
-    { id: 'moderado', title: 'Moderado', desc: 'Ejercicio de 1 a 2 veces por semana', emoji: '🚶🏻' },
-    { id: 'activo', title: 'Muy Activo', desc: 'Entreno duro más de 3 veces por semana', emoji: '⚡' },
+    { id: 'sedentario', title: 'Sedentario', desc: 'Paso la mayor parte del día sentada', icon: 'cafe', color: '#A2845E' },
+    { id: 'moderado', title: 'Moderado', desc: 'Ejercicio de 1 a 2 veces por semana', icon: 'walk', color: '#34C759' },
+    { id: 'activo', title: 'Muy Activo', desc: 'Entreno duro más de 3 veces por semana', icon: 'flash', color: '#FFB800' },
   ];
 
   const s = dynamicStyles(colors);
@@ -30,7 +30,17 @@ export default function ActivityScreen() {
       </View>
 
       <View style={staticStyles.header}>
-        <Text style={s.title}>Nivel de actividad</Text>
+        <View style={s.overlineContainer}>
+          <View style={s.overlineDot} />
+          <Text style={s.overlineText}>GYMTRACK ONBOARDING</Text>
+        </View>
+
+        <Text style={s.title}>
+          <Text style={s.titleLight}>Nivel de{"\n"}</Text>
+          <Text style={s.titleBold}>Actividad</Text>
+          <Text style={s.titleDot}>.</Text>
+        </Text>
+        
         <Text style={s.subtitle}>Esto nos permite calcular tu gasto calórico y ajustar la intensidad.</Text>
       </View>
 
@@ -42,7 +52,11 @@ export default function ActivityScreen() {
             onPress={() => setSelectedActivity(item.id)}
           >
             <View style={[s.iconBox, selectedActivity === item.id && s.iconBoxActive]}>
-              <Text style={{fontSize: 28}}>{item.emoji}</Text>
+              <Ionicons 
+                name={selectedActivity === item.id ? (item.icon as any) : (`${item.icon}-outline` as any)} 
+                size={28} 
+                color={selectedActivity === item.id ? '#FFFFFF' : item.color} 
+              />
             </View>
             <View style={staticStyles.textColumn}>
               <Text style={[s.cardTitle, selectedActivity === item.id && s.cardTitleActive]}>
@@ -57,7 +71,6 @@ export default function ActivityScreen() {
       </View>
 
       <View style={staticStyles.footer}>
-        {/* Botón de Atrás Secundario */}
         <Pressable 
           style={s.backButtonSecondary} 
           onPress={() => router.back()}
@@ -97,14 +110,21 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   stepDot: { width: 12, height: 6, borderRadius: 3, backgroundColor: c.surfaceBorder, marginRight: 8 },
   stepDotActive: { width: 32, backgroundColor: c.accent },
   stepDotDone: { backgroundColor: c.gold },
-  title: { fontSize: 32, fontWeight: '800', color: c.text, letterSpacing: -1 },
-  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 12, lineHeight: 24, fontWeight: '500' },
+  
+  overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
+  overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },
+  title: { fontSize: 46, letterSpacing: -1.5, lineHeight: 52 },
+  titleLight: { fontWeight: '300', color: c.textSecondary }, 
+  titleBold: { fontWeight: '900', color: c.text }, 
+  titleDot: { fontWeight: '900', color: c.accent }, 
+  subtitle: { fontSize: 16, color: c.textSecondary, marginTop: 18, lineHeight: 24, fontWeight: '500' },
   
   card: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, padding: 24, borderRadius: 32, marginBottom: 16, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.04, shadowRadius: 20, elevation: 2 },
   cardActive: { backgroundColor: c.accentDark, shadowOpacity: 0.15, shadowColor: c.accentDark, shadowRadius: 30 },
   
-  iconBox: { width: 60, height: 60, backgroundColor: c.background, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-  iconBoxActive: { backgroundColor: c.accent },
+  iconBox: { width: 60, height: 60, backgroundColor: c.background, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1, borderColor: c.surfaceBorder },
+  iconBoxActive: { backgroundColor: c.accent, borderColor: c.accent },
   
   cardTitle: { fontSize: 18, fontWeight: '800', color: c.text, letterSpacing: -0.5 },
   cardTitleActive: { color: c.buttonPrimaryText },
