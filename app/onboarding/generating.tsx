@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   FadeIn,
-  FadeInUp,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -93,10 +92,10 @@ export default function GeneratingScreen() {
           <Ionicons name="fitness" size={48} color={colors.accent} />
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.duration(800)}>
+        <View>
           <Text style={s.title}>Personalizando...</Text>
           <Text style={s.subtitle}>Preparando tu experiencia de entrenamiento exclusiva.</Text>
-        </Animated.View>
+        </View>
 
         <View style={s.progressRow}>
           <View style={s.progressBarTrack}>
@@ -107,13 +106,9 @@ export default function GeneratingScreen() {
       </View>
 
       <View style={staticStyles.footer}>
-        <Animated.View 
-            key={currentTip}
-            entering={FadeIn.duration(800)} 
-            style={s.tipBox}
-        >
+        <View style={s.tipBox}>
             <Text style={s.tipText}>{currentTip}</Text>
-        </Animated.View>
+        </View>
       </View>
     </View>
   );
