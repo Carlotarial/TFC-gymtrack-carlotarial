@@ -15,11 +15,20 @@ import Animated, {
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+const FITNESS_TIPS = [
+  "La hidratación constante mejora el rendimiento muscular.",
+  "El descanso es donde ocurre el crecimiento real.",
+  "Pequeños progresos diarios suman grandes resultados.",
+  "La técnica correcta previene lesiones a largo plazo.",
+  "Mantener el core activo protege tu columna vertebral.",
+  "La constancia es la llave del éxito físico."
+];
+
 export default function GeneratingScreen() {
   const router = useRouter();
-  const { user } = useUser();
   const { colors } = useTheme();
   const [loadingText, setLoadingText] = useState('Analizando biometría');
+  const [currentTip, setCurrentTip] = useState(FITNESS_TIPS[0]);
 
   const progress = useSharedValue(0.1);
   const pulse = useSharedValue(1);
@@ -48,17 +57,25 @@ export default function GeneratingScreen() {
       index++;
       if (index < messages.length) {
         setLoadingText(messages[index].text);
-        progress.value = withTiming(messages[index].p, { duration: 800 });
+        progress.value = withTiming(messages[index].p, { duration: 1500 });
       }
-    }, 800);
+    }, 1500);
+
+    // Ciclo de tips
+    let tipIndex = 0;
+    const tipInterval = setInterval(() => {
+        tipIndex = (tipIndex + 1) % FITNESS_TIPS.length;
+        setCurrentTip(FITNESS_TIPS[tipIndex]);
+    }, 3500);
 
     const timer = setTimeout(() => {
       router.replace('/(tabs)' as any);
-    }, 4500);
+    }, 9000); // Más largo para que se lean los tips cómodamente
 
     return () => {
       clearTimeout(timer);
       clearInterval(interval);
+      clearInterval(tipInterval);
     };
   }, []);
 
@@ -101,6 +118,16 @@ export default function GeneratingScreen() {
             <Text style={s.loadingMessage}>{loadingText}</Text>
           </View>
         </View>
+
+        {/* FITNESS TIPS SECTION */}
+        <Animated.View 
+            key={currentTip} // Re-render animation on tip change
+            entering={FadeInUp.duration(600)} 
+            style={s.tipCard}
+        >
+            <Ionicons name="bulb-outline" size={20} color={colors.gold} />
+            <Text style={s.tipText}>{currentTip}</Text>
+        </Animated.View>
       </View>
 
       <View style={staticStyles.footer}>
@@ -111,7 +138,7 @@ export default function GeneratingScreen() {
 }
 
 const staticStyles = StyleSheet.create({
-  stepContainer: { flexDirection: 'row', marginTop: 70, marginBottom: 40, justifyContent: 'flex-start' },
+  stepContainer: { flexDirection: 'row', marginTop: 150, marginBottom: 40, justifyContent: 'flex-start' },
   content: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   footer: { marginBottom: 50, alignItems: 'center' },
 });
@@ -130,5 +157,9 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
 
   loaderBox: { marginTop: 24, alignItems: 'center', flexDirection: 'row' },
   loadingMessage: { marginLeft: 16, fontSize: 15, fontWeight: '700', color: c.textSecondary },
+  
+  tipCard: { marginTop: 48, backgroundColor: c.surface, padding: 20, borderRadius: 24, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: c.surfaceBorder, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
+  tipText: { marginLeft: 12, fontSize: 14, color: c.text, fontWeight: '600', flex: 1 },
+  
   footerText: { fontSize: 12, color: c.gold, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 2, opacity: 0.8 },
 });

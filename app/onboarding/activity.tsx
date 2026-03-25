@@ -57,6 +57,14 @@ export default function ActivityScreen() {
       </View>
 
       <View style={staticStyles.footer}>
+        {/* Botón de Atrás Secundario */}
+        <Pressable 
+          style={s.backButtonSecondary} 
+          onPress={() => router.back()}
+        >
+          <Ionicons name="chevron-back" size={24} color={colors.accentDark} />
+        </Pressable>
+
         <Pressable 
           style={[s.nextButton, !selectedActivity && s.nextButtonDisabled]} 
           disabled={!selectedActivity}
@@ -81,7 +89,7 @@ const staticStyles = StyleSheet.create({
   header: { marginBottom: 40 },
   optionsContainer: { flex: 1 },
   textColumn: { flex: 1, paddingLeft: 8 },
-  footer: { paddingBottom: 50 },
+  footer: { paddingBottom: 50, flexDirection: 'row', alignItems: 'center' },
 });
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
@@ -103,7 +111,9 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   cardDesc: { fontSize: 14, color: c.textSecondary, marginTop: 4, fontWeight: '500' },
   cardDescActive: { color: c.buttonPrimaryText, opacity: 0.9 },
   
-  nextButton: { flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 24, borderRadius: 32, alignItems: 'center', justifyContent: 'center', shadowColor: c.accent, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 24 },
+  nextButton: { flex: 1, flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 24, borderRadius: 32, alignItems: 'center', justifyContent: 'center', shadowColor: c.accent, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 24 },
   nextButtonDisabled: { backgroundColor: c.buttonDisabled, shadowOpacity: 0 },
   nextButtonText: { fontSize: 18, fontWeight: '800', color: c.buttonPrimaryText, marginRight: 8 },
+  
+  backButtonSecondary: { width: 64, height: 64, borderRadius: 32, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1, borderColor: c.surfaceBorder, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
 });

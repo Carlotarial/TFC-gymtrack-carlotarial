@@ -28,74 +28,82 @@ export default function MeasurementsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View entering={FadeInRight.duration(400)} style={{ flex: 1 }}>
-        <View style={staticStyles.stepContainer}>
-          { [1, 2, 3, 4].map((step) => (
-            <View key={step} style={[s.stepDot, step === 4 && s.stepDotActive, step < 4 && s.stepDotDone]} />
-          ))}
-        </View>
+          <View style={staticStyles.stepContainer}>
+            { [1, 2, 3, 4].map((step) => (
+              <View key={step} style={[s.stepDot, step === 4 && s.stepDotActive, step < 4 && s.stepDotDone]} />
+            ))}
+          </View>
 
-        <View style={staticStyles.header}>
-          <Text style={s.title}>Tus medidas 📏</Text>
-          <Text style={s.subtitle}>Esto nos permite calcular tu IMC y ajustar tus objetivos calóricos con la máxima precisión.</Text>
-        </View>
+          <View style={staticStyles.header}>
+            <Text style={s.title}>Tus medidas 📏</Text>
+            <Text style={s.subtitle}>Esto nos permite calcular tu IMC y ajustar tus objetivos calóricos con la máxima precisión.</Text>
+          </View>
 
-        <View style={staticStyles.inputsContainer}>
-          <View style={staticStyles.inputGroup}>
-            <Text style={s.label}>Peso actual</Text>
-            <View style={s.inputWrapper}>
-              <TextInput
-                style={s.input}
-                placeholder="00"
-                placeholderTextColor={colors.textMuted}
-                keyboardType="numeric"
-                value={weight}
-                onChangeText={setWeight}
-                maxLength={3}
-                selectionColor={colors.accentDark}
-                cursorColor={colors.accentDark}
-                underlineColorAndroid="transparent"
-              />
-              <Text style={s.unitText}>kg</Text>
+          <View style={staticStyles.inputsContainer}>
+            <View style={staticStyles.inputGroup}>
+              <Text style={s.label}>Peso actual</Text>
+              <View style={s.inputWrapper}>
+                <TextInput
+                  style={s.input}
+                  placeholder="00"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="numeric"
+                  value={weight}
+                  onChangeText={setWeight}
+                  maxLength={3}
+                  selectionColor={colors.accentDark}
+                  cursorColor={colors.accentDark}
+                  underlineColorAndroid="transparent"
+                />
+                <Text style={s.unitText}>kg</Text>
+              </View>
+            </View>
+
+            <View style={staticStyles.inputGroup}>
+              <Text style={s.label}>Altura</Text>
+              <View style={s.inputWrapper}>
+                <TextInput
+                  style={s.input}
+                  placeholder="000"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="numeric"
+                  value={height}
+                  onChangeText={setHeight}
+                  maxLength={3}
+                  selectionColor={colors.accentDark}
+                  cursorColor={colors.accentDark}
+                  underlineColorAndroid="transparent"
+                />
+                <Text style={s.unitText}>cm</Text>
+              </View>
             </View>
           </View>
 
-          <View style={staticStyles.inputGroup}>
-            <Text style={s.label}>Altura</Text>
-            <View style={s.inputWrapper}>
-              <TextInput
-                style={s.input}
-                placeholder="000"
-                placeholderTextColor={colors.textMuted}
-                keyboardType="numeric"
-                value={height}
-                onChangeText={setHeight}
-                maxLength={3}
-                selectionColor={colors.accentDark}
-                cursorColor={colors.accentDark}
-                underlineColorAndroid="transparent"
-              />
-              <Text style={s.unitText}>cm</Text>
-            </View>
-          </View>
-        </View>
+          <View style={staticStyles.footer}>
+            {/* Botón de Atrás Secundario */}
+            <Pressable 
+              style={s.backButtonSecondary} 
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color={colors.accentDark} />
+            </Pressable>
 
-        <View style={staticStyles.footer}>
-          <Pressable 
-            style={[s.nextButton, !isValid && s.nextButtonDisabled]} 
-            disabled={!isValid}
-            onPress={async () => {
-              await updateUser({ weight, height });
-              router.push({
-                pathname: '/onboarding/generating',
-                params: { userName, goal, activity, weight, height }
-              } as any);
-            }}
-          >
-            <Text style={s.nextButtonText}>Finalizar test</Text>
-            <Ionicons name="sparkles" size={20} color={colors.buttonPrimaryText} />
-          </Pressable>
-        </View>
-      </Animated.View>
+            <Pressable 
+              style={[s.nextButton, !isValid && s.nextButtonDisabled]} 
+              disabled={!isValid}
+              onPress={async () => {
+                await updateUser({ weight, height });
+                router.push({
+                  pathname: '/onboarding/generating',
+                  params: { userName, goal, activity, weight, height }
+                } as any);
+              }}
+            >
+              <Text style={s.nextButtonText}>Finalizar test</Text>
+              <Ionicons name="sparkles" size={20} color={colors.buttonPrimaryText} />
+            </Pressable>
+          </View>
+        </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -106,7 +114,7 @@ const staticStyles = StyleSheet.create({
   header: { marginBottom: 40 },
   inputsContainer: { flex: 1 },
   inputGroup: { marginBottom: 28 },
-  footer: { paddingBottom: 50 },
+  footer: { paddingBottom: 50, flexDirection: 'row', alignItems: 'center' },
 });
 
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
@@ -122,7 +130,9 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   input: { flex: 1, fontSize: 32, fontWeight: '800', color: c.text, padding: 0, height: '100%', outlineStyle: 'none' } as any,
   unitText: { fontSize: 20, fontWeight: '800', color: c.accent },
   
-  nextButton: { flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 24, borderRadius: 32, alignItems: 'center', justifyContent: 'center', shadowColor: c.accent, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 24 },
+  nextButton: { flex: 1, flexDirection: 'row', backgroundColor: c.buttonPrimary, padding: 24, borderRadius: 32, alignItems: 'center', justifyContent: 'center', shadowColor: c.accent, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 24 },
   nextButtonDisabled: { backgroundColor: c.buttonDisabled, shadowOpacity: 0 },
   nextButtonText: { fontSize: 18, fontWeight: '800', color: c.buttonPrimaryText, marginRight: 8 },
+  
+  backButtonSecondary: { width: 64, height: 64, borderRadius: 32, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center', marginRight: 16, borderWidth: 1, borderColor: c.surfaceBorder, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
 });
