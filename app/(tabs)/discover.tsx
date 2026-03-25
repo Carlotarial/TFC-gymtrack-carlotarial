@@ -24,7 +24,7 @@ export default function DiscoverScreen() {
       </Animated.View>
 
       {/* Buscador de píldora redonda */}
-      <Animated.View entering={FadeInDown.delay(100)} style={{ marginBottom: 32 }}>
+      <Animated.View entering={FadeInDown.delay(100)} style={{ marginBottom: 20 }}>
         <View style={s.searchContainer}>
           <Text style={{fontSize: 20}}>🔍</Text>
           <TextInput
@@ -45,29 +45,70 @@ export default function DiscoverScreen() {
         </View>
       </Animated.View>
 
-      {/* Categorías (Pills) */}
-      <Animated.View entering={FadeInDown.delay(200)} style={{ marginBottom: 40 }}>
+      {/* Filtro Unificado */}
+      <Animated.View entering={FadeInDown.delay(150)} style={{ marginBottom: 32 }}>
+        <Text style={s.sectionTitle}>Explorar por</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {CATEGORIES.map((cat) => (
-            <Pressable 
-              key={cat} 
-              style={[s.tag, activeTag === cat && s.tagActive]}
-              onPress={() => setActiveTag(cat)}
-            >
-              <Text style={[s.tagText, activeTag === cat && s.tagTextActive]}>
-                {cat}
-              </Text>
-            </Pressable>
-          ))}
+          {[
+            ...CATEGORIES.map(c => ({ id: c, type: 'tag', label: c })),
+            ...['Abdomen', 'Inferior', 'Express'].map(s => ({ id: s, type: 'search', label: s }))
+          ].map((item) => {
+            // Filtrar solo si hay resultados disponibles
+            const hasResults = filterWorkouts(item.type === 'search' ? item.id : '', item.type === 'tag' ? item.id : 'Todos').length > 0;
+            if (!hasResults && item.id !== 'Todos') return null;
+
+            const isActive = (item.type === 'tag' && activeTag === item.id) || (item.type === 'search' && search === item.id);
+            return (
+              <Pressable 
+                key={item.id} 
+                style={[s.tag, isActive && s.tagActive]}
+                onPress={() => {
+                  if (item.type === 'tag') {
+                    setActiveTag(item.id);
+                    setSearch('');
+                  } else {
+                    setSearch(item.id);
+                    setActiveTag('Todos');
+                  }
+                }}
+              >
+                <Text style={[s.tagText, isActive && s.tagTextActive]}>
+                  {item.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </ScrollView>
       </Animated.View>
+
+      {/* Destacado del Día (Hero) - Solo si no hay búsqueda activa */}
+      {search.length === 0 && activeTag === 'Todos' && (
+        <Animated.View entering={FadeInDown.delay(250)} style={staticStyles.section}>
+          <Text style={s.sectionTitle}>Destacado del Día</Text>
+          <Pressable 
+            style={s.heroCard}
+            onPress={() => router.push({ pathname: '/routine', params: { id: 'w1', title: 'Abdomen de Acero' } } as any)}
+          >
+            <View style={s.heroContent}>
+               <View style={s.heroBadge}>
+                  <Text style={s.heroBadgeText}>🔥 RETO DE HOY</Text>
+               </View>
+               <Text style={s.heroTitle}>Abdomen de{"\n"}Acero</Text>
+               <Text style={s.heroSubtitle}>15 min • Alta Intensidad</Text>
+            </View>
+            <View style={s.heroEmojiBox}>
+               <Text style={{fontSize: 60}}>🏆</Text>
+            </View>
+          </Pressable>
+        </Animated.View>
+      )}
 
       {/* Lista de Resultados */}
       <Animated.View entering={FadeInDown.delay(300)} style={staticStyles.section}>
         <Text style={s.sectionTitle}>Entrenamientos para ti</Text>
         
         {filteredWorkouts.length > 0 ? (
-          filteredWorkouts.map((workout) => (
+          filteredWorkouts.map((workout, idx) => (
             <Pressable 
               key={workout.id} 
               style={s.workoutCard}
@@ -77,7 +118,11 @@ export default function DiscoverScreen() {
               } as any)}
             >
               <View style={staticStyles.workoutInfo}>
-                <Text style={s.workoutTitle}>{workout.title}</Text>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Text style={s.workoutTitle}>{workout.title}</Text>
+                  {idx === 0 && <View style={s.trendingBadge}><Text style={s.trendingText}>🔥</Text></View>}
+                  {idx === 2 && <View style={[s.trendingBadge, {backgroundColor: colors.goldLight}]}><Text style={[s.trendingText, {color: colors.gold}]}>✨</Text></View>}
+                </View>
                 <Text style={s.workoutDetails}>
                   {workout.duration} • {workout.intensity}
                 </Text>
@@ -149,10 +194,20 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   tagTextActive: { color: c.buttonPrimaryText },
   
   sectionTitle: { fontSize: 20, fontWeight: '700', color: c.text, marginBottom: 20, letterSpacing: -0.5 },
-  
+
+  heroCard: { backgroundColor: c.accent, borderRadius: 36, padding: 28, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', shadowColor: c.accentDark, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.1, shadowRadius: 32, elevation: 6 },
+  heroContent: { flex: 1 },
+  heroBadge: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, alignSelf: 'flex-start', marginBottom: 12 },
+  heroBadgeText: { fontSize: 10, fontWeight: '800', color: '#FFFFFF' },
+  heroTitle: { fontSize: 28, fontWeight: '800', color: '#FFFFFF', lineHeight: 32 },
+  heroSubtitle: { fontSize: 14, color: '#FFFFFF', marginTop: 8, opacity: 0.9, fontWeight: '600' },
+  heroEmojiBox: { width: 100, height: 100, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 50, justifyContent: 'center', alignItems: 'center' },
+
   workoutCard: { flexDirection: 'row', backgroundColor: c.surface, borderRadius: 32, padding: 28, alignItems: 'center', marginBottom: 16, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
-  workoutTitle: { fontSize: 18, fontWeight: '800', color: c.text, marginBottom: 4 },
-  workoutDetails: { fontSize: 14, color: c.textSecondary, fontWeight: '600' },
+  workoutTitle: { fontSize: 18, fontWeight: '800', color: c.text, marginRight: 8 },
+  trendingBadge: { backgroundColor: c.accentLight, width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center' },
+  trendingText: { fontSize: 10 },
+  workoutDetails: { fontSize: 14, color: c.textSecondary, fontWeight: '600', marginTop: 2 },
   actionIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.accentLight, justifyContent: 'center', alignItems: 'center' },
   
   imageBox: { width: '100%', height: 150, backgroundColor: c.surface, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 16, shadowColor: c.accentDark, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 30, elevation: 4 },
