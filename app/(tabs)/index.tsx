@@ -66,22 +66,22 @@ export default function HomeScreen() {
         </View>
       </Animated.View>
 
-      {/* Métricas Rápidas (Estilo Burbujas) */}
+      {/* Métricas Rápidas (Estilo Burbujas) - AHORA CON COLOR 🎨 */}
       <Animated.View entering={FadeInDown.delay(100).duration(600).easing(Easing.out(Easing.exp))} style={s.metricsRow}>
         <View style={staticStyles.metricItem}>
-           <Text style={s.metricEmoji}>🔥</Text>
+          <Ionicons name="flame-outline" size={28} color="#FF4B4B" style={{ marginBottom: 6 }} />
           <Text style={s.metricValue}>{user.streak}</Text>
           <Text style={s.metricLabel}>Racha</Text>
         </View>
         <View style={s.metricDivider} />
         <View style={staticStyles.metricItem}>
-          <Text style={s.metricEmoji}>⚡</Text>
+          <Ionicons name="flash-outline" size={28} color="#FFB800" style={{ marginBottom: 6 }} />
           <Text style={s.metricValue}>{user.kcalBurned}</Text>
           <Text style={s.metricLabel}>Energía</Text>
         </View>
         <View style={s.metricDivider} />
         <Pressable style={staticStyles.metricItem} onPress={handleAddWater}>
-          <Text style={s.metricEmoji}>💧</Text>
+          <Ionicons name="water-outline" size={28} color="#4A90E2" style={{ marginBottom: 6 }} />
           <Text style={s.metricValue}>{user.waterIntake.toFixed(1)}L</Text>
           <Text style={s.metricLabel}>Beber</Text>
         </Pressable>
@@ -140,7 +140,7 @@ export default function HomeScreen() {
       {/* Tip del día rotativo */}
       <Animated.View entering={FadeInDown.delay(400).duration(600).easing(Easing.out(Easing.exp))} style={s.tipCard}>
         <View style={s.tipIconBox}>
-           <Text style={{fontSize: 22}}>💡</Text>
+           <Ionicons name="bulb-outline" size={24} color={colors.gold} />
         </View>
         <View style={staticStyles.tipContent}>
           <Text style={s.tipTitle}>{tip.title}</Text>
@@ -167,9 +167,8 @@ const staticStyles = StyleSheet.create({
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
   
-  // Nuevos estilos de la cabecera editorial
   header: { marginTop: 50, marginBottom: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  headerButtons: { flexDirection: 'row', marginTop: 12 }, // Baja un poco los botones para alinearlos con el texto
+  headerButtons: { flexDirection: 'row', marginTop: 12 }, 
   overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
   overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },
@@ -182,7 +181,6 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   notificationBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: c.surface, justifyContent: 'center', alignItems: 'center', shadowColor: c.accentDark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 24, elevation: 4 },
   
   metricsRow: { flexDirection: 'row', backgroundColor: c.surface, borderRadius: 32, paddingVertical: 24, paddingHorizontal: 10, marginBottom: 40, alignItems: 'center', justifyContent: 'space-around', shadowColor: c.accentDark, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.06, shadowRadius: 32, elevation: 5 },
-  metricEmoji: { fontSize: 24, marginBottom: 8 },
   metricValue: { fontSize: 20, fontWeight: '800', color: c.text },
   metricLabel: { fontSize: 13, color: c.textSecondary, fontWeight: '600', marginTop: 2 },
   metricDivider: { width: 1, height: 40, backgroundColor: c.divider },

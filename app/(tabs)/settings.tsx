@@ -97,7 +97,7 @@ export default function SettingsScreen() {
     <SafeAreaView style={s.safeArea}>
       <ScrollView style={s.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         
-        {/* NUEVO HEADER EDITORIAL */}
+        {/* NUEVO HEADER EDITORIAL CON MARGEN UNIFICADO */}
         <View style={s.header}>
           <View style={s.overlineContainer}>
             <View style={s.overlineDot} />
@@ -457,8 +457,8 @@ const dynamicStyles = (c: AppColors) => StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: c.background },
   container: { flex: 1, paddingHorizontal: 24 },
   
-  // Nuevos estilos de la cabecera editorial
-  header: { marginTop: 20, marginBottom: 35 },
+  // 👈 AQUÍ EL CAMBIO: marginTop a 50
+  header: { marginTop: 50, marginBottom: 35 },
   overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
   overlineText: { fontSize: 11, fontWeight: '800', color: c.accentDark, letterSpacing: 2 },

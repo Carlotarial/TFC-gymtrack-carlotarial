@@ -1,6 +1,7 @@
 import { AppColors, useTheme } from '@/context/ThemeContext';
 import { useUser } from '@/context/UserContext';
 import { formatRelativeDate, useWeeklyStats } from '@/hooks/useWeeklyStats';
+import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, FadeInDown } from 'react-native-reanimated';
 
@@ -17,7 +18,7 @@ export default function ReportScreen() {
 
   return (
     <ScrollView style={s.container} showsVerticalScrollIndicator={false}>
-      {/* NUEVO HEADER EDITORIAL */}
+      {/* HEADER EDITORIAL */}
       <Animated.View entering={FadeInDown.duration(600).easing(Easing.out(Easing.exp))} style={s.header}>
         <View style={s.overlineContainer}>
           <View style={s.overlineDot} />
@@ -39,21 +40,24 @@ export default function ReportScreen() {
           <Text style={s.statLabel}>Calorías</Text>
           <Text style={s.statValue}>{user.kcalBurned.toLocaleString()}</Text>
           <View style={[staticStyles.miniBadge, { backgroundColor: colors.accentLight }]}>
-             <Text style={s.badgeText}>🔥 KCAL</Text>
+             <Ionicons name="flame" size={10} color={colors.accentDark} style={{ marginRight: 4 }} />
+             <Text style={s.badgeText}>KCAL</Text>
           </View>
         </View>
         <View style={s.statCard}>
           <Text style={s.statLabel}>Tiempo</Text>
           <Text style={s.statValue}>{totalMinutes}</Text>
           <View style={[staticStyles.miniBadge, { backgroundColor: colors.goldLight }]}>
-            <Text style={[s.badgeText, { color: colors.gold }]}>⏱️ MIN</Text>
+            <Ionicons name="time" size={12} color={colors.gold} style={{ marginRight: 4 }} />
+            <Text style={[s.badgeText, { color: colors.gold }]}>MIN</Text>
           </View>
         </View>
         <View style={s.statCard}>
           <Text style={s.statLabel}>Sesiones</Text>
           <Text style={s.statValue}>{user.sessionsCompleted}</Text>
           <View style={[staticStyles.miniBadge, { backgroundColor: colors.barInactive }]}>
-            <Text style={[s.badgeText, { color: colors.textSecondary }]}>🏆 TOTAL</Text>
+            <Ionicons name="trophy" size={10} color={colors.textSecondary} style={{ marginRight: 4 }} />
+            <Text style={[s.badgeText, { color: colors.textSecondary }]}>TOTAL</Text>
           </View>
         </View>
       </Animated.View>
@@ -103,7 +107,7 @@ export default function ReportScreen() {
             </View>
           ) : (
             <View style={staticStyles.emptyChart}>
-              <Text style={{fontSize: 40}}>📊</Text>
+              <Ionicons name="bar-chart-outline" size={48} color={colors.textMuted} style={{ marginBottom: 12 }} />
               <Text style={s.emptyText}>Completa tu primer reto para ver tus gráficas pastel brillantes.</Text>
             </View>
           )}
@@ -119,7 +123,7 @@ export default function ReportScreen() {
               <View key={session.id}>
                 {index > 0 && <View style={s.historyDivider} />}
                 <View style={staticStyles.historyItem}>
-                   <Text style={{fontSize: 24, marginRight: 16}}>✔️</Text>
+                  <Ionicons name="checkmark-circle" size={28} color={colors.accentLight} style={{ marginRight: 16 }} />
                   <View style={staticStyles.historyInfo}>
                     <Text style={s.historyTitle}>{session.title}</Text>
                     <Text style={s.historyMeta}>
@@ -132,7 +136,7 @@ export default function ReportScreen() {
           </View>
         ) : (
           <View style={s.emptyHistory}>
-            <Text style={{fontSize: 40}}>🌱</Text>
+            <Ionicons name="leaf-outline" size={48} color={colors.textMuted} style={{ marginBottom: 12 }} />
             <Text style={s.emptyHistoryText}>Tu historial está esperando su primer entrenamiento</Text>
           </View>
         )}
@@ -145,7 +149,7 @@ export default function ReportScreen() {
 
 const staticStyles = StyleSheet.create({
   statsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 36 },
-  miniBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, marginTop: 'auto' },
+  miniBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, marginTop: 'auto' },
   section: { marginBottom: 36 },
   emptyChart: { alignItems: 'center', paddingVertical: 32 },
   historyItem: { flexDirection: 'row', paddingVertical: 20, alignItems: 'center' },
@@ -160,7 +164,7 @@ const staticStyles = StyleSheet.create({
 const dynamicStyles = (c: AppColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: c.background, paddingHorizontal: 24 },
   
-  // Nuevos estilos de la cabecera editorial
+  // Estilos de la cabecera editorial
   header: { marginTop: 50, marginBottom: 35 },
   overlineContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   overlineDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.accent, marginRight: 8 },
